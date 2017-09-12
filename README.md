@@ -1,1 +1,1 @@
-# genetic-algorithms-submit
+# CS 776 code submissions.
