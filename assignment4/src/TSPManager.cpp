@@ -56,13 +56,13 @@ void TSPManager::preCalculateDistances() {
             //calculate distance
             float xD = source.second.first - destination.second.first;
             float yD = source.second.second - destination.second.second;
-            auto distance = (int)(std::sqrt(xD * xD + yD * yD) + 0.5);
+            auto distance = (std::sqrt(xD * xD + yD * yD));
             distances[source.first][destination.first] = distance;
         }
     }
 }
 
-int TSPManager::getEuclideanDistance(int source, int destination) {
+float TSPManager::getEuclideanDistance(int source, int destination) {
     if (distances.find(source) != distances.end()) {
         if (distances[source].find(destination) != distances[source].end()) {
             return distances[source][destination];

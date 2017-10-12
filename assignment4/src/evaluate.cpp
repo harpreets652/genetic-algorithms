@@ -11,11 +11,11 @@
 
 using namespace std;
 
-int getTotalRouteDistance(const int *chrom, int chromosomeLength) {
-    int totalDistance = 0;
-    for (int i = 0; i < chromosomeLength - 1; i++) {
+float getTotalRouteDistance(const int *chrom, int chromosomeLength) {
+    float totalDistance = 0;
+    for (int i = 0; i < chromosomeLength; i++) {
         if (i == chromosomeLength - 1) {
-            TSPManager::getInstance()->getEuclideanDistance(chrom[i], chrom[0]);
+            totalDistance += TSPManager::getInstance()->getEuclideanDistance(chrom[i], chrom[0]);
         } else {
             totalDistance += TSPManager::getInstance()->getEuclideanDistance(chrom[i], chrom[i + 1]);
         }
@@ -25,7 +25,7 @@ int getTotalRouteDistance(const int *chrom, int chromosomeLength) {
 }
 
 void tspEval(ga::Individual *ent) {
-    int objectiveValue = getTotalRouteDistance(ent->chrom, ent->length);
+    float objectiveValue = (getTotalRouteDistance(ent->chrom, ent->length));
 
     ent->fit = 1.0f / objectiveValue;
 }

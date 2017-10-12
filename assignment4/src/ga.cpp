@@ -108,15 +108,15 @@ void GA::setupOptions(int argc, char *argv[]) {
 
     //NOTE~ CONFIGURE THESE PARAMETERS***********
     //population size
-    options.popSize = 4600;
+    options.popSize = 800;
     //maximum number of generations
-    options.maxgens = 2000;//static_cast<unsigned int>(1.5 * options.popSize);
+    options.maxgens = 100;//static_cast<unsigned int>(1.5 * options.popSize);
 
     //lambda*popSize has to be an even number
     options.lambda = 1;
 
     options.px = 0.99f; //probability of crossover
-    options.pm = 0.5f; //probability of mutation
+    options.pm = 0.1f; //probability of mutation
     //Note~ CONFIGURE END**************************
 
     options.scaler = 1.05;
