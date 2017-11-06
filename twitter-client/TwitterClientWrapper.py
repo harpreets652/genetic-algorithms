@@ -1,4 +1,4 @@
-import twitter as twitter
+import twitter
 import twitter.models
 import os
 
