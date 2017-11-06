@@ -10,10 +10,8 @@ Evaluator* Evaluator::instance = nullptr;
 
 Evaluator* Evaluator::getInstance() {
     if (instance == nullptr) {
-        cout << "assigning new instance" << endl;
         instance = new Evaluator();
     }
-    cout << "returning" << endl;
     return instance;
 }
 
@@ -50,8 +48,6 @@ void Evaluator::init() {
     }
 
     fin.close();
-
-    getBestSolution();
 }
 
 void Evaluator::getBestSolution() {
@@ -71,7 +67,6 @@ void Evaluator::getBestSolution() {
 
 void Evaluator::evaluate(Individual &indiv) {
     double sum = 0.0;
-    cout << "inside evaluate..." << endl;
     for (int i = 0; i < indiv.size()-1; i++) {
         sum += getDistanceBetween(indiv[i], indiv[i+1]);
     }
@@ -102,6 +97,10 @@ void Evaluator::evaluate(Individual &indiv) {
     }
 
     if (&indiv != bestSolution) {
+      if (!haveEvaluatedBestSolution) {
+          getBestSolution();
+          haveEvaluatedBestSolution = true;
+      }
       indiv.diffFitness = (indiv.fitness - bestSolution->fitness);
       indiv.diffDistance = (indiv.distance - bestSolution->distance);
     }

@@ -5,11 +5,9 @@
 #include "config.h"
 
 void GA::init() {
-    cout << "init" << endl;
     parentPop.generate(config.POPULATION_SIZE);
-    cout << "init" << endl;
     parentPop.evaluate();
-    parentPop.print();
+    // parentPop.print();
 }
 
 void GA::makeNextGen() {
@@ -44,7 +42,6 @@ void GA::makeNextGen() {
 
 void GA::run() {
     for (int i = 0; i < config.ITERATION_SIZE; i++) {
-        cout << "iteration: " << i << endl;
         makeNextGen();
         parentPop = childPop;
     }

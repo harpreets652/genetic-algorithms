@@ -39,7 +39,6 @@ void Population::evaluate() {
     minFitness = 10000.0;
     sumFitness = 0.0;
     for (int i = 0; i < this->size(); i++) {
-        cout << "inside popuplation evaluate loop: " << i << endl;
         at(i).evaluate();
         minFitness = min(minFitness, at(i).fitness);
         maxFitness = max(maxFitness, at(i).fitness);

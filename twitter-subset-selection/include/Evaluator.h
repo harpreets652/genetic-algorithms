@@ -29,6 +29,7 @@ private:
     void init();
 
     static Evaluator* instance;
+    bool haveEvaluatedBestSolution = false;
 
     double getDistanceBetween(unsigned int startIndex, unsigned int endIndex);
 };

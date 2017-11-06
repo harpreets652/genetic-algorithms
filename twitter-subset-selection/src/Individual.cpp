@@ -39,9 +39,7 @@ void Individual::print() const {
 }
 
 void Individual::evaluate() {
-    cout << "pre evaluate" << endl;
     Evaluator::getInstance()->evaluate((*this));
-    cout << "POST evaluate" << endl;
 }
 
 void Individual::crossoverWith(Individual& other) {
