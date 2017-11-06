@@ -6,9 +6,9 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 properties = dict(line.strip().split('=') for line in open(ROOT_DIR + '/' + PROPERTIES_FILE))
 
-api = twitter.Api(consumer_key="'{}'".format(properties.get("api-key")),
+api = twitter.Api(consumer_key=properties.get("api-key"),
                   consumer_secret=properties.get("api-secret"),
-                  access_token_key="'{}'".format(properties.get("access-token-key")),
+                  access_token_key=properties.get("access-token-key"),
                   access_token_secret=properties.get("access-token-secret"))
 
 # result = api.UsersLookup(screen_name='CS_776_GA')
