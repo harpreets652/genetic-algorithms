@@ -1,4 +1,5 @@
 import twitter as twitter
+import twitter.models
 import os
 
 PROPERTIES_FILE = 'twitter-client.properties'
@@ -11,7 +12,9 @@ api = twitter.Api(consumer_key=properties.get("api-key"),
                   access_token_key=properties.get("access-token-key"),
                   access_token_secret=properties.get("access-token-secret"))
 
-# result = api.UsersLookup(screen_name='CS_776_GA')
+# users = api.UsersLookup(screen_name='CS_776_GA')
 users = api.GetFriends()
+trends = api.GetTrendsCurrent()
 
 print([u.screen_name for u in users])
+print (trends)
