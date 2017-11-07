@@ -3,8 +3,8 @@ CREATE ROLE SYSTEM WITH LOGIN PASSWORD 'SYSTEM';
 
 ALTER ROLE SYSTEM CREATEDB;
 
-\echo '============Creating database TSS_DEV===========';
-CREATE DATABASE TSS_DEV;
+\echo '============Creating database CS_776===========';
+CREATE DATABASE CS_776;
 
-\echo '============Granting ALL privileges of TSS_DEV to SYSTEM===========';
-GRANT ALL PRIVILEGES ON DATABASE TSS_DEV TO system;
+\echo '============Granting ALL privileges of CS_776 to SYSTEM===========';
+GRANT ALL PRIVILEGES ON DATABASE CS_776 TO system;

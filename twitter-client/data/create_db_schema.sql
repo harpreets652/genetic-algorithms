@@ -1,9 +1,9 @@
-\connect tss_dev;
+\connect cs_776;
 
-CREATE SCHEMA CS_776 AUTHORIZATION system;
+CREATE SCHEMA TSS_DEV AUTHORIZATION system;
 
-\echo 'Creating FAKE_NEWS_TWEETS table'
-CREATE TABLE CS_776.FAKE_NEWS_TWEETS (
+\echo 'Creating FAKE_NEWS_TWEETS table IN TSS_DEV'
+CREATE TABLE TSS_DEV.FAKE_NEWS_TWEETS (
   tweet_id                      BIGINT PRIMARY KEY,
   tweet_content                 JSON      DEFAULT NULL,
   tweet_created_date            TIMESTAMP DEFAULT NULL,
