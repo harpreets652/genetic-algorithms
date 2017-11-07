@@ -19,7 +19,7 @@
       * verify table is created ("\dt")
   * quit ("\q")
 * DataGrip connection info
-  * host: localhost, database: tss_dev, user: system, password: system, port: 5432
-  * url: jdbc:postgresql://localhost:5432/tss_dev
-  * schema: cs_776
+  * host: localhost, database: cs_776, user: system, password: system, port: 5432
+  * url: jdbc:postgresql://localhost:5432/cs_776
+  * schema: tss_dev
 
