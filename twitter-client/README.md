@@ -11,7 +11,7 @@
   * cd into twitter-client/data
   * login as postgres: "psql postgres"
   * run init_db.sql ("\i init_db.sql")
-    * verify system role is created ("\du") and tss_dev db is created ("\list")
+    * verify system role is created ("\du") and cs_776 db is created ("\list")
   * logout and login as system: "psql postgres -U system"
   * run create_db_schema.sql ("\i create_db_schema.sql")
     * verify schema and table created:
