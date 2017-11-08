@@ -5,7 +5,7 @@ CREATE SCHEMA TSS_DEV AUTHORIZATION system;
 \echo 'Creating FAKE_NEWS_TWEETS table IN TSS_DEV'
 CREATE TABLE TSS_DEV.FAKE_NEWS_TWEETS (
   tweet_id                      BIGINT PRIMARY KEY,
-  tweet_content                 JSON      DEFAULT NULL,
+  tweet_content                 JSONB      DEFAULT NULL,
   tweet_created_date            TIMESTAMP DEFAULT NULL,
   length_char                   SMALLINT  DEFAULT NULL,
   length_words                  SMALLINT  DEFAULT NULL,
