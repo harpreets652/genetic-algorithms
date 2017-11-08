@@ -2,8 +2,9 @@ import twitter
 import twitter.models
 import os
 import psycopg2 as psyco
-from numpy import long
 import json
+from datetime import datetime
+from numpy import long
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
 SELECT_TWEETS_TO_HYDRATE_SQL = """SELECT tweet_id FROM tss_dev.fake_news_tweets 
@@ -15,7 +16,8 @@ INSERT_TWEET_IDS_SQL = """INSERT INTO tss_dev.fake_news_tweets (tweet_id)
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
 UPDATE_TWEET_RECORD = """UPDATE tss_dev.fake_news_tweets
-                         SET tweet_content = %(tweetJSON)s
+                         SET tweet_content = %(tweetJSON)s,
+                             tweet_created_date = %(tweetCreatedDate)s
                          WHERE tweet_id = %(tweetId)s;"""
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -55,6 +57,8 @@ def hydrateTweets(batchSize):
                       access_token_secret=properties.get("access-token-secret"),
                       sleep_on_rate_limit=True)
 
+    print("-----> {}: Starting to hydrate tweets.".format(str(datetime.now())))
+    progessCounter = 0
     while True:
         curs = conn.cursor()
         try:
@@ -76,22 +80,30 @@ def hydrateTweets(batchSize):
                     try:
                         tweet = api.GetStatus(status_id=tweetId[0])
                         tweetJson = tweet.AsJsonString()
+                        createdDate = datetime.strptime(tweet.created_at, '%a %b %d %H:%M:%S +0000 %Y')
                     except Exception as e:
                         print(
                             "Exception occurred from Twitter.GetStatus for Id {}. Exception: {}".format(tweetId[0], e))
                         tweetJson = json.dumps({'ERROR_RESPONSE': str(e)})
+                        createdDate = datetime.now()
 
                     try:
-                        loopCurs.execute(UPDATE_TWEET_RECORD, {'tweetId': tweetId[0], 'tweetJSON': tweetJson})
+                        loopCurs.execute(UPDATE_TWEET_RECORD, {'tweetId': tweetId[0],
+                                                               'tweetCreatedDate': createdDate,
+                                                               'tweetJSON': tweetJson})
                     except Exception as e:
                         print("Exception occurred while inserting json for {}. Exception: {}".format(tweetId[0], e))
                         conn.rollback()
+
+        progessCounter += len(tweetsToHydrate)
+        if progessCounter % 10000 == 0:
+            print("-----> {}: {} tweets hydrated".format(str(datetime.now()), progessCounter))
 
     return
 
 
 # read tweet guids and save them in the db
-loadTweetIds(properties.get("hydrate.dataFile"))
+# loadTweetIds(properties.get("hydrate.dataFile"))
 
 # hydrate tweets
 hydrateTweets(int(properties.get("hydrate.batchSize")))
