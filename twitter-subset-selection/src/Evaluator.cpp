@@ -55,4 +55,18 @@ string Evaluator::exec(const string& cmd) {
 
 }
 
+void Evaluator::setWekaLocation(const string &wekaLoc) {
+    this->wekaLocation = wekaLoc;
+}
+
+void Evaluator::setDataLocation(const string &dataLoc) {
+    this->dataLocation = dataLoc;
+}
+
+string Evaluator::getRunCommand() {
+    char cmd[200];
+    snprintf(cmd, 200, "java -classpath %s/weka.jar weka.classifiers.rules.ZeroR -t %s/data/iris.arff",
+            wekaLocation.c_str(), dataLocation.c_str());
+    return string(cmd);
+}
 #endif

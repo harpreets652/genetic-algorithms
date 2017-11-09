@@ -19,8 +19,8 @@ struct Config {
     string INPUT_FILENAME;
 
     unsigned int NUM_FEATURES = 30;
-    unsigned int POPULATION_SIZE = 1000;
-    unsigned int ITERATION_SIZE = 50000;
+    unsigned int POPULATION_SIZE = 10;
+    unsigned int ITERATION_SIZE = 50;
     unsigned int TOTAL_GAS_SIZE = 30; // 5 for testing, 30 for reality
 };
 

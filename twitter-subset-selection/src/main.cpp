@@ -102,14 +102,20 @@ void iterateThrough(int argc, char * argv[]) {
 
 int main(int argc, char *argv[]) {
     srand((unsigned int)time(nullptr));
-    argh::parser cmdl({ "-w", "--wekaloc" });
+    argh::parser cmdl({ "-w", "--wekaloc", "-d", "--data" });
     cmdl.parse(argc, argv);
 
-    string loc = cmdl("wekaloc").str();
-    char cmd[200];
-    snprintf(cmd, 200, "java -classpath %s/weka.jar weka.classifiers.rules.ZeroR -t %s/data/iris.arff", loc.c_str(), loc.c_str());
+    Evaluator::getInstance()->setWekaLocation(cmdl("wekaloc").str());
+    Evaluator::getInstance()->setDataLocation(cmdl("data").str());
 
-    cout << Evaluator::getInstance()->exec(cmd) << endl;
+    cout << Evaluator::getInstance()->exec(
+            Evaluator::getInstance()->getRunCommand()
+    ) << endl;
+
+    GA ga;
+    cout << "running GA" << endl;
+    ga.init();
+    ga.run();
 
     return 0;
 }

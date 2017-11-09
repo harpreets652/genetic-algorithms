@@ -18,12 +18,17 @@ public:
 
     string exec(const string& cmd);
     string exec(const char * cmd);
+    void setWekaLocation(const string& wekaLoc);
+    void setDataLocation(const string& dataLoc);
+
+    string getRunCommand();
 private:
     Evaluator();
     void init();
 
     static Evaluator* instance;
-    const string wekaConstructionString = "";
+    string wekaLocation;
+    string dataLocation;
 };
 
 #endif
