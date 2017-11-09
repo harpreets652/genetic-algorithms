@@ -11,22 +11,23 @@ using namespace std;
 class Population : public vector<Individual> {
 public:
     Population();
-    ~Population();
 
     void generate(int n = 100);
     void print() const;
     void evaluate();
     void sortByFitness();
 
+
     Individual proportionalSelect();
     Individual tournamentSelect();
     Individual getBestIndividual() const;
 
     double minFitness, maxFitness, averageFitness;
-    int bestIndividualIndex, worstIndividualIndex;
+    unsigned int bestIndividualIndex, worstIndividualIndex;
 
 private:
     double sumFitness;
+    void sortByFitness(unsigned int left, unsigned int right);
 };
 
 #endif

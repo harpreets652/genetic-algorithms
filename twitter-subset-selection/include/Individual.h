@@ -12,10 +12,9 @@ class Evaluator;
 
 using namespace std;
 
-class Individual : public vector<unsigned int> {
+class Individual : public vector<bool> {
 public:
     Individual();
-    ~Individual();
 
     void generateRandom();
     void print() const;

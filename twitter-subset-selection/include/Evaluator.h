@@ -10,28 +10,19 @@ class Individual;
 
 using namespace std;
 
-struct Point {
-    double x, y;
-};
-
 class Evaluator {
 public:
     static Evaluator* getInstance();
     ~Evaluator();
     void evaluate(Individual &indiv);
-    void getBestSolution();
-    
-    vector<Point> pointsOfReference;
-    
-    Individual* bestSolution;
+
+    string exec(const string& cmd);
 private:
     Evaluator();
     void init();
 
     static Evaluator* instance;
-    bool haveEvaluatedBestSolution = false;
-
-    double getDistanceBetween(unsigned int startIndex, unsigned int endIndex);
+    const string wekaConstructionString = "";
 };
 
 #endif
