@@ -58,7 +58,7 @@ void iterateThrough(int argc, char * argv[]) {
     config.PROB_CROSSOVER = probabilityCombinations[2].second;
 
     // set the config and set up file
-    Logger graphLogger(getOutputFilename() + ".tsv"), bestIndividualsLogger("best" + getOutputFilename() + ".tsv");
+    Logger graphLogger(Utils::getOutputFilename() + ".tsv"), bestIndividualsLogger("best" + Utils::getOutputFilename() + ".tsv");
 
     // run the 30 iterations
     vector<GA> runs(config.TOTAL_GAS_SIZE);

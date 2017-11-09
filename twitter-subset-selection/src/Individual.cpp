@@ -19,7 +19,7 @@ void Individual::init() {
 void Individual::generateRandom() {
     // include all the indeces
     for (unsigned int i = 0; i < this->size(); i++) {
-        (*this)[i] = randomWithProbability(0.5);
+        (*this)[i] = Utils::randomWithProbability(0.5);
     }
 }
 
@@ -36,7 +36,7 @@ void Individual::evaluate() {
 
 void Individual::crossoverWith(Individual& other) {
     // pick random index
-    int index = randIntBetween(0, (int)size());
+    int index = Utils::randIntBetween(0, (int)size());
     // get the two subsets
     vector<bool> lSubset(begin() + index, end()), rSubset(other.begin() + index, other.end());
     // assign them back
@@ -48,7 +48,7 @@ void Individual::crossoverWith(Individual& other) {
 
 void Individual::mutate() {
     // flip at a random index
-    int index = randIntBetween(0, (int)size());
+    int index = Utils::randIntBetween(0, (int)size());
     (*this)[index] = !at((unsigned int)index);
 }
 

@@ -29,20 +29,4 @@ const Config config_test;
 
 extern Config config;
 
-
-static bool randomWithProbability(double prob) {
-    // assuming prob = (0,1]...
-    double shot = double(rand())/double(RAND_MAX);
-    return (shot <= prob);
-}
-
-static int randIntBetween(int low, int high) {
-    return (rand() % (high - low)) + low;
-}
-
-static string getOutputFilename() {
-    string result = "some_output.log";
-    return result;
-}
-
 #endif

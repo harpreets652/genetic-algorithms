@@ -95,8 +95,8 @@ Individual Population::proportionalSelect() {
 }
 
 Individual Population::tournamentSelect() {
-  int left = randIntBetween(0, size());
-  int right = randIntBetween(0, size());
+  int left = Utils::randIntBetween(0, size());
+  int right = Utils::randIntBetween(0, size());
   if (at(left).fitness >= at(right).fitness) {
     return at(left);
   } else {

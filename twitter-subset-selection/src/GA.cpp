@@ -17,11 +17,11 @@ void GA::makeNextGen() {
         );
 
         // if cross over probability, mess with individual i, and individual i _1
-        if (i < (parentPop.size() - 1) && randomWithProbability(config.PROB_CROSSOVER)) {
-            childPop[i].crossoverWith(parentPop[randIntBetween(i+1, parentPop.size())]);
+        if (i < (parentPop.size() - 1) && Utils::randomWithProbability(config.PROB_CROSSOVER)) {
+            childPop[i].crossoverWith(parentPop[Utils::randIntBetween(i+1, parentPop.size())]);
         }
         // if mutation probabiltiy, mess with individual i
-        if (randomWithProbability(config.PROB_MUTATION)) {
+        if (Utils::randomWithProbability(config.PROB_MUTATION)) {
             childPop[i].mutate();
         }
     }

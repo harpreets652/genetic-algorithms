@@ -9,6 +9,7 @@
 class Evaluator;
 
 #include "Evaluator.h"
+#include "Utils.h"
 
 using namespace std;
 
