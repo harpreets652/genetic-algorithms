@@ -1,10 +1,11 @@
 import twitter.models
+import json
 import os
 import psycopg2 as psyco
-import json
-from numpy import long
 import time
+from numpy import long
 from datetime import datetime
+import concurrent
 
 # TWEET FEATURE EXTRACTOR: looks for tweets with json and extracts features
 # Main method to use: twitter.Status.NewFromJsonDict(json.loads(tweet.AsJsonString()))
@@ -33,6 +34,7 @@ conn = psyco.connect(dbname="cs_776", user="system", password="system", host="lo
 
 
 def run(batchSize, sleepTimeSeconds, numOfThreads):
+
     while True:
         curs = conn.cursor()
         try:
