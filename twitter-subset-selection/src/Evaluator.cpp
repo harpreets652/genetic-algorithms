@@ -35,6 +35,10 @@ void Evaluator::evaluate(Individual &indiv) {
     indiv.distance = 0;
 }
 
+string Evaluator::exec(const char *cmd) {
+    return exec(string(cmd));
+}
+
 string Evaluator::exec(const string& cmd) {
     char buffer[128];
     string result;

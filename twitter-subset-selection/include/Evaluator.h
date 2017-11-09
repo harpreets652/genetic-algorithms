@@ -17,6 +17,7 @@ public:
     void evaluate(Individual &indiv);
 
     string exec(const string& cmd);
+    string exec(const char * cmd);
 private:
     Evaluator();
     void init();

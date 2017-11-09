@@ -1,5 +1,6 @@
 #include <iostream>
 #include <array>
+#include <argh/argh.h>
 
 #include "config.h"
 #include "Logger.h"
@@ -101,7 +102,14 @@ void iterateThrough(int argc, char * argv[]) {
 
 int main(int argc, char *argv[]) {
     srand((unsigned int)time(nullptr));
-    cout << Evaluator::getInstance()->exec("java -classpath /Applications/weka-3-8-1/weka.jar weka.classifiers.rules.ZeroR -t /Applications/weka-3-8-1/data/iris.arff") << endl;
+    argh::parser cmdl({ "-w", "--wekaloc" });
+    cmdl.parse(argc, argv);
+
+    string loc = cmdl("wekaloc").str();
+    char cmd[200];
+    snprintf(cmd, 200, "java -classpath %s/weka.jar weka.classifiers.rules.ZeroR -t %s/data/iris.arff", loc.c_str(), loc.c_str());
+
+    cout << Evaluator::getInstance()->exec(cmd) << endl;
 
     return 0;
 }
