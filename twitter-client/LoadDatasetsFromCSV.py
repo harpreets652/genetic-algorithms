@@ -2,7 +2,6 @@ import csv
 import glob
 import json
 import os
-import pprint
 
 import psycopg2 as psyco
 
@@ -10,7 +9,7 @@ import SqlStatements
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-PROPERTIES_FILE = 'twitter-client.properties'
+PROPERTIES_FILE = 'dataset.properties'
 properties = dict(line.strip().split('=') for line in open(ROOT_DIR + '/' + PROPERTIES_FILE))
 
 conn = psyco.connect(dbname="cs_776", user="system", password="system", host="localhost")
@@ -27,6 +26,7 @@ def loadUsers(usersDir):
             genuineUsers = True
 
         usersDataFile = ROOT_DIR + '/' + usersDir + file_name
+
         with conn:
             with conn.cursor() as curs:
                 with open(usersDataFile) as inFile:
@@ -38,7 +38,31 @@ def loadUsers(usersDir):
                         insertData(conn,
                                    curs,
                                    SqlStatements.INSERT_INTO_USERS,
-                                   SqlStatements.mapInputToUsers(row))
+                                   SqlStatements.mapUserInputToEntity(row))
+
+    return
+
+
+def loadTweets(tweetDir):
+    if not tweetDir:
+        print("tweetDir is not provided.")
+        return
+
+    for file_name in glob.glob1(ROOT_DIR + '/' + tweetDir, "*"):
+        tweetDataFile = ROOT_DIR + '/' + tweetDir + file_name
+
+        with conn:
+            with conn.cursor() as curs:
+                with open(tweetDataFile) as inFile:
+                    tweetReader = csv.DictReader(inFile)
+
+                    for line in tweetReader:
+                        row = json.loads(json.dumps(line).replace("\\ufeff", ""))
+
+                        insertData(conn,
+                                   curs,
+                                   SqlStatements.INSERT_INTO_TWEETS,
+                                   SqlStatements.mapTweetInputToEntity(row))
 
     return
 
@@ -55,3 +79,5 @@ def insertData(conn, cursor, sql, data):
 
 
 loadUsers(properties.get("loadDataSet.users-directory"))
+
+loadTweets(properties.get("loadDataSet.tweets-directory"))

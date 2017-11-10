@@ -32,8 +32,56 @@ VALUES (%(user_id)s, %(name)s, %(screen_name)s,
         %(verified)s, %(notifications)s, %(description)s, %(contributors_enabled)s, 
         %(following)s, %(created_at)s, %(timestamp)s, %(crawled_at)s, %(updated)s, %(is_user_genuine)s)"""
 
+# noinspection SqlNoDataSourceInspection,SqlDialectInspection
+INSERT_INTO_TWEETS = """INSERT INTO tss_dev.tweets
+                          (tweet_id, user_id_fk, tweet_text, 
+                          source, truncated, in_reply_to_status_id, 
+                          in_reply_to_user_id, retweeted_status_id, 
+                          in_reply_to_screen_name, geo, place, contributors, 
+                          retweet_count, reply_count, favorite_count, 
+                          favorited, retweeted, possibly_sensitive, 
+                          num_hashtags, num_urls, num_mentions, 
+                          created_at, timestamp, crawled_at, updated)
+VALUES (%(tweet_id)s, %(user_id_fk)s, %(tweet_text)s, 
+        %(source)s, %(truncated)s, %(in_reply_to_status_id)s, 
+        %(in_reply_to_user_id)s, %(retweeted_status_id)s, 
+        %(in_reply_to_screen_name)s, %(geo)s, %(place)s, 
+        %(contributors)s, %(retweet_count)s, %(reply_count)s, 
+        %(favorite_count)s, %(favorited)s, %(retweeted)s, 
+        %(possibly_sensitive)s, %(num_hashtags)s, %(num_urls)s, 
+        %(num_mentions)s, %(created_at)s, %(timestamp)s, %(crawled_at)s, %(updated)s)"""
 
-def mapInputToUsers(inputData):
+
+def mapTweetInputToEntity(inputData):
+    return {'tweet_id': convertInputToLong(inputData['id']),
+            'user_id_fk': convertInputToLong(inputData['user_id']),
+            'tweet_text': stringNullCheck(inputData['text']),
+            'source': stringNullCheck(inputData['source']),
+            'truncated': convertInputToBool(inputData['truncated']),
+            'in_reply_to_status_id': convertInputToLong(inputData['in_reply_to_status_id']),
+            'in_reply_to_user_id': convertInputToLong(inputData['in_reply_to_user_id']),
+            'retweeted_status_id': convertInputToLong(inputData['retweeted_status_id']),
+            'in_reply_to_screen_name': stringNullCheck(inputData['in_reply_to_screen_name']),
+            'geo': stringNullCheck(inputData['geo']),
+            'place': stringNullCheck(inputData['place']),
+            'contributors': stringNullCheck(inputData['contributors']),
+            'retweet_count': convertInputToLong(inputData['retweet_count']),
+            'reply_count': convertInputToLong(inputData['reply_count']),
+            'favorite_count': convertInputToLong(inputData['favorite_count']),
+            'favorited': convertInputToBool(inputData['favorited']),
+            'retweeted': convertInputToBool(inputData['retweeted']),
+            'possibly_sensitive': convertInputToBool(inputData['possibly_sensitive']),
+            'num_hashtags': convertInputToLong(inputData['num_hashtags']),
+            'num_urls': convertInputToLong(inputData['num_urls']),
+            'num_mentions': convertInputToLong(inputData['num_mentions']),
+            'created_at': stringNullCheck(inputData['created_at']),
+            'timestamp': convertInputToTimestamp(inputData['created_at'], '%a %b %d %H:%M:%S +0000 %Y'),
+            'crawled_at': convertInputToTimestamp(inputData['crawled_at'], '%m/%d/%y %H:%M'),
+            'updated': convertInputToTimestamp(inputData['updated'], '%m/%d/%y %H:%M')
+            }
+
+
+def mapUserInputToEntity(inputData):
     return {'user_id': convertInputToLong(inputData['id']),
             'name': stringNullCheck(inputData['name']),
             'screen_name': stringNullCheck(inputData['screen_name']),
@@ -79,28 +127,28 @@ def mapInputToUsers(inputData):
 
 
 def stringNullCheck(input):
-    if not input:
+    if not input or input.strip() == 'NULL':
         return None
 
     return input.strip()
 
 
 def convertInputToBool(input):
-    if not input:
+    if not input or input.strip() == 'NULL':
         return False
 
     return True if input.strip() == '1' else False
 
 
 def convertInputToTimestamp(input, fmt):
-    if not input:
+    if not input or input.strip() == 'NULL':
         return None
 
     return datetime.strptime(input.strip(), fmt)
 
 
 def convertInputToLong(input):
-    if not input:
+    if not input or input.strip() == 'NULL':
         return None
 
     return long(input.strip())
