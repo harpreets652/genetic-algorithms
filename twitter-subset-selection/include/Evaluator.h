@@ -28,6 +28,7 @@ private:
     Evaluator();
     void init();
     string buildQuery(Individual &individual);
+    string createFileHeader(Individual &individual);
     string createDataPoints(result &dataPoint, Individual &individual);
 
     static Evaluator* instance;
