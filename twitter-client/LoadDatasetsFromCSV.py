@@ -1,12 +1,12 @@
-import os
-import psycopg2 as psyco
 import csv
 import glob
 import json
-from datetime import datetime
-from numpy import long
-import SqlStatements
+import os
 import pprint
+
+import psycopg2 as psyco
+
+import SqlStatements
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -35,17 +35,20 @@ def loadUsers(usersDir):
                         row = json.loads(json.dumps(line).replace("\\ufeff", ""))
                         row['is_user_genuine'] = genuineUsers
 
-                        pprint.pprint(row)
-                        insertUser(conn, curs, SqlStatements.mapInputToUsers(row))
+                        insertData(conn,
+                                   curs,
+                                   SqlStatements.INSERT_INTO_USERS,
+                                   SqlStatements.mapInputToUsers(row))
 
     return
 
 
-def insertUser(conn, cursor, data):
+def insertData(conn, cursor, sql, data):
     try:
-        cursor.execute(SqlStatements.INSERT_INTO_USERS, data)
+        cursor.execute(sql, data)
     except Exception as e:
-        print("""Exception occurred during user insert, continuing loop.\ndata: {}\nException: {}""".format(data, e))
+        print("""Exception occurred during sql execution, continuing loop.\nsql: {}\ndata: {}\nException: {}"""
+              .format(sql, data, e))
         conn.rollback()
 
     return
