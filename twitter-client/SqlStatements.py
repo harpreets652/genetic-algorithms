@@ -30,7 +30,7 @@ VALUES (%(user_id)s, %(name)s, %(screen_name)s,
         %(profile_background_color)s, %(profile_link_color)s, %(utc_offset)s, 
         %(is_translator)s, %(follow_request_sent)s, %(protected)s, 
         %(verified)s, %(notifications)s, %(description)s, %(contributors_enabled)s, 
-        %(following)s, %(created_at)s, %(timestamp)s, %(crawled_at)s, %(updated)s, %(is_user_genuine)s)"""
+        %(following)s, %(created_at)s, %(timestamp)s, %(crawled_at)s, %(updated)s, %(is_user_genuine)s);"""
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
 INSERT_INTO_TWEETS = """INSERT INTO tss_dev.tweets
@@ -49,10 +49,16 @@ VALUES (%(tweet_id)s, %(user_id_fk)s, %(tweet_text)s,
         %(contributors)s, %(retweet_count)s, %(reply_count)s, 
         %(favorite_count)s, %(favorited)s, %(retweeted)s, 
         %(possibly_sensitive)s, %(num_hashtags)s, %(num_urls)s, 
-        %(num_mentions)s, %(created_at)s, %(timestamp)s, %(crawled_at)s, %(updated)s)"""
+        %(num_mentions)s, %(created_at)s, %(timestamp)s, %(crawled_at)s, %(updated)s);"""
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
-INIT_INSERT_INTO_FEATURES = """INSERT INTO tss_dev.users_features (user_id) VALUES (%(user_id)s)"""
+INIT_INSERT_INTO_FEATURES = """INSERT INTO tss_dev.users_features (user_id) VALUES (%(user_id)s);"""
+
+# noinspection SqlNoDataSourceInspection,SqlDialectInspection
+GEN_FEATURES_FOR_USERS = """SELECT user_id
+                            FROM tss_dev.users_features
+                            WHERE is_user_genuine IS NULL
+                              AND process_error IS NULL;"""
 
 
 def mapTweetInputToEntity(inputData):
@@ -83,8 +89,10 @@ def mapTweetInputToEntity(inputData):
             'updated': convertInputToTimestamp(inputData['updated'], '%m/%d/%y %H:%M')
             }
 
+
 def mapUserInputToFeaturesInit(inputData):
-        return {'user_id': convertInputToLong(inputData['id'])}
+    return {'user_id': convertInputToLong(inputData['id'])}
+
 
 def mapUserInputToUsersTable(inputData):
     return {'user_id': convertInputToLong(inputData['id']),
