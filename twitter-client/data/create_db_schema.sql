@@ -5,7 +5,7 @@ CREATE SCHEMA TSS_DEV
 
 \echo 'Creating USERS table IN TSS_DEV'
 CREATE TABLE TSS_DEV.USERS (
-  id                                 BIGINT PRIMARY KEY,
+  user_id                            BIGINT PRIMARY KEY,
   name                               CHAR(255) DEFAULT NULL,
   screen_name                        CHAR(255) DEFAULT NULL,
   statuses_count                     INTEGER   DEFAULT NULL,
