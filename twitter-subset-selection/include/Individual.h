@@ -15,12 +15,12 @@ using namespace std;
 
 // MESSAGE BASED FEATURES
 #define AVG_LEN_TWEET_CHARACTERS    0
-#define AVG LEN_TWEET_WORDS         1
+#define AVG_LEN_TWEET_WORDS         1
 #define AVG_NUM_POSITIVE_WORDS      2
 #define AVG_NUM_NEGATIVE_WORDS      3
 #define AVG_SENTIMENT_SCORE         4
 
-
+// PROPORTIONAL BASED FEATURES
 #define FRAC_CONTAINS_QUESTION      5
 #define FRAC_CONTAINS_EXCLAMATION   6
 #define FRAC_CONTAINS_MULT_Q_E      7
@@ -58,6 +58,7 @@ public:
     void print() const;
     void init();
     void evaluate();
+    string to_string() const;
     //vector<double> getAsValues() const;
 
     void crossoverWith(Individual& other);

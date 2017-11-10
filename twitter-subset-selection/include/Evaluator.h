@@ -4,11 +4,13 @@
 class Individual;
 
 #include <vector>
+#include <pqxx/pqxx>
 
 #include "config.h"
 #include "Individual.h"
 
 using namespace std;
+using namespace pqxx;
 
 class Evaluator {
 public:
@@ -25,10 +27,15 @@ public:
 private:
     Evaluator();
     void init();
+    string buildQuery(Individual &individual);
+    string createDataPoints(result &dataPoint, Individual &individual);
 
     static Evaluator* instance;
     string wekaLocation;
     string dataLocation;
+
+    connection *c;
+    work *txn;
 };
 
 #endif

@@ -26,13 +26,88 @@ Evaluator::~Evaluator() {
 }
 
 void Evaluator::init() {
+    c = new connection("dbname=cs_776 user=system");
+    txn = new work(*c);
+}
+
+void Evaluator::evaluate(Individual &individual) {
+    // for right now, all individuals get 100
+    individual.fitness = 100;
+    individual.distance = 0;
+
+    // query the database
+    string query = buildQuery(individual);
+    cout << "query: " << query << endl;
+    cout << "indiv as string: " << individual.to_string() << endl;
+    result r = txn->exec(query);
+
+    // if we have nothing, report fitness of 0
+    if (r.empty()) {
+        individual.fitness = 0;
+        individual.distance = 0;
+        return;
+    }
+    // int employee_id = r[0][0].as<int>();
+    // build the output file
+    ofstream fout("../weka_temp/" + individual.to_string() + ".txt");
+    fout << "@RELATION twitter" << endl;
+    if (individual[AVG_LEN_TWEET_CHARACTERS]) {
+        fout << "@ATTRIBUTE AVG_LEN_TWEET_CHARACTERS \t\tREAL" << endl;
+    }
+    if (individual[AVG_LEN_TWEET_WORDS]) {
+        fout << "@ATTRIBUTE AVG_LEN_TWEET_WORDS\t\tREAL" << endl;
+    }
+    if (individual[AVG_NUM_POSITIVE_WORDS]) {
+        fout << "@ATTRIBUTE AVG_NUM_POSITIVE_WORDS\t\tREAL" << endl;
+    }
+    // TODO ...
+
+
+    // output each of the data points (per user) here
+    fout << createDataPoints(r, individual) << endl;
+
+    fout.close();
+
+    // call the WEKA on this function
+
+    // get the data from it
 
 }
 
-void Evaluator::evaluate(Individual &indiv) {
-    // for right now, all individuals get 100
-    indiv.fitness = 100;
-    indiv.distance = 0;
+string Evaluator::createDataPoints(result &dataPoint, Individual &individual) {
+    string result = "@DATA\n";
+
+    return result;
+}
+
+string Evaluator::buildQuery(Individual &indiv) {
+    indiv.print();
+    string query;
+
+    if (indiv[AVG_LEN_TWEET_CHARACTERS]) {
+        query += "length_char,";
+    }
+    if (indiv[AVG_LEN_TWEET_WORDS]) {
+        query += "length_words,";
+    }
+    if (indiv[AVG_NUM_POSITIVE_WORDS]) {
+        query += "sentiment_pos_words,";
+    }
+    if (indiv[AVG_NUM_NEGATIVE_WORDS]) {
+        query += "sentiment_neg_words,";
+    }
+    if (indiv[AVG_SENTIMENT_SCORE]) {
+        query += "sentiment_score,";
+    }
+    if (indiv[FRAC_CONTAINS_QUESTION]) {
+        query += "contains_question";
+    }
+    //...
+    if (query[query.size()-1] == ',') {
+        query = query.substr(0, query.size()-1);
+    }
+
+    return "select " + query + " from here;";
 }
 
 string Evaluator::exec(const char *cmd) {

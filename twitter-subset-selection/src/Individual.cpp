@@ -34,6 +34,14 @@ void Individual::evaluate() {
     Evaluator::getInstance()->evaluate((*this));
 }
 
+string Individual::to_string() const {
+    string result(config.NUM_FEATURES, ' ');
+    for (unsigned int i = 0; i < size(); i++) {
+        result[i] = at(i) ? '1' : '0';
+    }
+    return result;
+}
+
 void Individual::crossoverWith(Individual& other) {
     // pick random index
     int index = Utils::randIntBetween(0, (int)size());
