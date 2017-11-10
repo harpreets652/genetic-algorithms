@@ -51,6 +51,9 @@ VALUES (%(tweet_id)s, %(user_id_fk)s, %(tweet_text)s,
         %(possibly_sensitive)s, %(num_hashtags)s, %(num_urls)s, 
         %(num_mentions)s, %(created_at)s, %(timestamp)s, %(crawled_at)s, %(updated)s)"""
 
+# noinspection SqlNoDataSourceInspection,SqlDialectInspection
+INIT_INSERT_INTO_FEATURES = """INSERT INTO tss_dev.users_features (user_id) VALUES (%(user_id)s)"""
+
 
 def mapTweetInputToEntity(inputData):
     return {'tweet_id': convertInputToLong(inputData['id']),
@@ -80,8 +83,10 @@ def mapTweetInputToEntity(inputData):
             'updated': convertInputToTimestamp(inputData['updated'], '%m/%d/%y %H:%M')
             }
 
+def mapUserInputToFeaturesInit(inputData):
+        return {'user_id': convertInputToLong(inputData['id'])}
 
-def mapUserInputToEntity(inputData):
+def mapUserInputToUsersTable(inputData):
     return {'user_id': convertInputToLong(inputData['id']),
             'name': stringNullCheck(inputData['name']),
             'screen_name': stringNullCheck(inputData['screen_name']),

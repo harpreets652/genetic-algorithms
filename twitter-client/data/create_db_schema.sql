@@ -111,5 +111,6 @@ CREATE TABLE TSS_DEV.USERS_FEATURES (
   user_num_friends                    INTEGER  DEFAULT NULL,
   user_verified                       BOOLEAN  DEFAULT NULL,
   user_has_description                BOOLEAN  DEFAULT NULL,
-  user_has_url                        BOOLEAN  DEFAULT NULL
+  user_has_url                        BOOLEAN  DEFAULT NULL,
+  process_error                       TEXT     DEFAULT NULL
 );

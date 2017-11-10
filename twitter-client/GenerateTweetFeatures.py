@@ -7,10 +7,6 @@ from numpy import long
 from datetime import datetime
 import concurrent
 
-# TWEET FEATURE EXTRACTOR: looks for tweets with json and extracts features
-# Main method to use: twitter.Status.NewFromJsonDict(json.loads(tweet.AsJsonString()))
-# import json
-
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
 SELECT_TWEETS_TO_PROCESS_SQL = """SELECT 
                                     tweet_id, 

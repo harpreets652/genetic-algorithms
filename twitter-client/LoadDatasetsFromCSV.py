@@ -27,6 +27,7 @@ def loadUsers(usersDir):
 
         usersDataFile = ROOT_DIR + '/' + usersDir + file_name
 
+        userInsertCounter = 0
         with conn:
             with conn.cursor() as curs:
                 with open(usersDataFile) as inFile:
@@ -38,7 +39,15 @@ def loadUsers(usersDir):
                         insertData(conn,
                                    curs,
                                    SqlStatements.INSERT_INTO_USERS,
-                                   SqlStatements.mapUserInputToEntity(row))
+                                   SqlStatements.mapUserInputToUsersTable(row))
+
+                        insertData(conn,
+                                   curs,
+                                   SqlStatements.INIT_INSERT_INTO_FEATURES,
+                                   SqlStatements.mapUserInputToFeaturesInit(row))
+                        userInsertCounter += 1
+
+        print("{} users inserted for {}".format(userInsertCounter, usersDataFile))
 
     return
 
@@ -51,6 +60,7 @@ def loadTweets(tweetDir):
     for file_name in glob.glob1(ROOT_DIR + '/' + tweetDir, "*"):
         tweetDataFile = ROOT_DIR + '/' + tweetDir + file_name
 
+        tweetInsertCounter = 0
         with conn:
             with conn.cursor() as curs:
                 with open(tweetDataFile) as inFile:
@@ -63,6 +73,9 @@ def loadTweets(tweetDir):
                                    curs,
                                    SqlStatements.INSERT_INTO_TWEETS,
                                    SqlStatements.mapTweetInputToEntity(row))
+                        tweetInsertCounter += 1
+
+        print("{} tweets inserted for {}".format(tweetInsertCounter, tweetDataFile))
 
     return
 
