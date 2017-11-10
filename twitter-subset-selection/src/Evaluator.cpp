@@ -49,7 +49,7 @@ void Evaluator::evaluate(Individual &individual) {
     }
     // int employee_id = r[0][0].as<int>();
     // build the output file
-    ofstream fout("../weka_temp/" + individual.to_string() + ".txt");
+    ofstream fout("../weka_temp/" + individual.to_string() + ".arff");
     fout << createFileHeader(individual);
 
     // output each of the data points (per user) here
@@ -58,9 +58,10 @@ void Evaluator::evaluate(Individual &individual) {
     fout.close();
 
     // call the WEKA on this function
+    string output = exec(getRunCommand(individual.to_string()));
 
     // get the data from it
-
+    individual.fitness = getFitnessFromOutput(output);
 }
 
 string Evaluator::createFileHeader(Individual &individual) {
@@ -188,10 +189,30 @@ void Evaluator::setDataLocation(const string &dataLoc) {
     this->dataLocation = dataLoc;
 }
 
-string Evaluator::getRunCommand() {
+string Evaluator::getRunCommand(const string& filename) {
     char cmd[200];
-    snprintf(cmd, 200, "java -classpath %s/weka.jar weka.classifiers.rules.ZeroR -t %s/data/iris.arff",
-            wekaLocation.c_str(), dataLocation.c_str());
+    snprintf(cmd, 200, "java -classpath %s/weka.jar weka.classifiers.rules.ZeroR -t %s/%s.arff",
+            wekaLocation.c_str(), dataLocation.c_str(), filename.c_str());
     return string(cmd);
 }
+
+double Evaluator::getFitnessFromOutput(const string &output) {
+    stringstream ss(output);
+    string s;
+
+    double numCorrect = 0.0, numIncorrect = 0.0, total, dummy;
+    do {
+        getline(ss, s);
+    } while (s.substr(0,30) != "Correctly Classified Instances");
+
+    cout << s << endl;
+
+    stringstream(s) >> s >> s >> s >> numCorrect >> dummy;
+    getline(ss, s);
+    stringstream(s) >> s >> s >> s >> numIncorrect >> dummy;
+    total = numCorrect + numIncorrect;
+
+    return numCorrect/total;
+}
+
 #endif

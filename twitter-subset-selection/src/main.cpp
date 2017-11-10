@@ -102,32 +102,17 @@ void iterateThrough(int argc, char * argv[]) {
 
 int main(int argc, char *argv[]) {
     srand((unsigned int)time(nullptr));
+    if (argc < 1) {
+        cout << "You don't have the right inputs, read the README" << endl;
+        cout << "You dumb fuck" << endl;
+        return 0;
+    }
+
     argh::parser cmdl({ "-w", "--wekaloc", "-d", "--data" });
     cmdl.parse(argc, argv);
 
     Evaluator::getInstance()->setWekaLocation(cmdl("wekaloc").str());
     Evaluator::getInstance()->setDataLocation(cmdl("data").str());
-
-    string output = Evaluator::getInstance()->exec(Evaluator::getInstance()->getRunCommand());
-    cout << output << endl;
-
-    // go through all of the lines in the output, look for the correct vs incorrect section
-    stringstream ss(output);
-    string s;
-
-    float numCorrect = 0.0, numIncorrect = 0.0, total, dummy;
-    do {
-        getline(ss, s);
-    } while (s.substr(0,30) != "Correctly Classified Instances");
-
-    cout << s << endl;
-
-    stringstream(s) >> s >> s >> s >> numCorrect >> dummy;
-    getline(ss, s);
-    stringstream(s) >> s >> s >> s >> numIncorrect >> dummy;
-    total = numCorrect + numIncorrect;
-
-    cout << "the CORRECT: " << numCorrect << " " <<  numIncorrect << endl << endl;
 
     GA ga;
     cout << "running GA" << endl;

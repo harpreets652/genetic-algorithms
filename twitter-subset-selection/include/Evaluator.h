@@ -23,7 +23,8 @@ public:
     void setWekaLocation(const string& wekaLoc);
     void setDataLocation(const string& dataLoc);
 
-    string getRunCommand();
+    string getRunCommand(const string& filename);
+    double getFitnessFromOutput(const string& output);
 private:
     Evaluator();
     void init();
