@@ -31,6 +31,7 @@ void Evaluator::init() {
 }
 
 void Evaluator::evaluate(Individual &individual) {
+    individual[USER_STATUS_COUNT] = true;
     // for right now, all individuals get 100
     individual.fitness = 100;
     individual.distance = 0;
@@ -42,11 +43,11 @@ void Evaluator::evaluate(Individual &individual) {
     result r = txn->exec(query);
 
     // if we have nothing, report fitness of 0
-    if (r.empty()) {
-        individual.fitness = 0;
-        individual.distance = 0;
-        return;
-    }
+//    if (r.empty()) {
+//        individual.fitness = 0;
+//        individual.distance = 0;
+//        return;
+//    }
     // int employee_id = r[0][0].as<int>();
     // build the output file
     ofstream fout("../weka_temp/" + individual.to_string() + ".txt");
@@ -84,30 +85,36 @@ string Evaluator::buildQuery(Individual &indiv) {
     indiv.print();
     string query;
 
-    if (indiv[AVG_LEN_TWEET_CHARACTERS]) {
-        query += "length_char,";
-    }
-    if (indiv[AVG_LEN_TWEET_WORDS]) {
-        query += "length_words,";
-    }
-    if (indiv[AVG_NUM_POSITIVE_WORDS]) {
-        query += "sentiment_pos_words,";
-    }
-    if (indiv[AVG_NUM_NEGATIVE_WORDS]) {
-        query += "sentiment_neg_words,";
-    }
-    if (indiv[AVG_SENTIMENT_SCORE]) {
-        query += "sentiment_score,";
-    }
-    if (indiv[FRAC_CONTAINS_QUESTION]) {
-        query += "contains_question";
+//    if (indiv[AVG_LEN_TWEET_CHARACTERS]) {
+//        query += "length_char,";
+//    }
+//    if (indiv[AVG_LEN_TWEET_WORDS]) {
+//        query += "length_words,";
+//    }
+//    if (indiv[AVG_NUM_POSITIVE_WORDS]) {
+//        query += "sentiment_pos_words,";
+//    }
+//    if (indiv[AVG_NUM_NEGATIVE_WORDS]) {
+//        query += "sentiment_neg_words,";
+//    }
+//    if (indiv[AVG_SENTIMENT_SCORE]) {
+//        query += "sentiment_score,";
+//    }
+//    if (indiv[FRAC_CONTAINS_QUESTION]) {
+//        query += "contains_question,";
+//    }
+//    if (indiv[USER_REGISTRATION_AGE]) {
+//        query += "user_registration_age,";
+//    }
+    if (indiv[USER_STATUS_COUNT]) {
+        query += "statuses_count,";
     }
     //...
     if (query[query.size()-1] == ',') {
         query = query.substr(0, query.size()-1);
     }
 
-    return "select " + query + " from here;";
+    return "select " + query + " from tss_dev.users;";
 }
 
 string Evaluator::exec(const char *cmd) {
@@ -127,7 +134,6 @@ string Evaluator::exec(const string& cmd) {
         }
     }
     return result;
-
 }
 
 void Evaluator::setWekaLocation(const string &wekaLoc) {
