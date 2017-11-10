@@ -1,3 +1,4 @@
+import psycopg2 as psyco
 from numpy import long
 from datetime import datetime
 
@@ -55,10 +56,25 @@ VALUES (%(tweet_id)s, %(user_id_fk)s, %(tweet_text)s,
 INIT_INSERT_INTO_FEATURES = """INSERT INTO tss_dev.users_features (user_id) VALUES (%(user_id)s);"""
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
-GEN_FEATURES_FOR_USERS = """SELECT user_id
-                            FROM tss_dev.users_features
-                            WHERE is_user_genuine IS NULL
-                              AND process_error IS NULL;"""
+GEN_FEATURES_FOR_USERS_SELECT = """SELECT user_id
+                                   FROM tss_dev.users_features
+                                   WHERE is_user_genuine IS NULL
+                                     AND process_error IS NULL;"""
+
+# noinspection SqlNoDataSourceInspection,SqlDialectInspection
+UPDATE_USER_FEATURES = """UPDATE tss_dev.users_features
+                          SET is_user_genuine = %(is_genuine)s 
+                          WHERE user_id = %(user_id)s"""
+
+# noinspection SqlNoDataSourceInspection,SqlDialectInspection
+UPDATE_USER_FEATURES_ERROR = """UPDATE tss_dev.users_features
+                                SET process_error = %(process_error)s 
+                                WHERE user_id = %(user_id)s"""
+
+# noinspection SqlNoDataSourceInspection,SqlDialectInspection
+SELECT_USER_DATA = """SELECT *
+                      FROM tss_dev.users
+                      WHERE user_id = %(user_id)s """
 
 
 def mapTweetInputToEntity(inputData):
@@ -165,3 +181,14 @@ def convertInputToLong(input):
         return None
 
     return long(input.strip())
+
+
+def modifyData(conn, cursor, sql, data):
+    try:
+        cursor.execute(sql, data)
+    except Exception as e:
+        print("""Exception occurred during sql execution, continuing loop.\nsql: {}\ndata: {}\nException: {}"""
+              .format(sql, data, e))
+        conn.rollback()
+
+    return

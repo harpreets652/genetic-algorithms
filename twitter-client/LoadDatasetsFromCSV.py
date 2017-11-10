@@ -36,15 +36,15 @@ def loadUsers(usersDir):
                         row = json.loads(json.dumps(line).replace("\\ufeff", ""))
                         row['is_user_genuine'] = genuineUsers
 
-                        insertData(conn,
-                                   curs,
-                                   SqlStatements.INSERT_INTO_USERS,
-                                   SqlStatements.mapUserInputToUsersTable(row))
+                        SqlStatements.modifyData(conn,
+                                                 curs,
+                                                 SqlStatements.INSERT_INTO_USERS,
+                                                 SqlStatements.mapUserInputToUsersTable(row))
 
-                        insertData(conn,
-                                   curs,
-                                   SqlStatements.INIT_INSERT_INTO_FEATURES,
-                                   SqlStatements.mapUserInputToFeaturesInit(row))
+                        SqlStatements.modifyData(conn,
+                                                 curs,
+                                                 SqlStatements.INIT_INSERT_INTO_FEATURES,
+                                                 SqlStatements.mapUserInputToFeaturesInit(row))
                         userInsertCounter += 1
 
         print("{} users inserted for {}".format(userInsertCounter, usersDataFile))
@@ -69,24 +69,13 @@ def loadTweets(tweetDir):
                     for line in tweetReader:
                         row = json.loads(json.dumps(line).replace("\\ufeff", ""))
 
-                        insertData(conn,
-                                   curs,
-                                   SqlStatements.INSERT_INTO_TWEETS,
-                                   SqlStatements.mapTweetInputToEntity(row))
+                        SqlStatements.modifyData(conn,
+                                                 curs,
+                                                 SqlStatements.INSERT_INTO_TWEETS,
+                                                 SqlStatements.mapTweetInputToEntity(row))
                         tweetInsertCounter += 1
 
         print("{} tweets inserted for {}".format(tweetInsertCounter, tweetDataFile))
-
-    return
-
-
-def insertData(conn, cursor, sql, data):
-    try:
-        cursor.execute(sql, data)
-    except Exception as e:
-        print("""Exception occurred during sql execution, continuing loop.\nsql: {}\ndata: {}\nException: {}"""
-              .format(sql, data, e))
-        conn.rollback()
 
     return
 
