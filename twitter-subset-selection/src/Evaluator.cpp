@@ -31,7 +31,6 @@ void Evaluator::init() {
 }
 
 void Evaluator::evaluate(Individual &individual) {
-    individual[USER_STATUS_COUNT] = true;
     // for right now, all individuals get 100
     individual.fitness = 100;
     individual.distance = 0;
@@ -43,16 +42,15 @@ void Evaluator::evaluate(Individual &individual) {
     result r = txn->exec(query);
 
     // if we have nothing, report fitness of 0
-//    if (r.empty()) {
-//        individual.fitness = 0;
-//        individual.distance = 0;
-//        return;
-//    }
+    if (r.empty()) {
+        individual.fitness = 0;
+        individual.distance = 0;
+        return;
+    }
     // int employee_id = r[0][0].as<int>();
     // build the output file
     ofstream fout("../weka_temp/" + individual.to_string() + ".txt");
     fout << createFileHeader(individual);
-    // TODO ...
 
     // output each of the data points (per user) here
     fout << createDataPoints(r, individual) << endl;
@@ -66,7 +64,7 @@ void Evaluator::evaluate(Individual &individual) {
 }
 
 string Evaluator::createFileHeader(Individual &individual) {
-    string result = "@RELATION twitter";
+    string result = "@RELATION twitter\n";
     if (individual[AVG_LEN_TWEET_CHARACTERS]) {
         result += "@ATTRIBUTE AVG_LEN_TWEET_CHARACTERS \t\tREAL\n";
     }
@@ -76,6 +74,16 @@ string Evaluator::createFileHeader(Individual &individual) {
     if (individual[AVG_NUM_POSITIVE_WORDS]) {
         result += "@ATTRIBUTE AVG_NUM_POSITIVE_WORDS\t\tREAL\n";
     }
+    if (individual[AVG_NUM_NEGATIVE_WORDS]) {
+        result += "@ATTRIBUTE AVG_NUM_NEGATIVE_WORDS\t\tREAL\n";
+    }
+    if (individual[AVG_SENTIMENT_SCORE]) {
+        result += "@ATTRIBUTE AVG_SENTIMENT_SCORE\t\tREAL\n";
+    }
+    if (individual[USER_STATUS_COUNT]) {
+        result += "@ATTRIBUTE USER_STATUS_COUNT\t\tnumeric\n";
+    }
+    result += "@ATTRIBUTE class \t\t{REAL,FAKE}\n";
     return result;
 }
 
@@ -86,9 +94,29 @@ string Evaluator::createDataPoints(result &dataPoint, Individual &individual) {
     // it is assumed that data point will have at least one point
     // and that at least one feature is enabled in the chromosome
     for (auto row : dataPoint) {
+        if (individual[AVG_LEN_TWEET_CHARACTERS]) {
+            float avg = row["avg_length_chars"].as<float>();
+            result += to_string(avg) + ",";
+        }
+        if (individual[AVG_LEN_TWEET_WORDS]) {
+            float avg = row["avg_length_words"].as<float>();
+            result += to_string(avg) + ",";
+        }
+        if (individual[AVG_NUM_POSITIVE_WORDS]) {
+            float avg = row["avg_sentiment_pos_words"].as<float>();
+            result += to_string(avg) + ",";
+        }
+        if (individual[AVG_NUM_NEGATIVE_WORDS]) {
+            float avg = row["avg_sentiment_neg_words"].as<float>();
+            result += to_string(avg) + ",";
+        }
+        if (individual[AVG_SENTIMENT_SCORE]) {
+            float avg = row["avg_sentiment_score"].as<float>();
+            result += to_string(avg) + ",";
+        }
         if (individual[USER_STATUS_COUNT]) {
-            int count = row["statuses_count"].as<int>();
-            result += to_string(count) + ",";
+            int avg = row["user_status_count"].as<int>();
+            result += to_string(avg) + ",";
         }
         bool isGenuine = row["is_user_genuine"].as<bool>();
         result += (isGenuine ? REAL : FAKE);
@@ -101,28 +129,28 @@ string Evaluator::buildQuery(Individual &indiv) {
     string query;
 
     if (indiv[AVG_LEN_TWEET_CHARACTERS]) {
-        query += "length_char,";
+        query += "avg_length_chars,";
     }
     if (indiv[AVG_LEN_TWEET_WORDS]) {
-        query += "length_words,";
+        query += "avg_length_words,";
     }
     if (indiv[AVG_NUM_POSITIVE_WORDS]) {
-        query += "sentiment_pos_words,";
+        query += "avg_sentiment_pos_words,";
     }
     if (indiv[AVG_NUM_NEGATIVE_WORDS]) {
-        query += "sentiment_neg_words,";
+        query += "avg_sentiment_neg_words,";
     }
     if (indiv[AVG_SENTIMENT_SCORE]) {
-        query += "sentiment_score,";
+        query += "avg_sentiment_score,";
     }
     if (indiv[FRAC_CONTAINS_QUESTION]) {
-        query += "contains_question,";
+        query += "fract_contains_question,";
     }
     if (indiv[USER_REGISTRATION_AGE]) {
-        query += "user_registration_age,";
+        query += "user_age,";
     }
     if (indiv[USER_STATUS_COUNT]) {
-        query += "statuses_count,";
+        query += "user_status_count,";
     }
     //...
     if (query[query.size()-1] == ',') {
@@ -130,7 +158,7 @@ string Evaluator::buildQuery(Individual &indiv) {
     }
     query += ",is_user_genuine";
 
-    return "select " + query + " from tss_dev.users;";
+    return "select " + query + " from tss_dev.users_features;";
 }
 
 string Evaluator::exec(const char *cmd) {

@@ -48,7 +48,6 @@ using namespace std;
 #define USER_HAS_URL                27
 
 
-// PROPAGATION BASED FEATURES
 
 class Individual : public vector<bool> {
 public:
@@ -74,7 +73,6 @@ public:
 private:
     //double getBinaryAsNumber(vector<bool> subset) const;
 };
-
 
 
 #endif
