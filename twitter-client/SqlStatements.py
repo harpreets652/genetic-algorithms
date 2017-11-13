@@ -63,7 +63,11 @@ GEN_FEATURES_FOR_USERS_SELECT = """SELECT user_id
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
 UPDATE_USER_FEATURES = """UPDATE tss_dev.users_features
-                          SET is_user_genuine = %(is_genuine)s 
+                          SET is_user_genuine = %(is_genuine)s, user_age = %(user_age)s,
+                              user_status_count = %(user_status_count)s, user_num_followers = %(user_num_followers)s,
+                              user_num_friends = %(user_num_friends)s, user_verified = %(user_verified)s,
+                              user_has_description = %(user_has_description)s, user_has_url = %(user_has_url)s,
+                              avg_length_chars = %(avg_length_chars)s, avg_length_words = %(avg_length_words)s 
                           WHERE user_id = %(user_id)s"""
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
@@ -75,6 +79,15 @@ UPDATE_USER_FEATURES_ERROR = """UPDATE tss_dev.users_features
 SELECT_USER_DATA = """SELECT *
                       FROM tss_dev.users
                       WHERE user_id = %(user_id)s """
+
+# noinspection SqlNoDataSourceInspection,SqlDialectInspection
+SELECT_TWEET_TEXT_FEATURES = """SELECT 
+                                   t.user_id_fk AS USER_ID,
+                                   avg(length(t.tweet_text)) AS AVG_LENGTH_CHAR,
+                                   avg(array_length(regexp_split_to_array(t.tweet_text, '\s'), 1)) AS AVG_LENGTH_WORDS
+                                FROM tss_dev.tweets t
+                                WHERE t.user_id_fk = %(user_id)s
+                                GROUP BY t.user_id_fk;"""
 
 
 def mapTweetInputToEntity(inputData):

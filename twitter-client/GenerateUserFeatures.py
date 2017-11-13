@@ -3,6 +3,7 @@ import psycopg2 as psyco
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
 import SqlStatements
+from datetime import datetime
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -51,13 +52,17 @@ def generateFeatures(userId):
     with conn:
         try:
             # get user data
-            readCursor = conn.cursor()
-            readCursor.execute(SqlStatements.SELECT_USER_DATA, {'user_id': userId})
-            userData = readCursor.fetchone()
-            readCursor.close()
+            userData = getUserData(conn, userId)
+
+            userFeatures = generateUserFeatures(userData)
+
+            usertTweetFeatures = generateTweetFeatures(conn, userData)
 
             data = {'user_id': userId,
-                    'is_genuine': userData[40]}
+                    'is_genuine': userData['is_user_genuine']}
+            data.update(userFeatures)
+            data.update(usertTweetFeatures)
+
             sql = SqlStatements.UPDATE_USER_FEATURES
             result = True
         except Exception as e:
@@ -70,6 +75,75 @@ def generateFeatures(userId):
             SqlStatements.modifyData(conn, curs, sql, data)
 
     return result
+
+
+def getUserData(connection, userId):
+    readCursor = connection.cursor()
+    readCursor.execute(SqlStatements.SELECT_USER_DATA, {'user_id': userId})
+
+    columns = []
+    for col in readCursor.description:
+        columns.append(col[0])
+    data = readCursor.fetchone()
+
+    userData = dict(zip(columns, data))
+
+    readCursor.close()
+
+    return userData
+
+
+def generateUserFeatures(userData):
+    userFeatures = {}
+
+    # registration age
+    regAge = (datetime.now() - userData['timestamp']).days
+    userFeatures['user_age'] = regAge
+
+    # statuses count on day
+    userFeatures['user_status_count'] = userData['statuses_count']
+
+    # number of followers
+    userFeatures['user_num_followers'] = userData['followers_count']
+
+    # number of friends
+    userFeatures['user_num_friends'] = userData['friends_count']
+
+    # is user verified
+    userFeatures['user_verified'] = userData['verified']
+
+    # has description?
+    description = userData['description']
+    userFeatures['user_has_description'] = True if description and description != 'NULL' else False
+
+    # has url?
+    url = userData['url']
+    userFeatures['user_has_url'] = True if url and url != 'NULL' else False
+
+    return userFeatures
+
+
+def generateTweetFeatures(connection, userData):
+    readCursor = connection.cursor()
+    readCursor.execute(SqlStatements.SELECT_TWEET_TEXT_FEATURES, {'user_id': userData['user_id']})
+
+    columns = []
+    for col in readCursor.description:
+        columns.append(col[0])
+    data = readCursor.fetchone()
+
+    tweetFeaturesFromSql = dict(zip(columns, data))
+    readCursor.close()
+
+    userTweetFeatures = {}
+
+    # average number of characters
+    userTweetFeatures['avg_length_chars'] = int(tweetFeaturesFromSql['avg_length_char'])
+
+    # average number of words
+    userTweetFeatures['avg_length_words'] = int(tweetFeaturesFromSql['avg_length_words'])
+
+    return userTweetFeatures
 
 
 run(5, 5)
