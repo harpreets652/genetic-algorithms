@@ -10,10 +10,6 @@ Population::Population() : minFitness(INT_MAX), maxFitness(0.0), averageFitness(
 
 }
 
-Population::~Population() {
-
-}
-
 void Population::generate(int n) {
     this->clear();
     for(int i = 0 ; i < n; i++) {
@@ -38,7 +34,7 @@ void Population::evaluate() {
     maxFitness = 0.0;
     minFitness = 10000.0;
     sumFitness = 0.0;
-    for (int i = 0; i < this->size(); i++) {
+    for (unsigned int i = 0; i < this->size(); i++) {
         at(i).evaluate();
         minFitness = min(minFitness, at(i).fitness);
         maxFitness = max(maxFitness, at(i).fitness);
@@ -55,17 +51,35 @@ void Population::evaluate() {
 }
 
 void Population::sortByFitness() {
-  // bubble sort, because fuck it
-  bool isSorted = false;
-  while (!isSorted) {
-    isSorted = true;
-    for (unsigned int i = 0; i < size()-1; i++) {
-      if (at(i).fitness > at(i+1).fitness) {
-        std::swap((*this)[i], (*this)[i+1]);
-        isSorted = false;
-      }
+  sortByFitness(0, (unsigned int)size()-1);
+}
+
+void Population::sortByFitness(unsigned int left, unsigned int right) {
+    if (left == right)
+        return;
+    else if (left + 1 == right) {
+        // single swap check
+        if (at(left).fitness > at(right).fitness) {
+            std::swap((*this)[left], (*this)[right]);
+        }
+        return;
     }
-  }
+
+    // recursive call...
+    unsigned int mid = (right - left)/2 + left;
+    sortByFitness(left, mid);
+    sortByFitness(mid+1, right);
+
+    // merge
+    unsigned int i = left;
+    unsigned int j = mid+1;
+    while (i <= mid+1) {
+        if (at(i).fitness > at(j).fitness) {
+            std::swap((*this)[left], (*this)[right]);
+            j++;
+        }
+        i++;
+    }
 }
 
 Individual Population::proportionalSelect() {
@@ -81,8 +95,8 @@ Individual Population::proportionalSelect() {
 }
 
 Individual Population::tournamentSelect() {
-  int left = randIntBetween(0, size());
-  int right = randIntBetween(0, size());
+  int left = Utils::randIntBetween(0, size());
+  int right = Utils::randIntBetween(0, size());
   if (at(left).fitness >= at(right).fitness) {
     return at(left);
   } else {

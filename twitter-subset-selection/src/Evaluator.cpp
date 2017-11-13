@@ -16,110 +16,203 @@ Evaluator* Evaluator::getInstance() {
 }
 
 Evaluator::Evaluator() {
-  bestSolution = new Individual();
   init();
 }
 
 Evaluator::~Evaluator() {
-  if (bestSolution != NULL) {
-    delete bestSolution;
-  }
+    if (instance != nullptr) {
+        delete instance;
+    }
 }
 
 void Evaluator::init() {
-    // check the config
-    string solutionFilename, bufferString;
-    unsigned int lineNumber;
-    ifstream fin;
-    Point tempPoint;
-
-    // get filename
-    pointsOfReference.clear();
-    fin.clear();
-    fin.open(config.INPUT_FILENAME.c_str());
-    // ignore the initial fluff
-    for (int i = 0; i < 6; i++) {
-        getline(fin, bufferString);
-    }
-    // variables
-    for (int i = 0; i < config.CITY_TOUR_SIZE; i++) {
-        fin >> lineNumber >> tempPoint.x >> tempPoint.y;
-        pointsOfReference.push_back(tempPoint);
-    }
-
-    fin.close();
+    c = new connection("dbname=cs_776 user=system");
+    txn = new work(*c);
 }
 
-void Evaluator::getBestSolution() {
-  // find the solution file and read in the values
-  ifstream fin;
-  fin.clear();
-  fin.open(config.SOLUTION_FILENAME.c_str());
-  for (int i = 0; i < config.CITY_TOUR_SIZE; i++) {
-    fin >> (*bestSolution)[i];
-  }
-  cout << endl;
-  fin.close();
+void Evaluator::evaluate(Individual &individual) {
+    // for right now, all individuals get 100
+    individual.fitness = 100;
+    individual.distance = 0;
 
-  // get my own statistics on the issue
-  bestSolution->evaluate();
+    // query the database
+    string query = buildQuery(individual);
+    cout << "query: " << query << endl;
+    cout << "indiv as string: " << individual.to_string() << endl;
+    result r = txn->exec(query);
+
+    // if we have nothing, report fitness of 0
+    if (r.empty()) {
+        individual.fitness = 0;
+        individual.distance = 0;
+        return;
+    }
+    // int employee_id = r[0][0].as<int>();
+    // build the output file
+    ofstream fout("../weka_temp/" + individual.to_string() + ".arff");
+    fout << createFileHeader(individual);
+
+    // output each of the data points (per user) here
+    fout << createDataPoints(r, individual) << endl;
+
+    fout.close();
+
+    // call the WEKA on this function
+    string output = exec(getRunCommand(individual.to_string()));
+
+    // get the data from it
+    individual.fitness = getFitnessFromOutput(output);
 }
 
-void Evaluator::evaluate(Individual &indiv) {
-    double sum = 0.0;
-    for (int i = 0; i < indiv.size()-1; i++) {
-        sum += getDistanceBetween(indiv[i], indiv[i+1]);
+string Evaluator::createFileHeader(Individual &individual) {
+    string result = "@RELATION twitter\n";
+    if (individual[AVG_LEN_TWEET_CHARACTERS]) {
+        result += "@ATTRIBUTE AVG_LEN_TWEET_CHARACTERS \t\tREAL\n";
     }
-    sum += getDistanceBetween(indiv[0], indiv[indiv.size()-1]);
-    indiv.distance = sum;
-    switch(config.city) {
-        case BURMA:
-            indiv.fitness = 1000.0/sum;
-            break;
-        case BERLIN:
-            indiv.fitness = 10000000.0/sum;
-            break;
-        case ELI_51:
-            indiv.fitness = 100000.0/sum;
-            break;
-        case ELI_76:
-            indiv.fitness = 100000.0/sum;
-            break;
-        case LIN_105:
-            indiv.fitness = 10000000.0/sum;
-            break;
-        case LIN_318:
-            indiv.fitness = 100000000.0/sum;
-            break;
-        default:
-            indiv.fitness = 1.0/sum;
-            break;
+    if (individual[AVG_LEN_TWEET_WORDS]) {
+        result += "@ATTRIBUTE AVG_LEN_TWEET_WORDS\t\tREAL\n";
     }
-
-    if (&indiv != bestSolution) {
-      if (!haveEvaluatedBestSolution) {
-          getBestSolution();
-          haveEvaluatedBestSolution = true;
-      }
-      indiv.diffFitness = (indiv.fitness - bestSolution->fitness);
-      indiv.diffDistance = (indiv.distance - bestSolution->distance);
+    if (individual[AVG_NUM_POSITIVE_WORDS]) {
+        result += "@ATTRIBUTE AVG_NUM_POSITIVE_WORDS\t\tREAL\n";
     }
+    if (individual[AVG_NUM_NEGATIVE_WORDS]) {
+        result += "@ATTRIBUTE AVG_NUM_NEGATIVE_WORDS\t\tREAL\n";
+    }
+    if (individual[AVG_SENTIMENT_SCORE]) {
+        result += "@ATTRIBUTE AVG_SENTIMENT_SCORE\t\tREAL\n";
+    }
+    if (individual[USER_STATUS_COUNT]) {
+        result += "@ATTRIBUTE USER_STATUS_COUNT\t\tnumeric\n";
+    }
+    result += "@ATTRIBUTE class \t\t{REAL,FAKE}\n";
+    return result;
 }
 
-double Evaluator::getDistanceBetween(unsigned int startIndex, unsigned int endIndex) {
-    // delta x squared + delta y squareds
-    //cout << pointsOfReference[startIndex].x << "--" << pointsOfReference[startIndex].y << endl;
-    double deltaX = pointsOfReference[startIndex].x - pointsOfReference[endIndex].x;
-    deltaX = pow(deltaX, 2);
-    double deltaY = pointsOfReference[startIndex].y - pointsOfReference[endIndex].y;
-    deltaY = pow(deltaY, 2);
+string Evaluator::createDataPoints(result &dataPoint, Individual &individual) {
+    string result = "@DATA\n";
+    string REAL = "REAL\n", FAKE = "FAKE\n";
 
-    if (deltaX < 0 || deltaY < 0)
-      cout << "negative values...." << endl;
+    // it is assumed that data point will have at least one point
+    // and that at least one feature is enabled in the chromosome
+    for (auto row : dataPoint) {
+        if (individual[AVG_LEN_TWEET_CHARACTERS]) {
+            float avg = row["avg_length_chars"].as<float>();
+            result += to_string(avg) + ",";
+        }
+        if (individual[AVG_LEN_TWEET_WORDS]) {
+            float avg = row["avg_length_words"].as<float>();
+            result += to_string(avg) + ",";
+        }
+        if (individual[AVG_NUM_POSITIVE_WORDS]) {
+            float avg = row["avg_sentiment_pos_words"].as<float>();
+            result += to_string(avg) + ",";
+        }
+        if (individual[AVG_NUM_NEGATIVE_WORDS]) {
+            float avg = row["avg_sentiment_neg_words"].as<float>();
+            result += to_string(avg) + ",";
+        }
+        if (individual[AVG_SENTIMENT_SCORE]) {
+            float avg = row["avg_sentiment_score"].as<float>();
+            result += to_string(avg) + ",";
+        }
+        if (individual[USER_STATUS_COUNT]) {
+            int avg = row["user_status_count"].as<int>();
+            result += to_string(avg) + ",";
+        }
+        bool isGenuine = row["is_user_genuine"].as<bool>();
+        result += (isGenuine ? REAL : FAKE);
+    }
+    return result;
+}
 
-    //TODO: remove the sqrt for faster processings
-    return sqrt(deltaX + deltaY);
-    return (deltaX + deltaY);
+string Evaluator::buildQuery(Individual &indiv) {
+    indiv.print();
+    string query;
+
+    if (indiv[AVG_LEN_TWEET_CHARACTERS]) {
+        query += "avg_length_chars,";
+    }
+    if (indiv[AVG_LEN_TWEET_WORDS]) {
+        query += "avg_length_words,";
+    }
+    if (indiv[AVG_NUM_POSITIVE_WORDS]) {
+        query += "avg_sentiment_pos_words,";
+    }
+    if (indiv[AVG_NUM_NEGATIVE_WORDS]) {
+        query += "avg_sentiment_neg_words,";
+    }
+    if (indiv[AVG_SENTIMENT_SCORE]) {
+        query += "avg_sentiment_score,";
+    }
+    if (indiv[FRAC_CONTAINS_QUESTION]) {
+        query += "fract_contains_question,";
+    }
+    if (indiv[USER_REGISTRATION_AGE]) {
+        query += "user_age,";
+    }
+    if (indiv[USER_STATUS_COUNT]) {
+        query += "user_status_count,";
+    }
+    //...
+    if (query[query.size()-1] == ',') {
+        query = query.substr(0, query.size()-1);
+    }
+    query += ",is_user_genuine";
+
+    return "select " + query + " from tss_dev.users_features;";
+}
+
+string Evaluator::exec(const char *cmd) {
+    return exec(string(cmd));
+}
+
+string Evaluator::exec(const string& cmd) {
+    char buffer[128];
+    string result;
+    shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
+
+    if (!pipe)
+        return "";
+    while (!feof(pipe.get())) {
+        if (fgets(buffer, 128, pipe.get()) != nullptr) {
+            result += string(buffer);
+        }
+    }
+    return result;
+}
+
+void Evaluator::setWekaLocation(const string &wekaLoc) {
+    this->wekaLocation = wekaLoc;
+}
+
+void Evaluator::setDataLocation(const string &dataLoc) {
+    this->dataLocation = dataLoc;
+}
+
+string Evaluator::getRunCommand(const string& filename) {
+    char cmd[200];
+    snprintf(cmd, 200, "java -classpath %s/weka.jar weka.classifiers.rules.ZeroR -t %s/%s.arff",
+            wekaLocation.c_str(), dataLocation.c_str(), filename.c_str());
+    return string(cmd);
+}
+
+double Evaluator::getFitnessFromOutput(const string &output) {
+    stringstream ss(output);
+    string s;
+
+    double numCorrect = 0.0, numIncorrect = 0.0, total, dummy;
+    do {
+        getline(ss, s);
+    } while (s.substr(0,30) != "Correctly Classified Instances");
+
+    cout << s << endl;
+
+    stringstream(s) >> s >> s >> s >> numCorrect >> dummy;
+    getline(ss, s);
+    stringstream(s) >> s >> s >> s >> numIncorrect >> dummy;
+    total = numCorrect + numIncorrect;
+
+    return numCorrect/total;
 }
 
 #endif

@@ -1,19 +1,17 @@
 #include <iostream>
-#include <ctime>
-#include <pthread.h>
+#include <array>
+#include <argh/argh.h>
 
 #include "config.h"
 #include "Logger.h"
 #include "Population.h"
-#include "Individual.h"
-#include "Evaluator.h"
 #include "GA.h"
 
 using namespace std;
 
 void getAverageValues(vector<GA> gas, vector<double>& avgMin, vector<double>& avgMax, vector<double>& avgAvg) {
     // iterate
-    int vecSize = gas[0].averageTimeline.size();
+    int vecSize = (int)gas[0].averageTimeline.size();
     for (int i = 0; i < vecSize; i++) {
         double sumMin = 0.0, sumAvg = 0.0, sumMax = 0.0;
         for (int gaIndex = 0; gaIndex < gas.size(); gaIndex++) {
@@ -27,33 +25,12 @@ void getAverageValues(vector<GA> gas, vector<double>& avgMin, vector<double>& av
     }
 }
 
-int main(int argc, char *argv[]) {
-    srand(time(NULL));
+void iterateThrough(int argc, char * argv[]) {
     if (argc >= 2) {
         switch(atoi(argv[1])) {
             case 1:
                 config = config_1;
                 cout << "working on config_1" << endl;
-                break;
-            case 2:
-                config = config_2;
-                cout << "working on config_2" << endl;
-                break;
-            case 3:
-                config = config_3;
-                cout << "working on config_3" << endl;
-                break;
-            case 4:
-                config = config_4;
-                cout << "working on config_4" << endl;
-                break;
-            case 5:
-                config = config_5;
-                cout << "working on config_5" << endl;
-                break;
-            case 6:
-                config = config_6;
-                cout << "working on config_6" << endl;
                 break;
             default:
                 cout << "not lol..." << endl;
@@ -63,18 +40,17 @@ int main(int argc, char *argv[]) {
     } else {
         config = config_test;
     }
-    cout << "dataset: " << to_string(config.city) << endl;
 
     pair<double, double> probabilityCombinations[] = {
-        {0.01,    0.2},
-        {0.01,    0.67},
-        {0.01,    0.99},
-        {0.001,   0.2},
-        {0.001,   0.67},
-        {0.001,   0.99},
-        {0.0001,  0.2},
-        {0.0001,  0.67},
-        {0.0001,  0.99}
+            {0.01,    0.2},
+            {0.01,    0.67},
+            {0.01,    0.99},
+            {0.001,   0.2},
+            {0.001,   0.67},
+            {0.001,   0.99},
+            {0.0001,  0.2},
+            {0.0001,  0.67},
+            {0.0001,  0.99}
     };
 
     vector<Individual> bestIndividuals;
@@ -83,45 +59,65 @@ int main(int argc, char *argv[]) {
     config.PROB_CROSSOVER = probabilityCombinations[2].second;
 
     // set the config and set up file
-    Logger graphLogger(getOutputFilename() + ".tsv"), bestIndividualsLogger("best" + getOutputFilename() + ".tsv");
+    Logger graphLogger(Utils::getOutputFilename() + ".tsv"), bestIndividualsLogger("best" + Utils::getOutputFilename() + ".tsv");
 
     // run the 30 iterations
     vector<GA> runs(config.TOTAL_GAS_SIZE);
     vector<double> mins, maxs, avgs;
     for (int i = 0; i < config.TOTAL_GAS_SIZE; i++) {
-      cout << "running GA " << i << "..." << endl;
-      runs[i].init();
-      runs[i].run();
-      bestIndividuals.push_back(runs[i].bestIndividualEver);
+        cout << "running GA " << i << "..." << endl;
+        runs[i].init();
+        runs[i].run();
+        bestIndividuals.push_back(runs[i].bestIndividualEver);
     }
 
     // compile and log averagaes
     getAverageValues(runs, mins, avgs, maxs);
     for (int i = 0; i < mins.size(); i++) {
-      //cout << mins[i] << '\t' << avgs[i] << '\t' << maxs[i] << endl;
-      string log = to_string(i) + "\t" +
-      to_string(mins[i]) + "\t" +
-      to_string(avgs[i]) + "\t" +
-      to_string(maxs[i]) + "\t";
-      graphLogger.log(log);
+        //cout << mins[i] << '\t' << avgs[i] << '\t' << maxs[i] << endl;
+        string log = to_string(i) + "\t" +
+                     to_string(mins[i]) + "\t" +
+                     to_string(avgs[i]) + "\t" +
+                     to_string(maxs[i]) + "\t";
+        graphLogger.log(log);
     }
 
     // output the statistics of the best ever
     for (unsigned int i = 0; i < bestIndividuals.size(); i++) {
-      // euclidian distance, fitness, indices
-      string indices = "\t";
-      for (unsigned int j = 0; j < bestIndividuals[i].size(); j++) {
-        indices += "\t";
-        indices += to_string(bestIndividuals[i][j]);
-      }
-      bestIndividualsLogger.log(
-        to_string(bestIndividuals[i].diffDistance/(bestIndividuals[i].diffDistance + bestIndividuals[i].distance)) + "\t" +
-        to_string(bestIndividuals[i].diffDistance) + "\t" +
-        to_string(bestIndividuals[i].distance) + "\t" +
-        //to_string(bestIndividuals[i].fitness) + "\t" +
-        indices
-      );
+        // euclidian distance, fitness, indices
+        string indices = "\t";
+        for (unsigned int j = 0; j < bestIndividuals[i].size(); j++) {
+            indices += "\t";
+//            indices += to_string(bestIndividuals[i][j]);
+        }
+        bestIndividualsLogger.log(
+                to_string(bestIndividuals[i].diffDistance/(bestIndividuals[i].diffDistance + bestIndividuals[i].distance)) + "\t" +
+                to_string(bestIndividuals[i].diffDistance) + "\t" +
+                to_string(bestIndividuals[i].distance) + "\t" +
+                //to_string(bestIndividuals[i].fitness) + "\t" +
+                indices
+        );
     }
+}
+
+int main(int argc, char *argv[]) {
+    srand((unsigned int)time(nullptr));
+    if (argc < 1) {
+        cout << "You don't have the right inputs, read the README" << endl;
+        cout << "You dumb fuck" << endl;
+        return 0;
+    }
+
+    argh::parser cmdl({ "-w", "--wekaloc", "-d", "--data" });
+    cmdl.parse(argc, argv);
+
+    Evaluator::getInstance()->setWekaLocation(cmdl("wekaloc").str());
+    Evaluator::getInstance()->setDataLocation(cmdl("data").str());
+
+    GA ga;
+    cout << "running GA" << endl;
+    ga.init();
+    ga.run();
 
     return 0;
 }

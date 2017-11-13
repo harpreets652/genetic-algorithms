@@ -4,34 +4,40 @@
 class Individual;
 
 #include <vector>
+#include <pqxx/pqxx>
 
 #include "config.h"
 #include "Individual.h"
 
 using namespace std;
-
-struct Point {
-    double x, y;
-};
+using namespace pqxx;
 
 class Evaluator {
 public:
     static Evaluator* getInstance();
     ~Evaluator();
     void evaluate(Individual &indiv);
-    void getBestSolution();
-    
-    vector<Point> pointsOfReference;
-    
-    Individual* bestSolution;
+
+    string exec(const string& cmd);
+    string exec(const char * cmd);
+    void setWekaLocation(const string& wekaLoc);
+    void setDataLocation(const string& dataLoc);
+
+    string getRunCommand(const string& filename);
+    double getFitnessFromOutput(const string& output);
 private:
     Evaluator();
     void init();
+    string buildQuery(Individual &individual);
+    string createFileHeader(Individual &individual);
+    string createDataPoints(result &dataPoint, Individual &individual);
 
     static Evaluator* instance;
-    bool haveEvaluatedBestSolution = false;
+    string wekaLocation;
+    string dataLocation;
 
-    double getDistanceBetween(unsigned int startIndex, unsigned int endIndex);
+    connection *c;
+    work *txn;
 };
 
 #endif
