@@ -77,7 +77,8 @@ UPDATE_USER_FEATURES = """UPDATE tss_dev.users_features
                               num_tweets_day_sun = %(num_tweets_day_sun)s, num_tweets_day_mon = %(num_tweets_day_mon)s,
                               num_tweets_day_tues = %(num_tweets_day_tues)s, num_tweets_day_wed = %(num_tweets_day_wed)s,
                               num_tweets_day_thur = %(num_tweets_day_thur)s, num_tweets_day_fri = %(num_tweets_day_fri)s,
-                              num_tweets_day_sat = %(num_tweets_day_sat)s  
+                              num_tweets_day_sat = %(num_tweets_day_sat)s, 
+                              fract_contains_multiple_quest_exlam = %(fract_contains_multiple_quest_exlam)s  
                           WHERE user_id = %(user_id)s"""
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
@@ -123,8 +124,14 @@ SELECT_TWEET_COUNT_BY_DAY = """SELECT
                                   COUNT(*) AS num_tweets
                                 FROM tss_dev.tweets
                                 WHERE user_id_fk = %(user_id)s
-                                GROUP BY extract(DOW FROM timestamp);
-"""
+                                GROUP BY extract(DOW FROM timestamp);"""
+
+# noinspection SqlNoDataSourceInspection,SqlDialectInspection
+SELECT_NUM_TWEETS_MULTIPLE_QUEST_EXCLAM = """SELECT COUNT(*) as tweet_count
+                                             FROM tss_dev.tweets
+                                             WHERE user_id_fk = %(user_id)s
+                                                   AND (length(tweet_text) - length(regexp_replace(tweet_text, '\?', '', 'g')) > 1 OR
+                                                        length(tweet_text) - length(regexp_replace(tweet_text, '\!', '', 'g')) > 1);"""
 
 DAY_OF_WEEK_POSTGRES_MAPPING = {0: 'sun', 1: 'mon', 2: 'tues', 3: 'wed', 4: 'thur', 5: 'fri', 6: 'sat'}
 

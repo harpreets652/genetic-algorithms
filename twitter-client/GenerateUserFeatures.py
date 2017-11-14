@@ -132,6 +132,9 @@ def generateTweetFeatures(connection, userId):
     readCursor.execute(SqlStatements.SELECT_TWEET_COUNT_BY_DAY, {'user_id': userId})
     tweetCountByDay = readCursor.fetchall()
 
+    readCursor.execute(SqlStatements.SELECT_NUM_TWEETS_MULTIPLE_QUEST_EXCLAM, {'user_id': userId})
+    tweetCountMultiQuestAndExclam = readCursor.fetchone()
+
     readCursor.close()
 
     userTweetFeatures = {}
@@ -152,7 +155,9 @@ def generateTweetFeatures(connection, userId):
     fractionExclamMarks = int(tweetFeaturesFromSql.num_exclam_marks) / totalNumTweets
     userTweetFeatures['fract_contains_exclamation'] = fractionExclamMarks
 
-    # fraction containing multiple exclamation or question marks todo: need to fix
+    # fraction containing multiple exclamation or question marks
+    numOfTweetsWithMultiQuestAndExclam = int(tweetCountMultiQuestAndExclam.tweet_count)
+    userTweetFeatures['fract_contains_multiple_quest_exlam'] = numOfTweetsWithMultiQuestAndExclam / totalNumTweets
 
     # fraction containing urls
     fractionUrls = int(tweetFeaturesFromSql.num_containing_urls) / totalNumTweets
