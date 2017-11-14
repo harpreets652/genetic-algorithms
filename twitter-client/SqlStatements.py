@@ -72,7 +72,8 @@ UPDATE_USER_FEATURES = """UPDATE tss_dev.users_features
                               fract_contains_exclamation = %(fract_contains_exclamation)s,
                               fract_contains_urls = %(fract_contains_urls)s, avg_number_of_urls = %(avg_number_of_urls)s,
                               fract_contains_user_mention = %(fract_contains_user_mention)s,
-                              fract_contains_hashtag = %(fract_contains_hashtag)s, fract_retweeted = %(fract_retweeted)s  
+                              fract_contains_hashtag = %(fract_contains_hashtag)s, fract_retweeted = %(fract_retweeted)s,
+                              most_commonly_tweeted_hour = %(most_commonly_tweeted_hour)s  
                           WHERE user_id = %(user_id)s"""
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
@@ -101,6 +102,18 @@ SELECT_TWEET_TEXT_FEATURES = """SELECT
                                 FROM tss_dev.tweets t
                                 WHERE t.user_id_fk = %(user_id)s
                                 GROUP BY t.user_id_fk;"""
+
+# noinspection SqlNoDataSourceInspection,SqlDialectInspection
+SELECT_MOST_COMMONLY_TWEETED_HOUR = """SELECT
+                                          extract(HOUR FROM timestamp) AS tweet_hour,
+                                          COUNT(*)                     AS num_tweets
+                                        FROM tss_dev.tweets
+                                        WHERE user_id_fk = %(user_id)s
+                                        GROUP BY EXTRACT(HOUR FROM TIMESTAMP)
+                                        ORDER BY COUNT(*) DESC
+                                        LIMIT 1;"""
+
+DAY_OF_WEEK_POSTGRES_MAPPING = {0: 'SUN', 1: 'MON', 2: 'TUES', 3: 'WED', 4: 'THUR', 5: 'FRI', 6: 'SAT'}
 
 
 def mapTweetInputToEntity(inputData):

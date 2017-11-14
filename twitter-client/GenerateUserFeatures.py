@@ -82,12 +82,7 @@ def getUserData(connection, userId):
     readCursor = connection.cursor()
     readCursor.execute(SqlStatements.SELECT_USER_DATA, {'user_id': userId})
 
-    columns = []
-    for col in readCursor.description:
-        columns.append(col[0])
-    data = readCursor.fetchone()
-
-    userData = dict(zip(columns, data))
+    userData = getQueryResultDict(readCursor)
 
     readCursor.close()
 
@@ -124,16 +119,30 @@ def generateUserFeatures(userData):
     return userFeatures
 
 
+def getQueryResultDict(cursor):
+    columns = []
+    for col in cursor.description:
+        columns.append(col[0])
+
+    data = cursor.fetchone()
+
+    dataFromSql = dict(zip(columns, data))
+
+    return dataFromSql
+
+
 def generateTweetFeatures(connection, userData):
     readCursor = connection.cursor()
     readCursor.execute(SqlStatements.SELECT_TWEET_TEXT_FEATURES, {'user_id': userData['user_id']})
 
-    columns = []
-    for col in readCursor.description:
-        columns.append(col[0])
-    data = readCursor.fetchone()
+    # todo: need to handle case of user with no tweets...all tweet-based features 0?
+    # TODO: LOOK FOR OTHER ERROR SCENARIOS
+    tweetFeaturesFromSql = getQueryResultDict(readCursor)
 
-    tweetFeaturesFromSql = dict(zip(columns, data))
+    readCursor.execute(SqlStatements.SELECT_MOST_COMMONLY_TWEETED_HOUR, {'user_id': userData['user_id']})
+
+    mostCommonlyTweetedHour = getQueryResultDict(readCursor)
+
     readCursor.close()
 
     userTweetFeatures = {}
@@ -172,6 +181,10 @@ def generateTweetFeatures(connection, userData):
 
     # fraction retweeted
     userTweetFeatures['fract_retweeted'] = int(tweetFeaturesFromSql['num_retweeted']) / totalNumTweets
+
+
+    # most commonly tweeted hour
+    userTweetFeatures['most_commonly_tweeted_hour'] = int(mostCommonlyTweetedHour['tweet_hour'])
 
     return userTweetFeatures
 
