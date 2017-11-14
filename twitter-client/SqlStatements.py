@@ -73,7 +73,11 @@ UPDATE_USER_FEATURES = """UPDATE tss_dev.users_features
                               fract_contains_urls = %(fract_contains_urls)s, avg_number_of_urls = %(avg_number_of_urls)s,
                               fract_contains_user_mention = %(fract_contains_user_mention)s,
                               fract_contains_hashtag = %(fract_contains_hashtag)s, fract_retweeted = %(fract_retweeted)s,
-                              most_commonly_tweeted_hour = %(most_commonly_tweeted_hour)s  
+                              most_commonly_tweeted_hour = %(most_commonly_tweeted_hour)s,
+                              num_tweets_day_sun = %(num_tweets_day_sun)s, num_tweets_day_mon = %(num_tweets_day_mon)s,
+                              num_tweets_day_tues = %(num_tweets_day_tues)s, num_tweets_day_wed = %(num_tweets_day_wed)s,
+                              num_tweets_day_thur = %(num_tweets_day_thur)s, num_tweets_day_fri = %(num_tweets_day_fri)s,
+                              num_tweets_day_sat = %(num_tweets_day_sat)s  
                           WHERE user_id = %(user_id)s"""
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
@@ -106,14 +110,23 @@ SELECT_TWEET_TEXT_FEATURES = """SELECT
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
 SELECT_MOST_COMMONLY_TWEETED_HOUR = """SELECT
                                           extract(HOUR FROM timestamp) AS tweet_hour,
-                                          COUNT(*)                     AS num_tweets
+                                          COUNT(*) AS num_tweets
                                         FROM tss_dev.tweets
                                         WHERE user_id_fk = %(user_id)s
                                         GROUP BY EXTRACT(HOUR FROM TIMESTAMP)
                                         ORDER BY COUNT(*) DESC
                                         LIMIT 1;"""
 
-DAY_OF_WEEK_POSTGRES_MAPPING = {0: 'SUN', 1: 'MON', 2: 'TUES', 3: 'WED', 4: 'THUR', 5: 'FRI', 6: 'SAT'}
+# noinspection SqlNoDataSourceInspection,SqlDialectInspection
+SELECT_TWEET_COUNT_BY_DAY = """SELECT
+                                  extract(DOW FROM timestamp) AS tweet_day,
+                                  COUNT(*) AS num_tweets
+                                FROM tss_dev.tweets
+                                WHERE user_id_fk = %(user_id)s
+                                GROUP BY extract(DOW FROM timestamp);
+"""
+
+DAY_OF_WEEK_POSTGRES_MAPPING = {0: 'sun', 1: 'mon', 2: 'tues', 3: 'wed', 4: 'thur', 5: 'fri', 6: 'sat'}
 
 
 def mapTweetInputToEntity(inputData):
