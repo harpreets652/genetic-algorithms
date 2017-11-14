@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
 import SqlStatements
 from datetime import datetime
+from numpy import long
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -142,6 +143,35 @@ def generateTweetFeatures(connection, userData):
 
     # average number of words
     userTweetFeatures['avg_length_words'] = int(tweetFeaturesFromSql['avg_length_words'])
+
+    totalNumTweets = int(tweetFeaturesFromSql['total_count'])
+
+    # fraction containing question marks
+    fractQuestionMarks = int(tweetFeaturesFromSql['num_question_marks']) / totalNumTweets
+    userTweetFeatures['fract_contains_question'] = fractQuestionMarks
+
+    # fraction containing exclamation marks
+    fractionExclamMarks = int(tweetFeaturesFromSql['num_exclam_marks']) / totalNumTweets
+    userTweetFeatures['fract_contains_exclamation'] = fractionExclamMarks
+
+    # fraction containing multiple exclamation or question marks todo: need to fix
+
+    # fraction containing urls
+    fractionUrls = int(tweetFeaturesFromSql['num_containing_urls']) / totalNumTweets
+    userTweetFeatures['fract_contains_urls'] = fractionUrls
+
+    # average number of urls
+    userTweetFeatures['avg_number_of_urls'] = long(tweetFeaturesFromSql['avg_num_urls'])
+
+    # fraction containing user mentions
+    fractContainsUserMention = int(tweetFeaturesFromSql['num_containing_mentions']) / totalNumTweets
+    userTweetFeatures['fract_contains_user_mention'] = fractContainsUserMention
+
+    # fraction containing hashtags
+    userTweetFeatures['fract_contains_hashtag'] = int(tweetFeaturesFromSql['num_containing_hashtags']) / totalNumTweets
+
+    # fraction retweeted
+    userTweetFeatures['fract_retweeted'] = int(tweetFeaturesFromSql['num_retweeted']) / totalNumTweets
 
     return userTweetFeatures
 

@@ -67,7 +67,12 @@ UPDATE_USER_FEATURES = """UPDATE tss_dev.users_features
                               user_status_count = %(user_status_count)s, user_num_followers = %(user_num_followers)s,
                               user_num_friends = %(user_num_friends)s, user_verified = %(user_verified)s,
                               user_has_description = %(user_has_description)s, user_has_url = %(user_has_url)s,
-                              avg_length_chars = %(avg_length_chars)s, avg_length_words = %(avg_length_words)s 
+                              avg_length_chars = %(avg_length_chars)s, avg_length_words = %(avg_length_words)s,
+                              fract_contains_question = %(fract_contains_question)s, 
+                              fract_contains_exclamation = %(fract_contains_exclamation)s,
+                              fract_contains_urls = %(fract_contains_urls)s, avg_number_of_urls = %(avg_number_of_urls)s,
+                              fract_contains_user_mention = %(fract_contains_user_mention)s,
+                              fract_contains_hashtag = %(fract_contains_hashtag)s, fract_retweeted = %(fract_retweeted)s  
                           WHERE user_id = %(user_id)s"""
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
@@ -82,9 +87,17 @@ SELECT_USER_DATA = """SELECT *
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
 SELECT_TWEET_TEXT_FEATURES = """SELECT 
-                                   t.user_id_fk AS USER_ID,
-                                   avg(length(t.tweet_text)) AS AVG_LENGTH_CHAR,
-                                   avg(array_length(regexp_split_to_array(t.tweet_text, '\s'), 1)) AS AVG_LENGTH_WORDS
+                                   t.user_id_fk AS user_id,
+                                   count(t.tweet_id) AS total_count,
+                                   avg(length(t.tweet_text)) AS avg_length_char,
+                                   avg(array_length(regexp_split_to_array(t.tweet_text, '\s'), 1)) AS avg_length_words,
+                                   sum(CASE WHEN t.tweet_text LIKE '%%\?%%' THEN 1 ELSE 0 END) AS num_question_marks,
+                                   sum(CASE WHEN t.tweet_text LIKE '%%\!%%' THEN 1 ELSE 0 END) AS num_exclam_marks,
+                                   avg(t.num_urls) AS avg_num_URLs,                                   
+                                   sum(CASE WHEN t.num_urls > 0 THEN 1 ELSE 0 END) AS num_containing_URLs,
+                                   sum(CASE WHEN t.num_mentions > 0 THEN 1 ELSE 0 END) AS num_containing_mentions,
+                                   sum(CASE WHEN t.num_hashtags > 0 THEN 1 ELSE 0 END) AS num_containing_hashtags,
+                                   sum(CASE WHEN t.retweeted = TRUE THEN 1 ELSE 0 END) AS num_retweeted
                                 FROM tss_dev.tweets t
                                 WHERE t.user_id_fk = %(user_id)s
                                 GROUP BY t.user_id_fk;"""
