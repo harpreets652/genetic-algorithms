@@ -22,9 +22,11 @@ def loadUsers(usersDir):
         return
 
     for file_name in glob.glob1(ROOT_DIR + '/' + usersDir, "*"):
-        genuineUsers = False
-        if 'genuine' in file_name:
-            genuineUsers = True
+        classification = 0  # genuine
+        if 'social' in file_name.lower():
+            classification = 1
+        elif 'traditional' in file_name.lower():
+            classification = 2
 
         usersDataFile = ROOT_DIR + '/' + usersDir + file_name
 
@@ -35,17 +37,21 @@ def loadUsers(usersDir):
                     userReader = csv.DictReader(x.replace('\0', '') for x in inFile)
                     for line in userReader:
                         row = json.loads(json.dumps(line).replace("\\ufeff", ""))
-                        row['is_user_genuine'] = genuineUsers
+                        row['classification'] = classification
+                        try:
+                            SqlStatements.modifyData(conn,
+                                                     curs,
+                                                     SqlStatements.INSERT_INTO_USERS,
+                                                     SqlStatements.mapUserInputToUsersTable(row))
 
-                        SqlStatements.modifyData(conn,
-                                                 curs,
-                                                 SqlStatements.INSERT_INTO_USERS,
-                                                 SqlStatements.mapUserInputToUsersTable(row))
+                            SqlStatements.modifyData(conn,
+                                                     curs,
+                                                     SqlStatements.INIT_INSERT_INTO_FEATURES,
+                                                     SqlStatements.mapUserInputToFeaturesInit(row))
+                        except Exception:
+                            # continue on
+                            pass
 
-                        SqlStatements.modifyData(conn,
-                                                 curs,
-                                                 SqlStatements.INIT_INSERT_INTO_FEATURES,
-                                                 SqlStatements.mapUserInputToFeaturesInit(row))
                         userInsertCounter += 1
 
         print("{} users inserted for {}".format(userInsertCounter, usersDataFile))
@@ -64,7 +70,7 @@ def loadTweets(tweetDir):
         tweetInsertCounter = 0
         with conn:
             with conn.cursor() as curs:
-                print ("going through {}".format(tweetDataFile))
+                print("going through {}".format(tweetDataFile))
                 # if '\0' in open(tweetDataFile).read():
                 #     print ("you have null bytes in the file: {}".format(tweetDataFile))
 
@@ -72,12 +78,16 @@ def loadTweets(tweetDir):
                     tweetReader = csv.DictReader(x.replace('\0', '') for x in inFile)
 
                     for line in tweetReader:
-                        row = json.loads(json.dumps(line).replace("\\\\ufeff", ""))
+                        row = json.loads(json.dumps(line).replace("\\\\ufeff", "").replace("\\ufeff", ""))
+                        try:
+                            SqlStatements.modifyData(conn,
+                                                     curs,
+                                                     SqlStatements.INSERT_INTO_TWEETS,
+                                                     SqlStatements.mapTweetInputToEntity(row))
+                        except Exception:
+                            # continue on
+                            pass
 
-                        SqlStatements.modifyData(conn,
-                                                 curs,
-                                                 SqlStatements.INSERT_INTO_TWEETS,
-                                                 SqlStatements.mapTweetInputToEntity(row))
                         tweetInsertCounter += 1
 
         print("{} tweets inserted for {}".format(tweetInsertCounter, tweetDataFile))

@@ -17,7 +17,7 @@ INSERT_INTO_USERS = """INSERT INTO tss_dev.users
                            profile_background_color, profile_link_color, utc_offset,
                            is_translator, follow_request_sent, protected,
                            verified, notifications, description, contributors_enabled,
-                           following, created_at, timestamp, updated, is_user_genuine)
+                           following, created_at, timestamp, updated, classification)
 VALUES (%(user_id)s, %(name)s, %(screen_name)s, 
         %(statuses_count)s, %(followers_count)s, 
         %(friends_count)s, %(favourites_count)s, 
@@ -31,7 +31,7 @@ VALUES (%(user_id)s, %(name)s, %(screen_name)s,
         %(profile_background_color)s, %(profile_link_color)s, %(utc_offset)s, 
         %(is_translator)s, %(follow_request_sent)s, %(protected)s, 
         %(verified)s, %(notifications)s, %(description)s, %(contributors_enabled)s, 
-        %(following)s, %(created_at)s, %(timestamp)s, %(updated)s, %(is_user_genuine)s);"""
+        %(following)s, %(created_at)s, %(timestamp)s, %(updated)s, %(classification)s);"""
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
 INSERT_INTO_TWEETS = """INSERT INTO tss_dev.tweets
@@ -58,12 +58,12 @@ INIT_INSERT_INTO_FEATURES = """INSERT INTO tss_dev.users_features (user_id) VALU
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
 GEN_FEATURES_FOR_USERS_SELECT = """SELECT user_id
                                    FROM tss_dev.users_features
-                                   WHERE is_user_genuine IS NULL
+                                   WHERE classification IS NULL
                                      AND process_error IS NULL;"""
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
 UPDATE_USER_FEATURES = """UPDATE tss_dev.users_features
-                          SET is_user_genuine = %(is_genuine)s, user_age = %(user_age)s,
+                          SET classification = %(classification)s, user_age = %(user_age)s,
                               user_status_count = %(user_status_count)s, user_num_followers = %(user_num_followers)s,
                               user_num_friends = %(user_num_friends)s, user_verified = %(user_verified)s,
                               user_has_description = %(user_has_description)s, user_has_url = %(user_has_url)s,
@@ -226,7 +226,7 @@ def mapUserInputToUsersTable(inputData):
             'created_at': stringNullCheck(inputData['created_at']),
             'timestamp': convertInputToTimestamp(inputData['created_at']),
             'updated': convertInputToTimestamp(inputData['updated']),
-            'is_user_genuine': inputData['is_user_genuine']
+            'classification': inputData['classification']
             }
 
 
@@ -281,5 +281,6 @@ def modifyData(conn, cursor, sql, data):
         print("""Exception occurred during sql execution, continuing loop.\nsql: {}\ndata: {}\nException: {}"""
               .format(sql, data, e))
         conn.rollback()
+        raise e
 
     return

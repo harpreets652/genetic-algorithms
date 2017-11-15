@@ -45,7 +45,7 @@ CREATE TABLE TSS_DEV.USERS (
   timestamp                          TIMESTAMP DEFAULT NULL,
   crawled_at                         TIMESTAMP DEFAULT NULL,
   updated                            TIMESTAMP DEFAULT NULL,
-  is_user_genuine                    BOOLEAN   DEFAULT FALSE
+  classification                     SMALLINT  DEFAULT NULL
 );
 
 
@@ -82,7 +82,7 @@ CREATE TABLE TSS_DEV.TWEETS (
 \echo 'Creating USERS_FEATURES table IN TSS_DEV'
 CREATE TABLE TSS_DEV.USERS_FEATURES (
   user_id                             BIGINT PRIMARY KEY,
-  is_user_genuine                     BOOLEAN  DEFAULT NULL,
+  classification                      SMALLINT DEFAULT NULL,
   avg_length_chars                    SMALLINT DEFAULT NULL,
   avg_length_words                    SMALLINT DEFAULT NULL,
   fract_contains_question             DECIMAL  DEFAULT NULL,

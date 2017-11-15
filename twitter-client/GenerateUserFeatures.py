@@ -61,16 +61,20 @@ def generateFeatures(userId):
             data.update(userFeatures)
             data.update(usertTweetFeatures)
 
-            sql = SqlStatements.UPDATE_USER_FEATURES
+            with conn.cursor() as curs:
+                SqlStatements.modifyData(conn,
+                                         curs,
+                                         SqlStatements.UPDATE_USER_FEATURES,
+                                         data)
             result = True
         except Exception as e:
-            data = {'user_id': userId,
-                    'process_error': str(e)}
-            sql = SqlStatements.UPDATE_USER_FEATURES_ERROR
+            with conn.cursor() as curs:
+                SqlStatements.modifyData(conn,
+                                         curs,
+                                         SqlStatements.UPDATE_USER_FEATURES_ERROR,
+                                         {'user_id': userId,
+                                          'process_error': str(e)})
             result = False
-
-        with conn.cursor() as curs:
-            SqlStatements.modifyData(conn, curs, sql, data)
 
     return result
 
@@ -86,7 +90,7 @@ def generateUserFeatures(connection, userId):
     userFeatures = {}
 
     # is user genuine
-    userFeatures['is_genuine'] = userData.is_user_genuine
+    userFeatures['classification'] = userData.classification
 
     # registration age
     regAge = (datetime.now() - userData.timestamp).days
