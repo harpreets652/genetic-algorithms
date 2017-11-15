@@ -188,6 +188,11 @@ def generateTweetFeatures(connection, userId):
         userTweetFeatures[countByDayPrefix +
                           SqlStatements.DAY_OF_WEEK_POSTGRES_MAPPING[countByDay.tweet_day]] = int(countByDay.num_tweets)
 
+    # fraction of personal pronouns
+    userTweetFeatures['fract_contains_pronoun_first_p'] = int(tweetFeaturesFromSql.first_person) / totalNumTweets
+    userTweetFeatures['fract_contains_pronoun_second_p'] = int(tweetFeaturesFromSql.second_person) / totalNumTweets
+    userTweetFeatures['fract_contains_pronoun_third_p'] = int(tweetFeaturesFromSql.third_person) / totalNumTweets
+
     return userTweetFeatures
 
 

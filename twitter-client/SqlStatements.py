@@ -78,7 +78,10 @@ UPDATE_USER_FEATURES = """UPDATE tss_dev.users_features
                               num_tweets_day_tues = %(num_tweets_day_tues)s, num_tweets_day_wed = %(num_tweets_day_wed)s,
                               num_tweets_day_thur = %(num_tweets_day_thur)s, num_tweets_day_fri = %(num_tweets_day_fri)s,
                               num_tweets_day_sat = %(num_tweets_day_sat)s, 
-                              fract_contains_multiple_quest_exlam = %(fract_contains_multiple_quest_exlam)s  
+                              fract_contains_multiple_quest_exlam = %(fract_contains_multiple_quest_exlam)s,
+                              fract_contains_pronoun_first_p = %(fract_contains_pronoun_first_p)s,
+                              fract_contains_pronoun_second_p = %(fract_contains_pronoun_second_p)s,
+                              fract_contains_pronoun_third_p = %(fract_contains_pronoun_third_p)s  
                           WHERE user_id = %(user_id)s"""
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
@@ -97,13 +100,19 @@ SELECT_TWEET_TEXT_FEATURES = """SELECT
                                    count(t.tweet_id) AS total_count,
                                    avg(length(t.tweet_text)) AS avg_length_char,
                                    avg(array_length(regexp_split_to_array(t.tweet_text, '\s'), 1)) AS avg_length_words,
-                                   sum(CASE WHEN t.tweet_text LIKE '%%\?%%' THEN 1 ELSE 0 END) AS num_question_marks,
-                                   sum(CASE WHEN t.tweet_text LIKE '%%\!%%' THEN 1 ELSE 0 END) AS num_exclam_marks,
+                                   SUM(CASE WHEN t.tweet_text LIKE '%%\?%%' THEN 1 ELSE 0 END) AS num_question_marks,
+                                   SUM(CASE WHEN t.tweet_text LIKE '%%\!%%' THEN 1 ELSE 0 END) AS num_exclam_marks,
                                    avg(t.num_urls) AS avg_num_URLs,                                   
-                                   sum(CASE WHEN t.num_urls > 0 THEN 1 ELSE 0 END) AS num_containing_URLs,
-                                   sum(CASE WHEN t.num_mentions > 0 THEN 1 ELSE 0 END) AS num_containing_mentions,
-                                   sum(CASE WHEN t.num_hashtags > 0 THEN 1 ELSE 0 END) AS num_containing_hashtags,
-                                   sum(CASE WHEN t.retweeted = TRUE THEN 1 ELSE 0 END) AS num_retweeted
+                                   SUM(CASE WHEN t.num_urls > 0 THEN 1 ELSE 0 END) AS num_containing_URLs,
+                                   SUM(CASE WHEN t.num_mentions > 0 THEN 1 ELSE 0 END) AS num_containing_mentions,
+                                   SUM(CASE WHEN t.num_hashtags > 0 THEN 1 ELSE 0 END) AS num_containing_hashtags,
+                                   SUM(CASE WHEN t.retweeted = TRUE THEN 1 ELSE 0 END) AS num_retweeted,
+                                   SUM(CASE WHEN tweet_text SIMILAR TO '%%[^[:alnum:]](I|i|Me|me|We|we|Us|us)[^[:alnum:]]%%'
+                                    THEN 1 ELSE 0 END)   AS first_person,
+                                   SUM(CASE WHEN tweet_text SIMILAR TO '%%[^[:alnum:]](You|you)[^[:alnum:]]%%'
+                                    THEN 1 ELSE 0 END)   AS second_person,
+                                   SUM(CASE WHEN tweet_text SIMILAR TO '%%[^[:alnum:]](She|she|He|he|Her|her|Him|him|It|it|They|they|Them|them)[^[:alnum:]]%%'
+                                    THEN 1 ELSE 0 END)   AS third_person
                                 FROM tss_dev.tweets t
                                 WHERE t.user_id_fk = %(user_id)s
                                 GROUP BY t.user_id_fk;"""
