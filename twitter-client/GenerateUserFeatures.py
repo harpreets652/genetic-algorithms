@@ -54,9 +54,7 @@ def run(batchSize, numOfThreads):
 def generateFeatures(userId):
     with conn:
         try:
-            # get user data
             userFeatures = generateUserFeatures(conn, userId)
-
             usertTweetFeatures = generateTweetFeatures(conn, userId)
 
             data = {'user_id': userId}
@@ -79,8 +77,8 @@ def generateFeatures(userId):
 
 def generateUserFeatures(connection, userId):
     readCursor = connection.cursor(cursor_factory=extras.NamedTupleCursor)
-    readCursor.execute(SqlStatements.SELECT_USER_DATA, {'user_id': userId})
 
+    readCursor.execute(SqlStatements.SELECT_USER_DATA, {'user_id': userId})
     userData = readCursor.fetchone()
 
     readCursor.close()
@@ -120,12 +118,16 @@ def generateUserFeatures(connection, userId):
 def generateTweetFeatures(connection, userId):
     readCursor = connection.cursor(cursor_factory=extras.NamedTupleCursor)
 
+    readCursor.execute(SqlStatements.SELECT_TWEET_TEXT, {'user_id': userId})
+    userTweetTexts = readCursor.fetchall()
+
+    # if no tweets, return default values
+    if not userTweetTexts:
+        readCursor.close()
+        return getDefaultTweetFeatures()
+
     readCursor.execute(SqlStatements.SELECT_TWEET_TEXT_FEATURES, {'user_id': userId})
     tweetFeaturesFromSql = readCursor.fetchone()
-
-    # todo: need to handle case of user with no tweets...all tweet-based features 0?
-    # easy to do: just set the default to be 0 for the column (excluding the user tweets)
-    # TODO: LOOK FOR OTHER ERROR SCENARIOS: when using records, what if the record isn't there?
 
     readCursor.execute(SqlStatements.SELECT_MOST_COMMONLY_TWEETED_HOUR, {'user_id': userId})
     mostCommonlyTweetedHour = readCursor.fetchone()
@@ -135,9 +137,6 @@ def generateTweetFeatures(connection, userId):
 
     readCursor.execute(SqlStatements.SELECT_NUM_TWEETS_MULTIPLE_QUEST_EXCLAM, {'user_id': userId})
     tweetCountMultiQuestAndExclam = readCursor.fetchone()
-
-    readCursor.execute(SqlStatements.SELECT_TWEET_TEXT, {'user_id': userId})
-    userTweetTexts = readCursor.fetchall()
 
     readCursor.close()
 
@@ -211,6 +210,22 @@ def generateTweetFeatures(connection, userId):
     userTweetFeatures['avg_sentiment_score'] = totalCompoundScore / totalNumTweets
 
     return userTweetFeatures
+
+
+def getDefaultTweetFeatures():
+    return {'avg_length_chars': 0, 'avg_length_words': 0,
+            'fract_contains_question': 0, 'fract_contains_exclamation': 0,
+            'fract_contains_multiple_quest_exlam': 0, 'fract_contains_urls': 0,
+            'avg_number_of_urls': 0, 'fract_contains_user_mention': 0,
+            'fract_contains_hashtag': 0, 'fract_retweeted': 0,
+            'most_commonly_tweeted_hour': 0, 'num_tweets_day_sun': 0,
+            'num_tweets_day_mon': 0, 'num_tweets_day_tues': 0,
+            'num_tweets_day_wed': 0, 'num_tweets_day_thur': 0,
+            'num_tweets_day_fri': 0, 'num_tweets_day_sat': 0,
+            'fract_contains_pronoun_first_p': 0, 'fract_contains_pronoun_second_p': 0,
+            'fract_contains_pronoun_third_p': 0, 'avg_sentiment_pos_words': 0,
+            'avg_sentiment_neg_words': 0, 'avg_sentiment_score': 0
+            }
 
 
 def getSentimentWordCounts(tweet):
