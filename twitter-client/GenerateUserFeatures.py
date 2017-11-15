@@ -1,9 +1,10 @@
 import os
 import psycopg2 as psyco
+import SqlStatements
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from psycopg2 import extras
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
-import SqlStatements
 from datetime import datetime
 from numpy import long
 
@@ -135,6 +136,9 @@ def generateTweetFeatures(connection, userId):
     readCursor.execute(SqlStatements.SELECT_NUM_TWEETS_MULTIPLE_QUEST_EXCLAM, {'user_id': userId})
     tweetCountMultiQuestAndExclam = readCursor.fetchone()
 
+    readCursor.execute(SqlStatements.SELECT_TWEET_TEXT, {'user_id': userId})
+    userTweetTexts = readCursor.fetchall()
+
     readCursor.close()
 
     userTweetFeatures = {}
@@ -193,7 +197,27 @@ def generateTweetFeatures(connection, userId):
     userTweetFeatures['fract_contains_pronoun_second_p'] = int(tweetFeaturesFromSql.second_person) / totalNumTweets
     userTweetFeatures['fract_contains_pronoun_third_p'] = int(tweetFeaturesFromSql.third_person) / totalNumTweets
 
+    # sentiment analysis: average number of positive and negative words in texts using VADER Scoring
+    # todo: score ranges from -1 to 1; is avg the best way to capture these values?
+    totalPositiveScore = totalNegativeScore = totalCompoundScore = 0
+    for tweet in userTweetTexts:
+        sentimentScores = getSentimentWordCounts(tweet.tweet_text)
+        totalPositiveScore += sentimentScores['pos']
+        totalNegativeScore += sentimentScores['neg']
+        totalCompoundScore += sentimentScores['compound']
+
+    userTweetFeatures['avg_sentiment_pos_words'] = totalPositiveScore / totalNumTweets
+    userTweetFeatures['avg_sentiment_neg_words'] = totalNegativeScore / totalNumTweets
+    userTweetFeatures['avg_sentiment_score'] = totalCompoundScore / totalNumTweets
+
     return userTweetFeatures
+
+
+def getSentimentWordCounts(tweet):
+    analyzer = SentimentIntensityAnalyzer()
+    scores = analyzer.polarity_scores(tweet)
+
+    return scores
 
 
 run(5, 5)

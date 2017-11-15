@@ -81,7 +81,9 @@ UPDATE_USER_FEATURES = """UPDATE tss_dev.users_features
                               fract_contains_multiple_quest_exlam = %(fract_contains_multiple_quest_exlam)s,
                               fract_contains_pronoun_first_p = %(fract_contains_pronoun_first_p)s,
                               fract_contains_pronoun_second_p = %(fract_contains_pronoun_second_p)s,
-                              fract_contains_pronoun_third_p = %(fract_contains_pronoun_third_p)s  
+                              fract_contains_pronoun_third_p = %(fract_contains_pronoun_third_p)s,
+                              avg_sentiment_pos_words = %(avg_sentiment_pos_words)s, avg_sentiment_neg_words = %(avg_sentiment_neg_words)s,
+                              avg_sentiment_score = %(avg_sentiment_score)s  
                           WHERE user_id = %(user_id)s"""
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
@@ -93,6 +95,11 @@ UPDATE_USER_FEATURES_ERROR = """UPDATE tss_dev.users_features
 SELECT_USER_DATA = """SELECT *
                       FROM tss_dev.users
                       WHERE user_id = %(user_id)s """
+
+# noinspection SqlNoDataSourceInspection,SqlDialectInspection
+SELECT_TWEET_TEXT = """SELECT tweet_text
+                       FROM tss_dev.tweets
+                       WHERE user_id_fk = %(user_id)s;"""
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
 SELECT_TWEET_TEXT_FEATURES = """SELECT 
