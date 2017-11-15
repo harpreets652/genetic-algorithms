@@ -13,7 +13,7 @@ Individual::Individual() : vector<bool>(config.NUM_FEATURES), fitness(0.0), dist
 }
 
 void Individual::init() {
-
+    generateRandom();
 }
 
 void Individual::generateRandom() {

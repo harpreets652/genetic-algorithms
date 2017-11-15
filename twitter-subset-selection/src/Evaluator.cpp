@@ -47,10 +47,10 @@ void Evaluator::evaluate(Individual &individual) {
         individual.distance = 0;
         return;
     }
-    // int employee_id = r[0][0].as<int>();
+
     // build the output file
     ofstream fout("../weka_temp/" + individual.to_string() + ".arff");
-    fout << createFileHeader(individual);
+    fout << createFileHeader(individual) << endl;
 
     // output each of the data points (per user) here
     fout << createDataPoints(r, individual) << endl;

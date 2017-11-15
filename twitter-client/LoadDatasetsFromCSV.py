@@ -74,8 +74,6 @@ def loadTweets(tweetDir):
                     for line in tweetReader:
                         row = json.loads(json.dumps(line).replace("\\\\ufeff", ""))
 
-                        # temp = SqlStatements.convertInputToTimestamp(row['created_at']),
-
                         SqlStatements.modifyData(conn,
                                                  curs,
                                                  SqlStatements.INSERT_INTO_TWEETS,
@@ -87,6 +85,6 @@ def loadTweets(tweetDir):
     return
 
 
-# loadUsers(properties.get("loadDataSet.users-directory"))
+loadUsers(properties.get("loadDataSet.users-directory"))
 
 loadTweets(properties.get("loadDataSet.tweets-directory"))

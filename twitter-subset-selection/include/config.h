@@ -18,7 +18,7 @@ struct Config {
     double PROB_CROSSOVER = 0.20;  // 0.2, 0.67, 0.99
     string INPUT_FILENAME;
 
-    unsigned int NUM_FEATURES = 30;
+    unsigned int NUM_FEATURES = 35;
     unsigned int POPULATION_SIZE = 10;
     unsigned int ITERATION_SIZE = 1;
     unsigned int TOTAL_GAS_SIZE = 30; // 5 for testing, 30 for reality

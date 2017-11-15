@@ -35,19 +35,31 @@ using namespace std;
 #define FRAC_CONTAINS_HASHTAG       16
 #define FRAC_CONTAINS_STOCK_SYM     17
 #define FRAC_ARE_RETWEET            18
-#define MOST_POPULAR_WEEKDAY        19
-#define MOST_POPULAR_HOUR           20
+#define FRAC_PUB_ON_MON             19
+#define FRAC_PUB_ON_TUES            20
+#define FRAC_PUB_ON_WED             21
+#define FRAC_PUB_ON_THUR            22
+#define FRAC_PUB_ON_FRI             23
+#define FRAC_PUB_ON_SAT             24
+#define FRAC_PUB_ON_SUN             25
+#define MOST_POPULAR_WEEKDAY        26
+#define MOST_POPULAR_HOUR           27
 
 // USER BASED FEATURES
-#define USER_REGISTRATION_AGE       21
-#define USER_STATUS_COUNT           22
-#define USER_NUM_FOLLOWERS          23
-#define USER_NUM_FRIENDS            24
-#define USER_IS_VERIFIED            25
-#define USER_HAS_DESCRIPTION        26
-#define USER_HAS_URL                27
+#define USER_REGISTRATION_AGE       28
+#define USER_STATUS_COUNT           29
+#define USER_NUM_FOLLOWERS          30
+#define USER_NUM_FRIENDS            31
+#define USER_IS_VERIFIED            32
+#define USER_HAS_DESCRIPTION        33
+#define USER_HAS_URL                34
+#define USER_DEF_PROFILE_PHOTO      35
+#define USER_DE
 
-
+const map<unsigned int, string> FEATURE_STRINGS = {
+        {0, ""},
+        {1, "1"}
+};
 
 class Individual : public vector<bool> {
 public:

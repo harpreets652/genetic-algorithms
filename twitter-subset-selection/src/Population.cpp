@@ -14,7 +14,7 @@ void Population::generate(int n) {
     this->clear();
     for(int i = 0 ; i < n; i++) {
         Individual randIndividual;
-        randIndividual.generateRandom();
+        randIndividual.init();
         this->push_back(randIndividual);
     }
 }
