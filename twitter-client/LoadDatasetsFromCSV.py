@@ -2,6 +2,7 @@ import csv
 import glob
 import json
 import os
+import codecs
 
 import psycopg2 as psyco
 
@@ -31,7 +32,7 @@ def loadUsers(usersDir):
         with conn:
             with conn.cursor() as curs:
                 with open(usersDataFile) as inFile:
-                    userReader = csv.DictReader(inFile)
+                    userReader = csv.DictReader(x.replace('\0', '') for x in inFile)
                     for line in userReader:
                         row = json.loads(json.dumps(line).replace("\\ufeff", ""))
                         row['is_user_genuine'] = genuineUsers
@@ -63,11 +64,17 @@ def loadTweets(tweetDir):
         tweetInsertCounter = 0
         with conn:
             with conn.cursor() as curs:
-                with open(tweetDataFile) as inFile:
-                    tweetReader = csv.DictReader(inFile)
+                print ("going through {}".format(tweetDataFile))
+                # if '\0' in open(tweetDataFile).read():
+                #     print ("you have null bytes in the file: {}".format(tweetDataFile))
+
+                with codecs.open(tweetDataFile, encoding='utf-8', errors='replace') as inFile:
+                    tweetReader = csv.DictReader(x.replace('\0', '') for x in inFile)
 
                     for line in tweetReader:
-                        row = json.loads(json.dumps(line).replace("\\ufeff", ""))
+                        row = json.loads(json.dumps(line).replace("\\\\ufeff", ""))
+
+                        # temp = SqlStatements.convertInputToTimestamp(row['created_at']),
 
                         SqlStatements.modifyData(conn,
                                                  curs,
@@ -80,6 +87,6 @@ def loadTweets(tweetDir):
     return
 
 
-loadUsers(properties.get("loadDataSet.users-directory"))
+# loadUsers(properties.get("loadDataSet.users-directory"))
 
 loadTweets(properties.get("loadDataSet.tweets-directory"))

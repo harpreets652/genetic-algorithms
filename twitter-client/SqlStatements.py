@@ -17,7 +17,7 @@ INSERT_INTO_USERS = """INSERT INTO tss_dev.users
                            profile_background_color, profile_link_color, utc_offset,
                            is_translator, follow_request_sent, protected,
                            verified, notifications, description, contributors_enabled,
-                           following, created_at, timestamp, crawled_at, updated, is_user_genuine)
+                           following, created_at, timestamp, updated, is_user_genuine)
 VALUES (%(user_id)s, %(name)s, %(screen_name)s, 
         %(statuses_count)s, %(followers_count)s, 
         %(friends_count)s, %(favourites_count)s, 
@@ -31,7 +31,7 @@ VALUES (%(user_id)s, %(name)s, %(screen_name)s,
         %(profile_background_color)s, %(profile_link_color)s, %(utc_offset)s, 
         %(is_translator)s, %(follow_request_sent)s, %(protected)s, 
         %(verified)s, %(notifications)s, %(description)s, %(contributors_enabled)s, 
-        %(following)s, %(created_at)s, %(timestamp)s, %(crawled_at)s, %(updated)s, %(is_user_genuine)s);"""
+        %(following)s, %(created_at)s, %(timestamp)s, %(updated)s, %(is_user_genuine)s);"""
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
 INSERT_INTO_TWEETS = """INSERT INTO tss_dev.tweets
@@ -42,7 +42,7 @@ INSERT_INTO_TWEETS = """INSERT INTO tss_dev.tweets
                           retweet_count, reply_count, favorite_count, 
                           favorited, retweeted, possibly_sensitive, 
                           num_hashtags, num_urls, num_mentions, 
-                          created_at, timestamp, crawled_at, updated)
+                          created_at, timestamp)
 VALUES (%(tweet_id)s, %(user_id_fk)s, %(tweet_text)s, 
         %(source)s, %(truncated)s, %(in_reply_to_status_id)s, 
         %(in_reply_to_user_id)s, %(retweeted_status_id)s, 
@@ -50,7 +50,7 @@ VALUES (%(tweet_id)s, %(user_id_fk)s, %(tweet_text)s,
         %(contributors)s, %(retweet_count)s, %(reply_count)s, 
         %(favorite_count)s, %(favorited)s, %(retweeted)s, 
         %(possibly_sensitive)s, %(num_hashtags)s, %(num_urls)s, 
-        %(num_mentions)s, %(created_at)s, %(timestamp)s, %(crawled_at)s, %(updated)s);"""
+        %(num_mentions)s, %(created_at)s, %(timestamp)s);"""
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
 INIT_INSERT_INTO_FEATURES = """INSERT INTO tss_dev.users_features (user_id) VALUES (%(user_id)s);"""
@@ -113,9 +113,7 @@ def mapTweetInputToEntity(inputData):
             'num_urls': convertInputToLong(inputData['num_urls']),
             'num_mentions': convertInputToLong(inputData['num_mentions']),
             'created_at': stringNullCheck(inputData['created_at']),
-            'timestamp': convertInputToTimestamp(inputData['created_at'], '%a %b %d %H:%M:%S +0000 %Y'),
-            'crawled_at': convertInputToTimestamp(inputData['crawled_at'], '%m/%d/%y %H:%M'),
-            'updated': convertInputToTimestamp(inputData['updated'], '%m/%d/%y %H:%M')
+            'timestamp': convertInputToTimestamp(inputData['created_at']),
             }
 
 
@@ -161,9 +159,8 @@ def mapUserInputToUsersTable(inputData):
             'contributors_enabled': convertInputToBool(inputData['contributors_enabled']),
             'following': stringNullCheck(inputData['following']),
             'created_at': stringNullCheck(inputData['created_at']),
-            'timestamp': convertInputToTimestamp(inputData['created_at'], '%a %b %d %H:%M:%S +0000 %Y'),
-            'crawled_at': convertInputToTimestamp(inputData['crawled_at'], '%m/%d/%y %H:%M'),
-            'updated': convertInputToTimestamp(inputData['updated'], '%m/%d/%y %H:%M'),
+            'timestamp': convertInputToTimestamp(inputData['created_at']),
+            'updated': convertInputToTimestamp(inputData['updated']),
             'is_user_genuine': inputData['is_user_genuine']
             }
 
@@ -182,11 +179,27 @@ def convertInputToBool(input):
     return True if input.strip() == '1' else False
 
 
-def convertInputToTimestamp(input, fmt):
+def convertInputToTimestamp(input):
     if not input or input.strip() == 'NULL':
         return None
 
-    return datetime.strptime(input.strip(), fmt)
+    fmts = ["%Y-%m-%d %H:%M:%S", "%m/%d/%y %H:%M", "%m/%d/%y %H:%M:%S", "%a %b %d %H:%M:%S +0000 %Y", "%c"]
+
+    for fmt in fmts:
+        # time.sleep(1.0)
+        try:
+            return datetime.strptime(input.strip().strip('L'), fmt)
+        except ValueError:
+            pass
+
+    # could be in millisecond epoch time
+    try:
+        return datetime.fromtimestamp(int(input.strip('L'))/1000)
+    except ValueError:
+        pass
+
+    print ("Unable to type this datetime input {}".format(input.strip()))
+    return None
 
 
 def convertInputToLong(input):
