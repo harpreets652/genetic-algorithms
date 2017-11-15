@@ -67,7 +67,21 @@ UPDATE_USER_FEATURES = """UPDATE tss_dev.users_features
                               user_status_count = %(user_status_count)s, user_num_followers = %(user_num_followers)s,
                               user_num_friends = %(user_num_friends)s, user_verified = %(user_verified)s,
                               user_has_description = %(user_has_description)s, user_has_url = %(user_has_url)s,
-                              avg_length_chars = %(avg_length_chars)s, avg_length_words = %(avg_length_words)s 
+                              avg_length_chars = %(avg_length_chars)s, avg_length_words = %(avg_length_words)s,
+                              fract_contains_question = %(fract_contains_question)s, 
+                              fract_contains_exclamation = %(fract_contains_exclamation)s,
+                              fract_contains_urls = %(fract_contains_urls)s, avg_number_of_urls = %(avg_number_of_urls)s,
+                              fract_contains_user_mention = %(fract_contains_user_mention)s,
+                              fract_contains_hashtag = %(fract_contains_hashtag)s, fract_retweeted = %(fract_retweeted)s,
+                              most_commonly_tweeted_hour = %(most_commonly_tweeted_hour)s,
+                              num_tweets_day_sun = %(num_tweets_day_sun)s, num_tweets_day_mon = %(num_tweets_day_mon)s,
+                              num_tweets_day_tues = %(num_tweets_day_tues)s, num_tweets_day_wed = %(num_tweets_day_wed)s,
+                              num_tweets_day_thur = %(num_tweets_day_thur)s, num_tweets_day_fri = %(num_tweets_day_fri)s,
+                              num_tweets_day_sat = %(num_tweets_day_sat)s, 
+                              fract_contains_multiple_quest_exlam = %(fract_contains_multiple_quest_exlam)s,
+                              fract_contains_pronoun_first_p = %(fract_contains_pronoun_first_p)s,
+                              fract_contains_pronoun_second_p = %(fract_contains_pronoun_second_p)s,
+                              fract_contains_pronoun_third_p = %(fract_contains_pronoun_third_p)s  
                           WHERE user_id = %(user_id)s"""
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
@@ -82,12 +96,53 @@ SELECT_USER_DATA = """SELECT *
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
 SELECT_TWEET_TEXT_FEATURES = """SELECT 
-                                   t.user_id_fk AS USER_ID,
-                                   avg(length(t.tweet_text)) AS AVG_LENGTH_CHAR,
-                                   avg(array_length(regexp_split_to_array(t.tweet_text, '\s'), 1)) AS AVG_LENGTH_WORDS
+                                   t.user_id_fk AS user_id,
+                                   count(t.tweet_id) AS total_count,
+                                   avg(length(t.tweet_text)) AS avg_length_char,
+                                   avg(array_length(regexp_split_to_array(t.tweet_text, '\s'), 1)) AS avg_length_words,
+                                   SUM(CASE WHEN t.tweet_text LIKE '%%\?%%' THEN 1 ELSE 0 END) AS num_question_marks,
+                                   SUM(CASE WHEN t.tweet_text LIKE '%%\!%%' THEN 1 ELSE 0 END) AS num_exclam_marks,
+                                   avg(t.num_urls) AS avg_num_URLs,                                   
+                                   SUM(CASE WHEN t.num_urls > 0 THEN 1 ELSE 0 END) AS num_containing_URLs,
+                                   SUM(CASE WHEN t.num_mentions > 0 THEN 1 ELSE 0 END) AS num_containing_mentions,
+                                   SUM(CASE WHEN t.num_hashtags > 0 THEN 1 ELSE 0 END) AS num_containing_hashtags,
+                                   SUM(CASE WHEN t.retweeted = TRUE THEN 1 ELSE 0 END) AS num_retweeted,
+                                   SUM(CASE WHEN tweet_text SIMILAR TO '%%[^[:alnum:]](I|i|Me|me|We|we|Us|us)[^[:alnum:]]%%'
+                                    THEN 1 ELSE 0 END)   AS first_person,
+                                   SUM(CASE WHEN tweet_text SIMILAR TO '%%[^[:alnum:]](You|you)[^[:alnum:]]%%'
+                                    THEN 1 ELSE 0 END)   AS second_person,
+                                   SUM(CASE WHEN tweet_text SIMILAR TO '%%[^[:alnum:]](She|she|He|he|Her|her|Him|him|It|it|They|they|Them|them)[^[:alnum:]]%%'
+                                    THEN 1 ELSE 0 END)   AS third_person
                                 FROM tss_dev.tweets t
                                 WHERE t.user_id_fk = %(user_id)s
                                 GROUP BY t.user_id_fk;"""
+
+# noinspection SqlNoDataSourceInspection,SqlDialectInspection
+SELECT_MOST_COMMONLY_TWEETED_HOUR = """SELECT
+                                          extract(HOUR FROM timestamp) AS tweet_hour,
+                                          COUNT(*) AS num_tweets
+                                        FROM tss_dev.tweets
+                                        WHERE user_id_fk = %(user_id)s
+                                        GROUP BY EXTRACT(HOUR FROM TIMESTAMP)
+                                        ORDER BY COUNT(*) DESC
+                                        LIMIT 1;"""
+
+# noinspection SqlNoDataSourceInspection,SqlDialectInspection
+SELECT_TWEET_COUNT_BY_DAY = """SELECT
+                                  extract(DOW FROM timestamp) AS tweet_day,
+                                  COUNT(*) AS num_tweets
+                                FROM tss_dev.tweets
+                                WHERE user_id_fk = %(user_id)s
+                                GROUP BY extract(DOW FROM timestamp);"""
+
+# noinspection SqlNoDataSourceInspection,SqlDialectInspection
+SELECT_NUM_TWEETS_MULTIPLE_QUEST_EXCLAM = """SELECT COUNT(*) as tweet_count
+                                             FROM tss_dev.tweets
+                                             WHERE user_id_fk = %(user_id)s
+                                                   AND (length(tweet_text) - length(regexp_replace(tweet_text, '\?', '', 'g')) > 1 OR
+                                                        length(tweet_text) - length(regexp_replace(tweet_text, '\!', '', 'g')) > 1);"""
+
+DAY_OF_WEEK_POSTGRES_MAPPING = {0: 'sun', 1: 'mon', 2: 'tues', 3: 'wed', 4: 'thur', 5: 'fri', 6: 'sat'}
 
 
 def mapTweetInputToEntity(inputData):

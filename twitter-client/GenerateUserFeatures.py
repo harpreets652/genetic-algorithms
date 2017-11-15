@@ -1,9 +1,11 @@
 import os
 import psycopg2 as psyco
+from psycopg2 import extras
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
 import SqlStatements
 from datetime import datetime
+from numpy import long
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -52,14 +54,11 @@ def generateFeatures(userId):
     with conn:
         try:
             # get user data
-            userData = getUserData(conn, userId)
+            userFeatures = generateUserFeatures(conn, userId)
 
-            userFeatures = generateUserFeatures(userData)
+            usertTweetFeatures = generateTweetFeatures(conn, userId)
 
-            usertTweetFeatures = generateTweetFeatures(conn, userData)
-
-            data = {'user_id': userId,
-                    'is_genuine': userData['is_user_genuine']}
+            data = {'user_id': userId}
             data.update(userFeatures)
             data.update(usertTweetFeatures)
 
@@ -77,71 +76,122 @@ def generateFeatures(userId):
     return result
 
 
-def getUserData(connection, userId):
-    readCursor = connection.cursor()
+def generateUserFeatures(connection, userId):
+    readCursor = connection.cursor(cursor_factory=extras.NamedTupleCursor)
     readCursor.execute(SqlStatements.SELECT_USER_DATA, {'user_id': userId})
 
-    columns = []
-    for col in readCursor.description:
-        columns.append(col[0])
-    data = readCursor.fetchone()
-
-    userData = dict(zip(columns, data))
+    userData = readCursor.fetchone()
 
     readCursor.close()
 
-    return userData
-
-
-def generateUserFeatures(userData):
     userFeatures = {}
 
+    # is user genuine
+    userFeatures['is_genuine'] = userData.is_user_genuine
+
     # registration age
-    regAge = (datetime.now() - userData['timestamp']).days
+    regAge = (datetime.now() - userData.timestamp).days
     userFeatures['user_age'] = regAge
 
     # statuses count on day
-    userFeatures['user_status_count'] = userData['statuses_count']
+    userFeatures['user_status_count'] = userData.statuses_count
 
     # number of followers
-    userFeatures['user_num_followers'] = userData['followers_count']
+    userFeatures['user_num_followers'] = userData.followers_count
 
     # number of friends
-    userFeatures['user_num_friends'] = userData['friends_count']
+    userFeatures['user_num_friends'] = userData.friends_count
 
     # is user verified
-    userFeatures['user_verified'] = userData['verified']
+    userFeatures['user_verified'] = userData.verified
 
     # has description?
-    description = userData['description']
+    description = userData.description
     userFeatures['user_has_description'] = True if description and description != 'NULL' else False
 
     # has url?
-    url = userData['url']
+    url = userData.url
     userFeatures['user_has_url'] = True if url and url != 'NULL' else False
 
     return userFeatures
 
 
-def generateTweetFeatures(connection, userData):
-    readCursor = connection.cursor()
-    readCursor.execute(SqlStatements.SELECT_TWEET_TEXT_FEATURES, {'user_id': userData['user_id']})
+def generateTweetFeatures(connection, userId):
+    readCursor = connection.cursor(cursor_factory=extras.NamedTupleCursor)
 
-    columns = []
-    for col in readCursor.description:
-        columns.append(col[0])
-    data = readCursor.fetchone()
+    readCursor.execute(SqlStatements.SELECT_TWEET_TEXT_FEATURES, {'user_id': userId})
+    tweetFeaturesFromSql = readCursor.fetchone()
 
-    tweetFeaturesFromSql = dict(zip(columns, data))
+    # todo: need to handle case of user with no tweets...all tweet-based features 0?
+    # easy to do: just set the default to be 0 for the column (excluding the user tweets)
+    # TODO: LOOK FOR OTHER ERROR SCENARIOS: when using records, what if the record isn't there?
+
+    readCursor.execute(SqlStatements.SELECT_MOST_COMMONLY_TWEETED_HOUR, {'user_id': userId})
+    mostCommonlyTweetedHour = readCursor.fetchone()
+
+    readCursor.execute(SqlStatements.SELECT_TWEET_COUNT_BY_DAY, {'user_id': userId})
+    tweetCountByDay = readCursor.fetchall()
+
+    readCursor.execute(SqlStatements.SELECT_NUM_TWEETS_MULTIPLE_QUEST_EXCLAM, {'user_id': userId})
+    tweetCountMultiQuestAndExclam = readCursor.fetchone()
+
     readCursor.close()
 
     userTweetFeatures = {}
 
     # average number of characters
-    userTweetFeatures['avg_length_chars'] = int(tweetFeaturesFromSql['avg_length_char'])
+    userTweetFeatures['avg_length_chars'] = int(tweetFeaturesFromSql.avg_length_char)
 
     # average number of words
-    userTweetFeatures['avg_length_words'] = int(tweetFeaturesFromSql['avg_length_words'])
+    userTweetFeatures['avg_length_words'] = int(tweetFeaturesFromSql.avg_length_words)
+
+    totalNumTweets = int(tweetFeaturesFromSql.total_count)
+
+    # fraction containing question marks
+    fractQuestionMarks = int(tweetFeaturesFromSql.num_question_marks) / totalNumTweets
+    userTweetFeatures['fract_contains_question'] = fractQuestionMarks
+
+    # fraction containing exclamation marks
+    fractionExclamMarks = int(tweetFeaturesFromSql.num_exclam_marks) / totalNumTweets
+    userTweetFeatures['fract_contains_exclamation'] = fractionExclamMarks
+
+    # fraction containing multiple exclamation or question marks
+    numOfTweetsWithMultiQuestAndExclam = int(tweetCountMultiQuestAndExclam.tweet_count)
+    userTweetFeatures['fract_contains_multiple_quest_exlam'] = numOfTweetsWithMultiQuestAndExclam / totalNumTweets
+
+    # fraction containing urls
+    fractionUrls = int(tweetFeaturesFromSql.num_containing_urls) / totalNumTweets
+    userTweetFeatures['fract_contains_urls'] = fractionUrls
+
+    # average number of urls
+    userTweetFeatures['avg_number_of_urls'] = long(tweetFeaturesFromSql.avg_num_urls)
+
+    # fraction containing user mentions
+    fractContainsUserMention = int(tweetFeaturesFromSql.num_containing_mentions) / totalNumTweets
+    userTweetFeatures['fract_contains_user_mention'] = fractContainsUserMention
+
+    # fraction containing hashtags
+    userTweetFeatures['fract_contains_hashtag'] = int(tweetFeaturesFromSql.num_containing_hashtags) / totalNumTweets
+
+    # fraction retweeted
+    userTweetFeatures['fract_retweeted'] = int(tweetFeaturesFromSql.num_retweeted) / totalNumTweets
+
+    # most commonly tweeted hour
+    userTweetFeatures['most_commonly_tweeted_hour'] = int(mostCommonlyTweetedHour.tweet_hour)
+
+    # tweet count by day
+    countByDayPrefix = 'num_tweets_day_'
+    for days in SqlStatements.DAY_OF_WEEK_POSTGRES_MAPPING.values():
+        userTweetFeatures[countByDayPrefix + days] = 0
+
+    for countByDay in tweetCountByDay:
+        userTweetFeatures[countByDayPrefix +
+                          SqlStatements.DAY_OF_WEEK_POSTGRES_MAPPING[countByDay.tweet_day]] = int(countByDay.num_tweets)
+
+    # fraction of personal pronouns
+    userTweetFeatures['fract_contains_pronoun_first_p'] = int(tweetFeaturesFromSql.first_person) / totalNumTweets
+    userTweetFeatures['fract_contains_pronoun_second_p'] = int(tweetFeaturesFromSql.second_person) / totalNumTweets
+    userTweetFeatures['fract_contains_pronoun_third_p'] = int(tweetFeaturesFromSql.third_person) / totalNumTweets
 
     return userTweetFeatures
 
