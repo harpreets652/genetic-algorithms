@@ -187,6 +187,9 @@ def generateTweetFeatures(connection, userId, userData):
     # average number of urls in top 100
     userTweetFeatures['fract_urls_top_100'] = long(tweetFeaturesFromSql.num_urls_in_top_100) / totalNumTweets
 
+    # average number that contain company references
+    userTweetFeatures['fract_contains_company'] = long(tweetFeaturesFromSql.num_contains_company) / totalNumTweets
+
     # fraction containing user mentions
     fractContainsUserMention = int(tweetFeaturesFromSql.num_containing_mentions) / totalNumTweets
     userTweetFeatures['fract_contains_user_mention'] = fractContainsUserMention
@@ -272,4 +275,5 @@ def getSentimentWordCounts(tweet):
     return scores
 
 
-run(5, 5)
+if __name__ == __main__:
+    run(5, 5)
