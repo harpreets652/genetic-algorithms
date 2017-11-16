@@ -174,7 +174,7 @@ def generateTweetFeatures(connection, userId):
     userTweetFeatures['avg_number_of_urls'] = long(tweetFeaturesFromSql.avg_num_urls)
 
     # average number of urls in top 100
-    userTweetFeatures['contains_urls_top_100'] = long(tweetFeaturesFromSql.contains_urls_top_100) / totalNumTweets
+    userTweetFeatures['fract_urls_top_100'] = long(tweetFeaturesFromSql.num_urls_in_top_100) / totalNumTweets
 
     # fraction containing user mentions
     fractContainsUserMention = int(tweetFeaturesFromSql.num_containing_mentions) / totalNumTweets
@@ -232,7 +232,7 @@ def getDefaultTweetFeatures():
             'fract_contains_pronoun_first_p': 0, 'fract_contains_pronoun_second_p': 0,
             'fract_contains_pronoun_third_p': 0, 'avg_sentiment_pos_words': 0,
             'avg_sentiment_neg_words': 0, 'avg_sentiment_score': 0,
-            'contains_urls_top_100': 0
+            'fract_urls_top_100': 0
             }
 
 

@@ -71,7 +71,7 @@ UPDATE_USER_FEATURES = """UPDATE tss_dev.users_features
                               fract_contains_question = %(fract_contains_question)s, 
                               fract_contains_exclamation = %(fract_contains_exclamation)s,
                               fract_contains_urls = %(fract_contains_urls)s, avg_number_of_urls = %(avg_number_of_urls)s,
-                              contains_urls_top_100 = %(contains_urls_top_100)s,
+                              fract_urls_top_100 = %(fract_urls_top_100)s,
                               fract_contains_user_mention = %(fract_contains_user_mention)s,
                               fract_contains_hashtag = %(fract_contains_hashtag)s, fract_retweeted = %(fract_retweeted)s,
                               most_commonly_tweeted_hour = %(most_commonly_tweeted_hour)s,

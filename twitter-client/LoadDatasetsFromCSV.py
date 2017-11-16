@@ -16,6 +16,10 @@ properties = dict(line.strip().split('=') for line in open(ROOT_DIR + '/' + PROP
 conn = psyco.connect(dbname="cs_776", user="system", password="system", host="localhost")
 
 
+"""
+do not import tweets that are not in english
+last step: remove users from user_features that don't have any tweets
+"""
 def loadUsers(usersDir):
     if not usersDir:
         print("usersDir is not provided.")
