@@ -122,5 +122,6 @@ CREATE TABLE TSS_DEV.USERS_FEATURES (
   user_verified                       BOOLEAN  DEFAULT NULL,
   user_has_description                BOOLEAN  DEFAULT NULL,
   user_has_url                        BOOLEAN  DEFAULT NULL,
+  user_has_default_profile_image      BOOLEAN  DEFAULT NULL,
   process_error                       TEXT     DEFAULT NULL
 );
