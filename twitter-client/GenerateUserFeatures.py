@@ -58,8 +58,8 @@ def run(batchSize, numOfThreads):
 def generateFeatures(userId):
     with conn:
         try:
-            userFeatures = generateUserFeatures(conn, userId)
-            usertTweetFeatures = generateTweetFeatures(conn, userId)
+            userFeatures, userData = generateUserFeatures(conn, userId)
+            usertTweetFeatures = generateTweetFeatures(conn, userId, userData)
 
             data = {'user_id': userId}
             data.update(userFeatures)
@@ -127,10 +127,10 @@ def generateUserFeatures(connection, userId):
     url = userData.url
     userFeatures['user_has_url'] = True if url and url != 'NULL' else False
 
-    return userFeatures
+    return userFeatures, userData
 
 
-def generateTweetFeatures(connection, userId):
+def generateTweetFeatures(connection, userId, userData):
     readCursor = connection.cursor(cursor_factory=extras.NamedTupleCursor)
 
     readCursor.execute(SqlStatements.SELECT_TWEET_TEXT, {'user_id': userId})
@@ -214,22 +214,28 @@ def generateTweetFeatures(connection, userId):
     userTweetFeatures['fract_contains_pronoun_second_p'] = int(tweetFeaturesFromSql.second_person) / totalNumTweets
     userTweetFeatures['fract_contains_pronoun_third_p'] = int(tweetFeaturesFromSql.third_person) / totalNumTweets
 
-    totalPositiveScore = totalNegativeScore = totalCompoundScore = numTweetsWithEmoticons = 0
+    totalPositiveScore = totalNegativeScore = totalCompoundScore = numTweetsWithEmoticons = numTweetsReferenceSelf = 0
     for tweet in userTweetTexts:
         # sentiment VADER Scoring
-        sentimentScores = getSentimentWordCounts(tweet.tweet_text)
+        tweet_text = tweet.tweet_text.strip()
+        sentimentScores = getSentimentWordCounts(tweet_text)
         totalPositiveScore += sentimentScores['pos']
         totalNegativeScore += sentimentScores['neg']
         totalCompoundScore += sentimentScores['compound']
 
         # number of tweets with emoticons
-        numTweetsWithEmoticons += tweetContainsEmoticons(tweet.tweet_text)
+        numTweetsWithEmoticons += tweetContainsEmoticons(tweet_text)
+
+        # number of tweets that reference self
+        if userData.name.strip() in tweet_text or userData.screen_name.strip() in tweet_text:
+            numTweetsReferenceSelf += 1
 
     userTweetFeatures['avg_sentiment_pos_words'] = totalPositiveScore / totalNumTweets
     userTweetFeatures['avg_sentiment_neg_words'] = totalNegativeScore / totalNumTweets
     userTweetFeatures['avg_sentiment_score'] = totalCompoundScore / totalNumTweets
 
     userTweetFeatures['fract_contains_emoticon'] = numTweetsWithEmoticons / totalNumTweets
+    userTweetFeatures['fract_self_promoting'] = numTweetsReferenceSelf / totalNumTweets
 
     return userTweetFeatures
 
@@ -255,7 +261,7 @@ def getDefaultTweetFeatures():
             'fract_contains_pronoun_first_p': 0, 'fract_contains_pronoun_second_p': 0,
             'fract_contains_pronoun_third_p': 0, 'avg_sentiment_pos_words': 0,
             'avg_sentiment_neg_words': 0, 'avg_sentiment_score': 0,
-            'fract_urls_top_100': 0, 'fract_contains_emoticon': 0
+            'fract_urls_top_100': 0, 'fract_contains_emoticon': 0, 'fract_self_promoting': 0
             }
 
 

@@ -85,7 +85,8 @@ UPDATE_USER_FEATURES = """UPDATE tss_dev.users_features
                               fract_contains_pronoun_third_p = %(fract_contains_pronoun_third_p)s,
                               avg_sentiment_pos_words = %(avg_sentiment_pos_words)s, avg_sentiment_neg_words = %(avg_sentiment_neg_words)s,
                               avg_sentiment_score = %(avg_sentiment_score)s, user_followers_to_lifetime = %(user_followers_to_lifetime)s,
-                              user_reputation_ratio = %(user_reputation_ratio)s, fract_contains_emoticon = %(fract_contains_emoticon)s  
+                              user_reputation_ratio = %(user_reputation_ratio)s, fract_contains_emoticon = %(fract_contains_emoticon)s,
+                              fract_self_promoting = %(fract_self_promoting)s  
                           WHERE user_id = %(user_id)s"""
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
