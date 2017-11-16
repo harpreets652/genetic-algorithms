@@ -105,6 +105,13 @@ def generateUserFeatures(connection, userId):
     # number of friends
     userFeatures['user_num_friends'] = userData.friends_count
 
+    # followers to lifetime ratio
+    userFeatures['user_followers_to_lifetime'] = userData.followers_count / regAge
+
+    # reputation ratio: followers / followers + following
+    reputationRatio = userData.followers_count / (userData.followers_count + userData.friends_count)
+    userFeatures['user_reputation_ratio'] = reputationRatio
+
     # is user verified
     userFeatures['user_verified'] = userData.verified
 
