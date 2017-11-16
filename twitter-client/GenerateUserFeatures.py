@@ -7,6 +7,10 @@ from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import as_completed
 from datetime import datetime
 from numpy import long
+import re
+
+EMOTICONS = r"""([:;=8][\-o\*'']?[\)\]\(\[dDpP/\:\}\{@\|\\]|[\)\]\(\[dDpP/\:\}\{@\|\\][\-o\*'']?[:;=8]|<3)"""
+EMOTICONS_REGEX = re.compile(EMOTICONS, re.VERBOSE | re.I | re.UNICODE)
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -213,23 +217,35 @@ def generateTweetFeatures(connection, userId):
     userTweetFeatures['fract_contains_pronoun_second_p'] = int(tweetFeaturesFromSql.second_person) / totalNumTweets
     userTweetFeatures['fract_contains_pronoun_third_p'] = int(tweetFeaturesFromSql.third_person) / totalNumTweets
 
-    # sentiment analysis: average number of positive and negative words in texts using VADER Scoring
-    # todo: score ranges from -1 to 1; is avg the best way to capture these values?
-    totalPositiveScore = totalNegativeScore = totalCompoundScore = 0
+    totalPositiveScore = totalNegativeScore = totalCompoundScore = numTweetsWithEmoticons = 0
     for tweet in userTweetTexts:
+        # sentiment VADER Scoring
         sentimentScores = getSentimentWordCounts(tweet.tweet_text)
         totalPositiveScore += sentimentScores['pos']
         totalNegativeScore += sentimentScores['neg']
         totalCompoundScore += sentimentScores['compound']
 
+        # number of tweets with emoticons
+        numTweetsWithEmoticons += tweetContainsEmoticons(tweet.tweet_text)
+
     userTweetFeatures['avg_sentiment_pos_words'] = totalPositiveScore / totalNumTweets
     userTweetFeatures['avg_sentiment_neg_words'] = totalNegativeScore / totalNumTweets
     userTweetFeatures['avg_sentiment_score'] = totalCompoundScore / totalNumTweets
 
+    userTweetFeatures['fract_contains_emoticon'] = numTweetsWithEmoticons / totalNumTweets
+
     return userTweetFeatures
 
 
+def tweetContainsEmoticons(tweet):
+    if EMOTICONS_REGEX.search(tweet):
+        return 1
+
+    return 0
+
+
 def getDefaultTweetFeatures():
+    # todo: add default for the new features...this won't be necessary when users with no tweets are removed
     return {'avg_length_chars': 0, 'avg_length_words': 0,
             'fract_contains_question': 0, 'fract_contains_exclamation': 0,
             'fract_contains_multiple_quest_exlam': 0, 'fract_contains_urls': 0,
@@ -242,7 +258,7 @@ def getDefaultTweetFeatures():
             'fract_contains_pronoun_first_p': 0, 'fract_contains_pronoun_second_p': 0,
             'fract_contains_pronoun_third_p': 0, 'avg_sentiment_pos_words': 0,
             'avg_sentiment_neg_words': 0, 'avg_sentiment_score': 0,
-            'fract_urls_top_100': 0
+            'fract_urls_top_100': 0, 'fract_contains_emoticon': 0
             }
 
 
