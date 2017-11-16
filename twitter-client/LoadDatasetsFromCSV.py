@@ -3,9 +3,8 @@ import glob
 import json
 import os
 import codecs
-
 import psycopg2 as psyco
-
+from langdetect import detect_langs
 import SqlStatements
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -16,10 +15,6 @@ properties = dict(line.strip().split('=') for line in open(ROOT_DIR + '/' + PROP
 conn = psyco.connect(dbname="cs_776", user="system", password="system", host="localhost")
 
 
-"""
-do not import tweets that are not in english
-last step: remove users from user_features that don't have any tweets
-"""
 def loadUsers(usersDir):
     if not usersDir:
         print("usersDir is not provided.")
@@ -83,6 +78,13 @@ def loadTweets(tweetDir):
 
                     for line in tweetReader:
                         row = json.loads(json.dumps(line).replace("\\\\ufeff", "").replace("\\ufeff", ""))
+
+                        langs = detect_langs(row['text'])
+                        if langs:
+                            mostProbableLang = langs[0]
+                            if 'en' != mostProbableLang.lang and mostProbableLang.prob >= 0.75:
+                                continue
+
                         try:
                             SqlStatements.modifyData(conn,
                                                      curs,
@@ -99,6 +101,22 @@ def loadTweets(tweetDir):
     return
 
 
+def cleanUpData():
+    with conn:
+        with conn.cursor() as cursor:
+            try:
+                SqlStatements.modifyData(conn,
+                                         cursor,
+                                         SqlStatements.DELETE_FEATURE_ROWS_WITH_NO_TWEETS,
+                                         {})
+            except Exception as e:
+                print("Exception occurred during cleaning up.\nException: {}".format(e))
+
+    return
+
+
 loadUsers(properties.get("loadDataSet.users-directory"))
 
 loadTweets(properties.get("loadDataSet.tweets-directory"))
+
+cleanUpData()

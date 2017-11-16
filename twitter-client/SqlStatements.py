@@ -159,6 +159,14 @@ SELECT_NUM_TWEETS_MULTIPLE_QUEST_EXCLAM = """SELECT COUNT(*) as tweet_count
                                                    AND (length(tweet_text) - length(regexp_replace(tweet_text, '\?', '', 'g')) > 1 OR
                                                         length(tweet_text) - length(regexp_replace(tweet_text, '\!', '', 'g')) > 1);"""
 
+# noinspection SqlNoDataSourceInspection,SqlDialectInspection
+DELETE_FEATURE_ROWS_WITH_NO_TWEETS = """DELETE FROM tss_dev.users_features
+                                        WHERE user_id IN (
+                                          SELECT u.user_id
+                                          FROM tss_dev.users u
+                                            LEFT JOIN tss_dev.tweets t on t.user_id_fk = u.user_id
+                                          WHERE t.tweet_id IS NULL);"""
+
 DAY_OF_WEEK_POSTGRES_MAPPING = {0: 'sun', 1: 'mon', 2: 'tues', 3: 'wed', 4: 'thur', 5: 'fri', 6: 'sat'}
 
 

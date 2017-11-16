@@ -1,6 +1,6 @@
 # Twitter Client wrapper
 
-* install https://github.com/bear/python-twitter
+* Python packages: python-twitter, psycopg2, vaderSentiment, numpy, langdetect
 * add **twitter-client.properties** to 'ROOT_DIR'. Required properties:
   * api-key=?????
   * api-secret=?????

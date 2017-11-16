@@ -264,7 +264,8 @@ def getDefaultTweetFeatures():
             'fract_contains_pronoun_first_p': 0, 'fract_contains_pronoun_second_p': 0,
             'fract_contains_pronoun_third_p': 0, 'avg_sentiment_pos_words': 0,
             'avg_sentiment_neg_words': 0, 'avg_sentiment_score': 0,
-            'fract_urls_top_100': 0, 'fract_contains_emoticon': 0, 'fract_self_promoting': 0
+            'fract_urls_top_100': 0, 'fract_contains_emoticon': 0, 'fract_self_promoting': 0,
+            'fract_contains_company': 0
             }
 
 
