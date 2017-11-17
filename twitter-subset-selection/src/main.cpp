@@ -108,9 +108,9 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+    // parse and set the correct cmd line args
     argh::parser cmdl({ "-w", "--wekaloc", "-d", "--data" });
     cmdl.parse(argc, argv);
-
     Evaluator::getInstance()->setWekaLocation(cmdl("wekaloc").str());
     Evaluator::getInstance()->setDataLocation(cmdl("data").str());
 

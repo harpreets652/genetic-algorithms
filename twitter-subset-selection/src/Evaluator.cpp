@@ -66,61 +66,65 @@ void Evaluator::evaluate(Individual &individual) {
 
 string Evaluator::createFileHeader(Individual &individual) {
     string result = "@RELATION twitter\n";
-    if (individual[AVG_LEN_TWEET_CHARACTERS]) {
-        result += "@ATTRIBUTE AVG_LEN_TWEET_CHARACTERS \t\tREAL\n";
+
+    for (unsigned int i = 0; i < 41; i++) {
+        if (individual[i]) {
+            result += "@ATTRIBUTE " + config.getFSMap().at(i) + "\t\t" + config.getTypeMap().at(i) + "\n";
+        }
     }
-    if (individual[AVG_LEN_TWEET_WORDS]) {
-        result += "@ATTRIBUTE AVG_LEN_TWEET_WORDS\t\tREAL\n";
-    }
-    if (individual[AVG_NUM_POSITIVE_WORDS]) {
-        result += "@ATTRIBUTE AVG_NUM_POSITIVE_WORDS\t\tREAL\n";
-    }
-    if (individual[AVG_NUM_NEGATIVE_WORDS]) {
-        result += "@ATTRIBUTE AVG_NUM_NEGATIVE_WORDS\t\tREAL\n";
-    }
-    if (individual[AVG_SENTIMENT_SCORE]) {
-        result += "@ATTRIBUTE AVG_SENTIMENT_SCORE\t\tREAL\n";
-    }
-    if (individual[USER_STATUS_COUNT]) {
-        result += "@ATTRIBUTE USER_STATUS_COUNT\t\tnumeric\n";
-    }
-    result += "@ATTRIBUTE class \t\t{REAL,FAKE}\n";
+    result += "@ATTRIBUTE class \t\t{REAL,TRADITIONAL,SOCIAL}\n";
     return result;
 }
 
 string Evaluator::createDataPoints(result &dataPoint, Individual &individual) {
     string result = "@DATA\n";
-    string REAL = "REAL\n", FAKE = "FAKE\n";
-
+    const string REAL = "REAL\n",
+                 FAKE_T = "TRADITIONAL\n",
+                 FAKE_S = "SOCIAL\n";
+    const int REAL_VALUE = 0,
+              FAKE_T_VALUE = 1,
+              FAKE_S_VALUE = 2;
     // it is assumed that data point will have at least one point
     // and that at least one feature is enabled in the chromosome
     for (auto row : dataPoint) {
+//        for (unsigned int i = 0; i < config.NUM_FEATURES; i++) {
+//            if (individual[i]) {
+//                auto value;
+//                value = row[Individual::getFSMap().at(i)].as<float>();
+//                result += to_string(value) + ",";
+//            }
+//        }
         if (individual[AVG_LEN_TWEET_CHARACTERS]) {
-            float avg = row["avg_length_chars"].as<float>();
+            auto avg = row["avg_length_chars"].as<float>();
             result += to_string(avg) + ",";
         }
-        if (individual[AVG_LEN_TWEET_WORDS]) {
-            float avg = row["avg_length_words"].as<float>();
-            result += to_string(avg) + ",";
-        }
-        if (individual[AVG_NUM_POSITIVE_WORDS]) {
-            float avg = row["avg_sentiment_pos_words"].as<float>();
-            result += to_string(avg) + ",";
-        }
-        if (individual[AVG_NUM_NEGATIVE_WORDS]) {
-            float avg = row["avg_sentiment_neg_words"].as<float>();
-            result += to_string(avg) + ",";
-        }
-        if (individual[AVG_SENTIMENT_SCORE]) {
-            float avg = row["avg_sentiment_score"].as<float>();
-            result += to_string(avg) + ",";
-        }
-        if (individual[USER_STATUS_COUNT]) {
-            int avg = row["user_status_count"].as<int>();
-            result += to_string(avg) + ",";
-        }
-        bool isGenuine = row["is_user_genuine"].as<bool>();
-        result += (isGenuine ? REAL : FAKE);
+//        if (individual[AVG_LEN_TWEET_WORDS]) {
+//            float avg = row["avg_length_words"].as<float>();
+//            result += to_string(avg) + ",";
+//        }
+//        if (individual[AVG_NUM_POSITIVE_WORDS]) {
+//            float avg = row["avg_sentiment_pos_words"].as<float>();
+//            result += to_string(avg) + ",";
+//        }
+//        if (individual[AVG_NUM_NEGATIVE_WORDS]) {
+//            float avg = row["avg_sentiment_neg_words"].as<float>();
+//            result += to_string(avg) + ",";
+//        }
+//        if (individual[AVG_SENTIMENT_SCORE]) {
+//            float avg = row["avg_sentiment_score"].as<float>();
+//            result += to_string(avg) + ",";
+//        }
+//        if (individual[USER_STATUS_COUNT]) {
+//            int avg = row["user_status_count"].as<int>();
+//            result += to_string(avg) + ",";
+//        }
+        int isGenuine = row["classification"].as<int>();
+        if (isGenuine == REAL_VALUE)
+            result += REAL;
+        else if (isGenuine == FAKE_T_VALUE)
+            result += FAKE_T;
+        else
+            result += FAKE_S;
     }
     return result;
 }
@@ -129,35 +133,15 @@ string Evaluator::buildQuery(Individual &indiv) {
     indiv.print();
     string query;
 
-    if (indiv[AVG_LEN_TWEET_CHARACTERS]) {
-        query += "avg_length_chars,";
+    for (unsigned int i = 0; i < config.NUM_FEATURES; i++) {
+        if (indiv[i]) {
+            query += config.getFSMap().at(i) + ",";
+        }
     }
-    if (indiv[AVG_LEN_TWEET_WORDS]) {
-        query += "avg_length_words,";
-    }
-    if (indiv[AVG_NUM_POSITIVE_WORDS]) {
-        query += "avg_sentiment_pos_words,";
-    }
-    if (indiv[AVG_NUM_NEGATIVE_WORDS]) {
-        query += "avg_sentiment_neg_words,";
-    }
-    if (indiv[AVG_SENTIMENT_SCORE]) {
-        query += "avg_sentiment_score,";
-    }
-    if (indiv[FRAC_CONTAINS_QUESTION]) {
-        query += "fract_contains_question,";
-    }
-    if (indiv[USER_REGISTRATION_AGE]) {
-        query += "user_age,";
-    }
-    if (indiv[USER_STATUS_COUNT]) {
-        query += "user_status_count,";
-    }
-    //...
     if (query[query.size()-1] == ',') {
         query = query.substr(0, query.size()-1);
     }
-    query += ",is_user_genuine";
+    query += ",classification";
 
     return "select " + query + " from tss_dev.users_features;";
 }

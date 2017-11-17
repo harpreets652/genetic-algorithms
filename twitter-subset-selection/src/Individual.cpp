@@ -17,8 +17,8 @@ void Individual::init() {
 }
 
 void Individual::generateRandom() {
-    // include all the indeces
-    for (unsigned int i = 0; i < this->size(); i++) {
+    // include all the indices
+    for (unsigned int i = 0; i < config.NUM_FEATURES; i++) {
         (*this)[i] = Utils::randomWithProbability(0.5);
     }
 }
