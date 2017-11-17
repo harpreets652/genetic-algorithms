@@ -1,8 +1,10 @@
+import re
 import csv
 import glob
 import json
 import os
 import codecs
+import string
 import psycopg2 as psyco
 from langdetect import detect_langs
 import SqlStatements
@@ -70,20 +72,24 @@ def loadTweets(tweetDir):
         with conn:
             with conn.cursor() as curs:
                 print("going through {}".format(tweetDataFile))
-                # if '\0' in open(tweetDataFile).read():
-                #     print ("you have null bytes in the file: {}".format(tweetDataFile))
 
                 with codecs.open(tweetDataFile, encoding='utf-8', errors='replace') as inFile:
                     tweetReader = csv.DictReader(x.replace('\0', '') for x in inFile)
 
                     for line in tweetReader:
                         row = json.loads(json.dumps(line).replace("\\\\ufeff", "").replace("\\ufeff", ""))
+                        # detect languages of strings with no URLS, no all-caps words, and no punctuation
+                        textToDetect = re.sub(r'http\S+|[A-Z]{2,}', '', row['text'], flags=re.MULTILINE).translate(string.punctuation).strip()
 
-                        langs = detect_langs(row['text'])
-                        if langs:
-                            mostProbableLang = langs[0]
-                            if 'en' != mostProbableLang.lang and mostProbableLang.prob >= 0.75:
-                                continue
+                        if textToDetect:
+                            try:
+                                langs = detect_langs(textToDetect)
+                                if langs:
+                                    mostProbableLang = langs[0]
+                                    if 'en' != mostProbableLang.lang and mostProbableLang.prob >= 0.75:
+                                        continue
+                            except Exception:
+                                pass
 
                         try:
                             SqlStatements.modifyData(conn,
@@ -95,6 +101,8 @@ def loadTweets(tweetDir):
                             pass
 
                         tweetInsertCounter += 1
+                        if tweetInsertCounter > 200:
+                            break
 
         print("{} tweets inserted for {}".format(tweetInsertCounter, tweetDataFile))
 
