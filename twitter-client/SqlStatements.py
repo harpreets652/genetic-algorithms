@@ -1,4 +1,3 @@
-import psycopg2 as psyco
 from numpy import long
 from datetime import datetime
 
@@ -87,7 +86,8 @@ UPDATE_USER_FEATURES = """UPDATE tss_dev.users_features
                               avg_sentiment_pos_words = %(avg_sentiment_pos_words)s, avg_sentiment_neg_words = %(avg_sentiment_neg_words)s,
                               avg_sentiment_score = %(avg_sentiment_score)s, user_followers_to_lifetime = %(user_followers_to_lifetime)s,
                               user_reputation_ratio = %(user_reputation_ratio)s, fract_contains_emoticon = %(fract_contains_emoticon)s,
-                              fract_self_promoting = %(fract_self_promoting)s  
+                              fract_self_promoting = %(fract_self_promoting)s, fract_source_unpopular = %(fract_source_unpopular)s,
+                              fract_source_unpop_w_url = %(fract_source_unpop_w_url)s  
                           WHERE user_id = %(user_id)s"""
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
@@ -124,12 +124,18 @@ SELECT_TWEET_TEXT_FEATURES = """SELECT
                                    SUM(CASE WHEN t.num_mentions > 0 THEN 1 ELSE 0 END) AS num_containing_mentions,
                                    SUM(CASE WHEN t.num_hashtags > 0 THEN 1 ELSE 0 END) AS num_containing_hashtags,
                                    SUM(CASE WHEN t.retweeted = TRUE THEN 1 ELSE 0 END) AS num_retweeted,
-                                   SUM(CASE WHEN tweet_text SIMILAR TO '%%[^[:alnum:]](I|i|Me|me|We|we|Us|us)[^[:alnum:]]%%'
+                                   SUM(CASE WHEN t.tweet_text SIMILAR TO '%%[^[:alnum:]](I|i|Me|me|We|we|Us|us)[^[:alnum:]]%%'
                                     THEN 1 ELSE 0 END)   AS first_person,
-                                   SUM(CASE WHEN tweet_text SIMILAR TO '%%[^[:alnum:]](You|you)[^[:alnum:]]%%'
+                                   SUM(CASE WHEN t.tweet_text SIMILAR TO '%%[^[:alnum:]](You|you)[^[:alnum:]]%%'
                                     THEN 1 ELSE 0 END)   AS second_person,
-                                   SUM(CASE WHEN tweet_text SIMILAR TO '%%[^[:alnum:]](She|she|He|he|Her|her|Him|him|It|it|They|they|Them|them)[^[:alnum:]]%%'
-                                    THEN 1 ELSE 0 END)   AS third_person
+                                   SUM(CASE WHEN t.tweet_text SIMILAR TO '%%[^[:alnum:]](She|she|He|he|Her|her|Him|him|It|it|They|they|Them|them)[^[:alnum:]]%%'
+                                    THEN 1 ELSE 0 END)   AS third_person,
+                                   SUM(CASE WHEN lower(t.source) NOT SIMILAR TO
+                                        '%%(twitter.com|twitter for *|web|facebook|google|instagram|ifttt|twitbird|tweetbot|tweetings|twitterrific|tweetelator|tweetlist|tweetCaster|tweetlogix|osfoora|twipple|fenix|flamingo|hootsuite|plume|talon|twidere|tweetCaster|twitPane|ubersocial|tweetDeck|twhirl|twitterfeed)%%'
+                                    THEN 1 ELSE 0 END) AS num_tweets_unpopular_source,
+                                   SUM(CASE WHEN (t.num_urls > 0 AND lower(source) NOT SIMILAR TO
+                                        '%%(twitter.com|twitter for *|web|facebook|google|instagram|ifttt|twitbird|tweetbot|tweetings|twitterrific|tweetelator|tweetlist|tweetCaster|tweetlogix|osfoora|twipple|fenix|flamingo|hootsuite|plume|talon|twidere|tweetCaster|twitPane|ubersocial|tweetDeck|twhirl|twitterfeed)%%')
+                                    THEN 1 ELSE 0 END) AS num_unpopular_w_source
                                 FROM tss_dev.tweets t
                                 WHERE t.user_id_fk = %(user_id)s
                                 GROUP BY t.user_id_fk;"""

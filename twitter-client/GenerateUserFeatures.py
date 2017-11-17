@@ -136,11 +136,6 @@ def generateTweetFeatures(connection, userId, userData):
     readCursor.execute(SqlStatements.SELECT_TWEET_TEXT, {'user_id': userId})
     userTweetTexts = readCursor.fetchall()
 
-    # if no tweets, return default values
-    if not userTweetTexts:
-        readCursor.close()
-        return getDefaultTweetFeatures()
-
     readCursor.execute(SqlStatements.SELECT_TWEET_TEXT_FEATURES, {'user_id': userId})
     tweetFeaturesFromSql = readCursor.fetchone()
 
@@ -239,6 +234,8 @@ def generateTweetFeatures(connection, userId, userData):
 
     userTweetFeatures['fract_contains_emoticon'] = numTweetsWithEmoticons / totalNumTweets
     userTweetFeatures['fract_self_promoting'] = numTweetsReferenceSelf / totalNumTweets
+    userTweetFeatures['fract_source_unpopular'] = int(tweetFeaturesFromSql.num_tweets_unpopular_source) / totalNumTweets
+    userTweetFeatures['fract_source_unpop_w_url'] = int(tweetFeaturesFromSql.num_unpopular_w_source) / totalNumTweets
 
     return userTweetFeatures
 
@@ -250,25 +247,6 @@ def tweetContainsEmoticons(tweet):
     return 0
 
 
-def getDefaultTweetFeatures():
-    # todo: add default for the new features...this won't be necessary when users with no tweets are removed
-    return {'avg_length_chars': 0, 'avg_length_words': 0,
-            'fract_contains_question': 0, 'fract_contains_exclamation': 0,
-            'fract_contains_multiple_quest_exlam': 0, 'fract_contains_urls': 0,
-            'avg_number_of_urls': 0, 'fract_contains_user_mention': 0,
-            'fract_contains_hashtag': 0, 'fract_retweeted': 0,
-            'most_commonly_tweeted_hour': 0, 'num_tweets_day_sun': 0,
-            'num_tweets_day_mon': 0, 'num_tweets_day_tues': 0,
-            'num_tweets_day_wed': 0, 'num_tweets_day_thur': 0,
-            'num_tweets_day_fri': 0, 'num_tweets_day_sat': 0,
-            'fract_contains_pronoun_first_p': 0, 'fract_contains_pronoun_second_p': 0,
-            'fract_contains_pronoun_third_p': 0, 'avg_sentiment_pos_words': 0,
-            'avg_sentiment_neg_words': 0, 'avg_sentiment_score': 0,
-            'fract_urls_top_100': 0, 'fract_contains_emoticon': 0, 'fract_self_promoting': 0,
-            'fract_contains_company': 0
-            }
-
-
 def getSentimentWordCounts(tweet):
     analyzer = SentimentIntensityAnalyzer()
     scores = analyzer.polarity_scores(tweet)
@@ -276,5 +254,4 @@ def getSentimentWordCounts(tweet):
     return scores
 
 
-if __name__ == __main__:
-    run(5, 5)
+run(5, 5)
