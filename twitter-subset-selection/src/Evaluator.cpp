@@ -95,7 +95,7 @@ string Evaluator::createDataPoints(result &dataPoint, Individual &individual) {
 //            }
 //        }
         if (individual[AVG_LEN_TWEET_CHARACTERS]) {
-            auto avg = row["avg_length_chars"].as<float>();
+            auto avg = row[config.getFSMap().at(AVG_LEN_TWEET_CHARACTERS)].as<float>();
             result += to_string(avg) + ",";
         }
 //        if (individual[AVG_LEN_TWEET_WORDS]) {
