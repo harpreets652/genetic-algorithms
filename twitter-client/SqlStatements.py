@@ -66,6 +66,7 @@ UPDATE_USER_FEATURES = """UPDATE tss_dev.users_features
                               user_status_count = %(user_status_count)s, user_num_followers = %(user_num_followers)s,
                               user_num_friends = %(user_num_friends)s, user_verified = %(user_verified)s,
                               user_has_description = %(user_has_description)s, user_has_url = %(user_has_url)s,
+                              user_has_default_profile_image = %(user_has_default_profile_image)s,
                               avg_length_chars = %(avg_length_chars)s, avg_length_words = %(avg_length_words)s,
                               fract_contains_question = %(fract_contains_question)s, 
                               fract_contains_exclamation = %(fract_contains_exclamation)s,

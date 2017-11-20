@@ -79,7 +79,8 @@ def loadTweets(tweetDir):
                     for line in tweetReader:
                         row = json.loads(json.dumps(line).replace("\\\\ufeff", "").replace("\\ufeff", ""))
                         # detect languages of strings with no URLS, no all-caps words, and no punctuation
-                        textToDetect = re.sub(r'http\S+|[A-Z]{2,}', '', row['text'], flags=re.MULTILINE).translate(string.punctuation).strip()
+                        textToDetect = re.sub(r'http\S+|[A-Z]{2,}', '', row['text'], flags=re.MULTILINE).translate(
+                            string.punctuation).strip()
 
                         if textToDetect:
                             try:
