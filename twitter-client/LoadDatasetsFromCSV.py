@@ -82,7 +82,8 @@ def loadTweets(tweetDir):
                         if not row['text']:
                             print ("row {} in file {} has an empty tweet".format(row['id'], tweetDataFile))
                             continue
-                        textToDetect = re.sub(r'http\S+|[A-Z]{2,}', '', row['text'], flags=re.MULTILINE).translate(string.punctuation).strip()
+                        textToDetect = re.sub(r'http\S+|[A-Z]{2,}', '', row['text'], flags=re.MULTILINE).translate(
+                            string.punctuation).strip()
 
                         if textToDetect:
                             try:

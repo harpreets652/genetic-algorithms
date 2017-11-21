@@ -127,6 +127,9 @@ def generateUserFeatures(connection, userId):
     url = userData.url
     userFeatures['user_has_url'] = True if url and url != 'NULL' else False
 
+    defaultProfileImage = userData.default_profile_image
+    userFeatures['user_has_default_profile_image'] = False if not defaultProfileImage else defaultProfileImage
+
     return userFeatures, userData
 
 
