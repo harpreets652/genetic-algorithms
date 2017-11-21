@@ -14,7 +14,7 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROPERTIES_FILE = 'dataset.properties'
 properties = dict(line.strip().split('=') for line in open(ROOT_DIR + '/' + PROPERTIES_FILE))
 
-conn = psyco.connect(dbname="cs_776", user="system", password="system", host="localhost")
+conn = psyco.connect(dbname="cs_776", user="system", password="SYSTEM", host="localhost")
 
 
 def loadUsers(usersDir):
@@ -79,6 +79,9 @@ def loadTweets(tweetDir):
                     for line in tweetReader:
                         row = json.loads(json.dumps(line).replace("\\\\ufeff", "").replace("\\ufeff", ""))
                         # detect languages of strings with no URLS, no all-caps words, and no punctuation
+                        if not row['text']:
+                            print ("row {} in file {} has an empty tweet".format(row['id'], tweetDataFile))
+                            continue
                         textToDetect = re.sub(r'http\S+|[A-Z]{2,}', '', row['text'], flags=re.MULTILINE).translate(string.punctuation).strip()
 
                         if textToDetect:
@@ -96,13 +99,12 @@ def loadTweets(tweetDir):
                                                      curs,
                                                      SqlStatements.INSERT_INTO_TWEETS,
                                                      SqlStatements.mapTweetInputToEntity(row))
-                        except Exception:
+                        except Exception as e:
                             # continue on
+                            print ("error, skipping row...: Exception: {}".format(e))
                             pass
 
                         tweetInsertCounter += 1
-                        if tweetInsertCounter > 200:
-                            break
 
         print("{} tweets inserted for {}".format(tweetInsertCounter, tweetDataFile))
 

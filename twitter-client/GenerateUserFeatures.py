@@ -254,4 +254,4 @@ def getSentimentWordCounts(tweet):
     return scores
 
 
-run(5, 5)
+run(5, 500)
