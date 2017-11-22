@@ -19,6 +19,16 @@ struct Config {
     double PROB_CROSSOVER = 0.20;  // 0.2, 0.67, 0.99
     string INPUT_FILENAME;
 
+    enum {
+        BAYES_NET,
+        PART,
+        ZERO_R,
+        RANDOM_FOREST,
+        RANDOM_TREE
+    } WEKA_CLASSIFIER = ZERO_R;
+
+    string getWEKAClassifierName() const;
+
     unsigned int NUM_FEATURES = 40;
     unsigned int POPULATION_SIZE = 10;
     unsigned int ITERATION_SIZE = 1;

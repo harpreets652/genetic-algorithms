@@ -29,8 +29,8 @@ private:
     Evaluator();
     void init();
     string buildQuery(Individual &individual);
-    string createFileHeader(Individual &individual);
-    string createDataPoints(result &dataPoint, Individual &individual);
+    void createFileHeader(ofstream& fout, Individual &individual);
+    void createDataPoints(ofstream& fout, result &dataPoint, Individual &individual);
 
     static Evaluator* instance;
     string wekaLocation;

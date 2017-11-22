@@ -33,7 +33,7 @@ void Evaluator::init() {
 void Evaluator::evaluate(Individual &individual) {
     // TODO: fix the boolean options
     individual[USER_HAS_DESCRIPTION] = false;
-    individual[USER_HAS_URL] = false;
+//    individual[USER_HAS_URL] = false;
     individual[USER_DEF_PROFILE_PHOTO] = false;
     individual[USER_IS_VERIFIED] = false;
 
@@ -50,10 +50,10 @@ void Evaluator::evaluate(Individual &individual) {
 
     // build the output file
     ofstream fout("../weka_temp/" + individual.to_string() + ".arff");
-    fout << createFileHeader(individual) << endl;
+    createFileHeader(fout, individual);
 
     // output each of the data points (per user) here
-    fout << createDataPoints(r, individual) << endl;
+    createDataPoints(fout, r, individual);
 
     fout.close();
 
@@ -63,32 +63,35 @@ void Evaluator::evaluate(Individual &individual) {
     // get the data from it
     individual.fitness = getFitnessFromOutput(output) * 1000;
 
-    // delete the file
-    exec("rm -f ../weka_temp/" + individual.to_string() + ".arff");
-
     individual.print();
 }
 
-string Evaluator::createFileHeader(Individual &individual) {
-    string result = "@RELATION twitter\n";
+void Evaluator::createFileHeader(ofstream& fout, Individual &individual) {
+    fout << "@RELATION twitter" << endl;
 
     for (unsigned int i = 0; i < 41; i++) {
         if (individual[i]) {
-            result += "@ATTRIBUTE " + config.getFSMap().at(i) + "\t\t" + config.getTypeMap().at(i) + "\n";
+
+            fout << "@ATTRIBUTE " << config.getFSMap().at(i) << "\t\t";
+            if (config.getTypeMap().at(i) == "boolean") {
+                fout << "{0,1}" << endl;
+            } else {
+                fout << config.getTypeMap().at(i) << endl;
+            }
         }
     }
-    result += "@ATTRIBUTE class \t\t{REAL,TRADITIONAL,SOCIAL}\n";
-    return result;
+    fout << "@ATTRIBUTE class \t\t{REAL,TRADITIONAL,SOCIAL}" << endl;
 }
 
-string Evaluator::createDataPoints(result &dataPoint, Individual &individual) {
-    string result = "@DATA\n";
-    const string REAL = "REAL\n",
-                 FAKE_T = "TRADITIONAL\n",
-                 FAKE_S = "SOCIAL\n";
+void Evaluator::createDataPoints(ofstream& fout, result &dataPoint, Individual &individual) {
+    const string REAL = "REAL",
+                 FAKE_T = "TRADITIONAL",
+                 FAKE_S = "SOCIAL";
     const int REAL_VALUE = 0,
               FAKE_T_VALUE = 1,
               FAKE_S_VALUE = 2;
+
+    fout << "@DATA" << endl;
     // it is assumed that data point will have at least one point
     // and that at least one feature is enabled in the chromosome
     for (auto row : dataPoint) {
@@ -96,24 +99,24 @@ string Evaluator::createDataPoints(result &dataPoint, Individual &individual) {
             if (individual[i]) {
                 if (config.getTypeMap().at(i) == "boolean") {
                     bool flag = row[config.getFSMap().at(i)].as<bool>();
-                    result += (flag) ? "1," : "0,";
+                    fout << ((flag) ? "1," : "0,");
                 } else {
                     auto value = row[config.getFSMap().at(i)].c_str();
-
-                    result += to_string(value) + ",";
+                    fout << value << ",";
                 }
             }
         }
 
         int isGenuine = row["classification"].as<int>();
         if (isGenuine == REAL_VALUE)
-            result += REAL;
+            fout << REAL;
         else if (isGenuine == FAKE_T_VALUE)
-            result += FAKE_T;
-        else
-            result += FAKE_S;
+            fout << FAKE_T;
+        else if (isGenuine == FAKE_S_VALUE)
+            fout << FAKE_S;
+
+        fout << endl;
     }
-    return result;
 }
 
 string Evaluator::buildQuery(Individual &indiv) {
@@ -161,8 +164,8 @@ void Evaluator::setDataLocation(const string &dataLoc) {
 
 string Evaluator::getRunCommand(const string& filename) {
     char cmd[200];
-    snprintf(cmd, 200, "java -classpath %s/weka.jar weka.classifiers.rules.PART -t %s/%s.arff",
-            wekaLocation.c_str(), dataLocation.c_str(), filename.c_str());
+    snprintf(cmd, 200, "java -classpath %s/weka.jar %s -t %s/%s.arff",
+            wekaLocation.c_str(), config.getWEKAClassifierName().c_str(), dataLocation.c_str(), filename.c_str());
     return string(cmd);
 }
 

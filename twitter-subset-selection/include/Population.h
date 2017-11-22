@@ -27,7 +27,6 @@ public:
 
 private:
     double sumFitness;
-    void sortByFitness(unsigned int left, unsigned int right);
 };
 
 #endif
