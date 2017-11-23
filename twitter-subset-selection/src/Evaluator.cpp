@@ -46,7 +46,7 @@ void Evaluator::evaluate(Individual &individual) {
     }
 
     // build the output file
-    ofstream fout("../weka_temp/" + individual.to_string() + ".arff");
+    ofstream fout(dataLocation + "/" + individual.to_string() + ".arff");
     createFileHeader(fout, individual);
 
     // output each of the data points (per user) here
