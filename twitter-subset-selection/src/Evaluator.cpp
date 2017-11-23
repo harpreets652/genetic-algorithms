@@ -26,15 +26,16 @@ Evaluator::~Evaluator() {
 }
 
 void Evaluator::init() {
-    c = new connection("dbname=cs_776 user=system password=SYSTEM host=127.0.0.1");
-    txn = new work(*c);
+
 }
 
 void Evaluator::evaluate(Individual &individual) {
-    cout << "evaluating " << individual.to_string() << endl;
     // query the database
     string query = buildQuery(individual);
-    result r = txn->exec(query);
+
+    connection c("dbname=cs_776 user=system password=SYSTEM host=127.0.0.1");
+    work txn(c);
+    result r = txn.exec(query);
 
     // if we have nothing, report fitness of 0
     cout << r.size() << endl;

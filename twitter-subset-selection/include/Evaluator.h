@@ -35,9 +35,6 @@ private:
     static Evaluator* instance;
     string wekaLocation;
     string dataLocation;
-
-    connection *c;
-    work *txn;
 };
 
 #endif
