@@ -26,22 +26,18 @@ Evaluator::~Evaluator() {
 }
 
 void Evaluator::init() {
-    c = new connection("dbname=cs_776 user=system");
+    c = new connection("dbname=cs_776 user=system password=SYSTEM host=127.0.0.1");
     txn = new work(*c);
 }
 
 void Evaluator::evaluate(Individual &individual) {
-    // TODO: fix the boolean options
-    individual[USER_HAS_DESCRIPTION] = false;
-//    individual[USER_HAS_URL] = false;
-    individual[USER_DEF_PROFILE_PHOTO] = false;
-    individual[USER_IS_VERIFIED] = false;
-
+    cout << "evaluating " << individual.to_string() << endl;
     // query the database
     string query = buildQuery(individual);
     result r = txn->exec(query);
 
     // if we have nothing, report fitness of 0
+    cout << r.size() << endl;
     if (r.empty()) {
         individual.fitness = 0;
         individual.distance = 0;
@@ -61,7 +57,7 @@ void Evaluator::evaluate(Individual &individual) {
     string output = exec(getRunCommand(individual.to_string()));
 
     // get the data from it
-    individual.fitness = getFitnessFromOutput(output) * 1000;
+    individual.fitness = getFitnessFromOutput(output) * 100;
 
     individual.print();
 }
@@ -69,7 +65,7 @@ void Evaluator::evaluate(Individual &individual) {
 void Evaluator::createFileHeader(ofstream& fout, Individual &individual) {
     fout << "@RELATION twitter" << endl;
 
-    for (unsigned int i = 0; i < 41; i++) {
+    for (unsigned int i = 0; i < individual.size(); i++) {
         if (individual[i]) {
 
             fout << "@ATTRIBUTE " << config.getFSMap().at(i) << "\t\t";
@@ -80,16 +76,14 @@ void Evaluator::createFileHeader(ofstream& fout, Individual &individual) {
             }
         }
     }
-    fout << "@ATTRIBUTE class \t\t{REAL,TRADITIONAL,SOCIAL}" << endl;
+    fout << "@ATTRIBUTE class \t\t{REAL,TRADITIONAL}" << endl;
 }
 
 void Evaluator::createDataPoints(ofstream& fout, result &dataPoint, Individual &individual) {
     const string REAL = "REAL",
-                 FAKE_T = "TRADITIONAL",
-                 FAKE_S = "SOCIAL";
+                 FAKE_T = "TRADITIONAL";
     const int REAL_VALUE = 0,
-              FAKE_T_VALUE = 1,
-              FAKE_S_VALUE = 2;
+            FAKE_T_VALUE = 1;
 
     fout << "@DATA" << endl;
     // it is assumed that data point will have at least one point
@@ -110,10 +104,8 @@ void Evaluator::createDataPoints(ofstream& fout, result &dataPoint, Individual &
         int isGenuine = row["classification"].as<int>();
         if (isGenuine == REAL_VALUE)
             fout << REAL;
-        else if (isGenuine == FAKE_T_VALUE)
+        else
             fout << FAKE_T;
-        else if (isGenuine == FAKE_S_VALUE)
-            fout << FAKE_S;
 
         fout << endl;
     }
@@ -132,7 +124,7 @@ string Evaluator::buildQuery(Individual &indiv) {
     }
     query += ",classification";
 
-    return "select " + query + " from tss_dev.users_features;";
+    return "select " + query + " from tss_dev.users_features where process_error is null;";
 }
 
 string Evaluator::exec(const char *cmd) {
@@ -140,6 +132,7 @@ string Evaluator::exec(const char *cmd) {
 }
 
 string Evaluator::exec(const string& cmd) {
+    cout << "CMD: " << cmd << endl;
     char buffer[128];
     string result;
     shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
@@ -164,7 +157,7 @@ void Evaluator::setDataLocation(const string &dataLoc) {
 
 string Evaluator::getRunCommand(const string& filename) {
     char cmd[200];
-    snprintf(cmd, 200, "java -classpath %s/weka.jar %s -t %s/%s.arff",
+    snprintf(cmd, 200, "java -Xmx8000m -classpath %s/weka.jar %s -t %s/%s.arff",
             wekaLocation.c_str(), config.getWEKAClassifierName().c_str(), dataLocation.c_str(), filename.c_str());
     return string(cmd);
 }
@@ -178,10 +171,11 @@ double Evaluator::getFitnessFromOutput(const string &output) {
         getline(ss, s);
     } while (s.substr(0,30) != "Correctly Classified Instances");
 
-    stringstream(s) >> s >> s >> s >> numCorrect >> dummy;
+    stringstream(s) >> s >> s >> s >> numCorrect >> dummy >> s;
     getline(ss, s);
-    stringstream(s) >> s >> s >> s >> numIncorrect >> dummy;
+    stringstream(s) >> s >> s >> s >> numIncorrect >> dummy >> s;
     total = numCorrect + numIncorrect;
+    cout << numCorrect << " and " << numIncorrect << endl;
 
     return numCorrect/total;
 }

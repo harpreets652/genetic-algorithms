@@ -5,6 +5,9 @@
 #include "config.h"
 #include <cmath>
 #include <climits>
+#include <algorithm>
+#include <thread>
+#include <functional>
 
 Population::Population() : minFitness(INT_MAX), maxFitness(0.0), averageFitness(0.0), sumFitness(0.0),
                            bestIndividualIndex(0), worstIndividualIndex(0) {
@@ -13,17 +16,17 @@ Population::Population() : minFitness(INT_MAX), maxFitness(0.0), averageFitness(
 
 void Population::generate(int n) {
     this->clear();
-    for (int i = 0; i < n; i++) {
-        Individual randIndividual;
-        randIndividual.init();
-        this->push_back(randIndividual);
-    }
     Individual allTrue;
     allTrue.init();
     for (int i = 0; i < allTrue.size(); i++) {
         allTrue[i] = true;
     }
     this->push_back(allTrue);
+    for (int i = 0; i < n; i++) {
+        Individual randIndividual;
+        randIndividual.init();
+        this->push_back(randIndividual);
+    }
 }
 
 void Population::print() const {
@@ -41,8 +44,16 @@ void Population::evaluate() {
     maxFitness = 0.0;
     minFitness = 10000.0;
     sumFitness = 0.0;
+
+    thread* each_eval[this->size()];
+
     for (unsigned int i = 0; i < this->size(); i++) {
-        at(i).evaluate();
+        each_eval[i] = new thread(&Individual::evaluate, at(i));
+//        at(i).evaluate();
+    }
+
+    for (unsigned int i = 0; i < this->size(); i++) {
+        each_eval[i]->join();
         minFitness = min(minFitness, at(i).fitness);
         maxFitness = max(maxFitness, at(i).fitness);
         if (at(i).fitness > at(bestIndividualIndex).fitness) {

@@ -96,7 +96,6 @@ map<unsigned int, string> Config::getTypeMap() {
             case USER_DEF_PROFILE_PHOTO:
             case USER_IS_VERIFIED:
                 m[i] = "boolean";
-                // booleans will be numeric for now...
                 break;
             case AVG_NUM_URLS:
             case USER_REGISTRATION_AGE:

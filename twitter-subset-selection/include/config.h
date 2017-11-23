@@ -25,7 +25,7 @@ struct Config {
         ZERO_R,
         RANDOM_FOREST,
         RANDOM_TREE
-    } WEKA_CLASSIFIER = ZERO_R;
+    } WEKA_CLASSIFIER = PART;
 
     string getWEKAClassifierName() const;
 
