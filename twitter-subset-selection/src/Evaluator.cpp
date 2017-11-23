@@ -181,4 +181,8 @@ double Evaluator::getFitnessFromOutput(const string &output) {
     return numCorrect/total;
 }
 
+string Evaluator::getDataLocation() const {
+    return dataLocation;
+}
+
 #endif

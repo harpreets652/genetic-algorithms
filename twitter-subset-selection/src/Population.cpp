@@ -45,16 +45,13 @@ void Population::evaluate() {
     minFitness = 10000.0;
     sumFitness = 0.0;
 
-//    thread* each_eval[this->size()];
 
     #pragma omp for
     for (unsigned int i = 0; i < this->size(); i++) {
-//        each_eval[i] = new thread(&Individual::evaluate, at(i));
         at(i).evaluate();
     }
 
     for (unsigned int i = 0; i < this->size(); i++) {
-//        each_eval[i]->join();
         minFitness = min(minFitness, at(i).fitness);
         maxFitness = max(maxFitness, at(i).fitness);
         if (at(i).fitness > at(bestIndividualIndex).fitness) {
@@ -69,7 +66,7 @@ void Population::evaluate() {
     }
 
     // get rid of all the temp files
-//    Evaluator::getInstance()->exec("rm -f ../weka_temp/*.arff");
+    Evaluator::getInstance()->exec("rm -f " + Evaluator::getInstance()->getDataLocation() + "/*.arff");
 }
 
 bool sortFunc(Individual i, Individual j) {
