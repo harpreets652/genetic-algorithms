@@ -33,7 +33,7 @@ void Evaluator::evaluate(Individual &individual) {
     // query the database
     string query = buildQuery(individual);
 
-    connection c("dbname=cs_776 user=system password=SYSTEM host=127.0.0.1");
+    connection c("dbname=cs_776 user=system password=SYSTEM host=hpcvis3.cse.unr.edu");
     work txn(c);
     result r = txn.exec(query);
 

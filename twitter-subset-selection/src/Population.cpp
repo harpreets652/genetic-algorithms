@@ -21,7 +21,7 @@ void Population::generate(int n) {
     for (int i = 0; i < allTrue.size(); i++) {
         allTrue[i] = true;
     }
-    this->push_back(allTrue);
+    //this->push_back(allTrue);
     for (int i = 0; i < n; i++) {
         Individual randIndividual;
         randIndividual.init();
@@ -47,7 +47,7 @@ void Population::evaluate() {
 
 //    thread* each_eval[this->size()];
 
-    #pragma omp for
+    #pragma omp for schedule(dynamic, 3)
     for (unsigned int i = 0; i < this->size(); i++) {
 //        each_eval[i] = new thread(&Individual::evaluate, at(i));
         at(i).evaluate();
@@ -69,7 +69,7 @@ void Population::evaluate() {
     }
 
     // get rid of all the temp files
-//    Evaluator::getInstance()->exec("rm -f ../weka_temp/*.arff");
+    Evaluator::getInstance()->exec("rm -f " + dataLocation + "/*.arff");
 }
 
 bool sortFunc(Individual i, Individual j) {

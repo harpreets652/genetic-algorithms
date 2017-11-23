@@ -26,13 +26,13 @@ struct Config {
         RANDOM_FOREST,
         RANDOM_TREE,
         DECISION_TABLE
-    } WEKA_CLASSIFIER = PART;
+    } WEKA_CLASSIFIER = DECISION_TABLE;
 
     string getWEKAClassifierName() const;
 
     unsigned int NUM_FEATURES = 40;
-    unsigned int POPULATION_SIZE = 10;
-    unsigned int ITERATION_SIZE = 1;
+    unsigned int POPULATION_SIZE = 100;
+    unsigned int ITERATION_SIZE = 200;
     unsigned int TOTAL_GAS_SIZE = 30; // 5 for testing, 30 for reality
 
     map<unsigned int, string> getFSMap();
