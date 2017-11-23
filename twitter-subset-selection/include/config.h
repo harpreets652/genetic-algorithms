@@ -24,7 +24,8 @@ struct Config {
         PART,
         ZERO_R,
         RANDOM_FOREST,
-        RANDOM_TREE
+        RANDOM_TREE,
+        DECISION_TABLE
     } WEKA_CLASSIFIER = PART;
 
     string getWEKAClassifierName() const;

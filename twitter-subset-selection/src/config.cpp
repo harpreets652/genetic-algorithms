@@ -25,6 +25,8 @@ string Config::getWEKAClassifierName() const {
             return "weka.classifiers.trees.RandomForest";
         case RANDOM_TREE:
             return "weka.classifiers.trees.RandomTree";
+        case DECISION_TABLE:
+            return "weka.classifiers.rules.DecisionTable";
     }
 }
 

@@ -41,6 +41,7 @@ void GA::makeNextGen() {
 
 void GA::run() {
     for (int i = 0; i < config.ITERATION_SIZE; i++) {
+        cout << "iteration: " << i << endl;
         makeNextGen();
         parentPop = childPop;
     }
