@@ -21,7 +21,7 @@ void Population::generate(int n) {
     for (int i = 0; i < allTrue.size(); i++) {
         allTrue[i] = true;
     }
-    this->push_back(allTrue);
+    //this->push_back(allTrue);
     for (int i = 0; i < n; i++) {
         Individual randIndividual;
         randIndividual.init();
@@ -46,7 +46,7 @@ void Population::evaluate() {
     sumFitness = 0.0;
 
 
-    #pragma omp for
+    #pragma omp for schedule(dynamic, 3)
     for (unsigned int i = 0; i < this->size(); i++) {
         at(i).evaluate();
     }
