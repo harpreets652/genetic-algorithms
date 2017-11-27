@@ -14,6 +14,7 @@ public:
     static bool randomWithProbability(double prob);
     static int randIntBetween(int low, int high);
     static string getOutputFilename();
+    static void to_upper(string& word);
 };
 
 

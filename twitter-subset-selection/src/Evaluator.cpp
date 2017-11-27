@@ -2,6 +2,7 @@
 #define __EVALUATOR_CPP_
 
 #include <fstream>
+#include <Timer.h>
 
 #include "Evaluator.h"
 #include "config.h"
@@ -30,35 +31,39 @@ void Evaluator::init() {
 }
 
 void Evaluator::evaluate(Individual &individual) {
-    // query the database
-    string query = buildQuery(individual);
-
-    connection c("dbname=cs_776 user=system password=SYSTEM host=hpcvis3.cse.unr.edu");
-    work txn(c);
-    result r = txn.exec(query);
-
-    // if we have nothing, report fitness of 0
-    cout << r.size() << endl;
-    if (r.empty()) {
-        individual.fitness = 0;
-        individual.distance = 0;
-        return;
-    }
-
     // build the output file
     ofstream fout(dataLocation + "/" + individual.to_string() + ".arff");
     createFileHeader(fout, individual);
 
-    // output each of the data points (per user) here
-    createDataPoints(fout, r, individual);
+    // connect to the database
+    connection c("dbname=cs_776 user=system password=SYSTEM host=hpcvis3.cse.unr.edu");
+    work txn(c);
+
+    // query the database
+    for (bool b : {true, false}) {
+        string query = buildQuery(individual, b);
+        result r = txn.exec(query);
+        // if we have nothing, report fitness of 0
+        if (r.empty()) {
+            individual.fitness = 0;
+            individual.distance = 0;
+            return;
+        }
+        // output each of the data points (per user) here
+        createDataPoints(fout, r, individual);
+    }
 
     fout.close();
 
     // call the WEKA on this function
+    Timer t;
+    t.start();
     string output = exec(getRunCommand(individual.to_string()));
+    t.stop();
 
     // get the data from it
     individual.fitness = getFitnessFromOutput(output) * 100;
+    individual.timeTaken = t.getElapsedTime();
 
     individual.print();
 }
@@ -78,6 +83,8 @@ void Evaluator::createFileHeader(ofstream& fout, Individual &individual) {
         }
     }
     fout << "@ATTRIBUTE class \t\t{REAL,TRADITIONAL}" << endl;
+
+    fout << "@DATA" << endl;
 }
 
 void Evaluator::createDataPoints(ofstream& fout, result &dataPoint, Individual &individual) {
@@ -86,7 +93,6 @@ void Evaluator::createDataPoints(ofstream& fout, result &dataPoint, Individual &
     const int REAL_VALUE = 0,
             FAKE_T_VALUE = 1;
 
-    fout << "@DATA" << endl;
     // it is assumed that data point will have at least one point
     // and that at least one feature is enabled in the chromosome
     for (auto row : dataPoint) {
@@ -112,8 +118,8 @@ void Evaluator::createDataPoints(ofstream& fout, result &dataPoint, Individual &
     }
 }
 
-string Evaluator::buildQuery(Individual &indiv) {
-    string query;
+string Evaluator::buildQuery(Individual &indiv, bool getReal) {
+    string query, whereClause, limitClause = "limit 1000";
 
     for (unsigned int i = 0; i < config.NUM_FEATURES; i++) {
         if (indiv[i]) {
@@ -125,7 +131,15 @@ string Evaluator::buildQuery(Individual &indiv) {
     }
     query += ",classification";
 
-    return "select " + query + " from tss_dev.users_features where process_error is null;";
+    if (getReal) {
+        whereClause = "where process_error is null and classification = 0 ";
+    } else {
+        whereClause = "where process_error is null and classification > 0 ";
+    }
+
+    return "select " + query + " from tss_dev.users_features "
+            + whereClause
+            + limitClause;
 }
 
 string Evaluator::exec(const char *cmd) {

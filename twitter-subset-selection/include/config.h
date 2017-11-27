@@ -14,6 +14,7 @@ struct Config {
     Config() = default;
 
     Config& operator=(const Config& other);
+    void setClassifier(string classifier);
 
     double PROB_MUTATION = 0.001; // 0.01, 0.001, 0.0001
     double PROB_CROSSOVER = 0.20;  // 0.2, 0.67, 0.99

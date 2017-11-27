@@ -1,6 +1,7 @@
 #ifndef __CONFIG_CPP_
 #define __CONFIG_CPP_
 
+#include <Utils.h>
 #include "config.h"
 
 Config &Config::operator=(const Config &other) {
@@ -11,6 +12,33 @@ Config &Config::operator=(const Config &other) {
     this->PROB_CROSSOVER = other.PROB_CROSSOVER;
     this->INPUT_FILENAME = other.INPUT_FILENAME;
     return *this;
+}
+
+void Config::setClassifier(string classifier) {
+    Utils::to_upper(classifier);
+    if (classifier == "0" ||
+            classifier == "BAYES" ||
+            classifier == "BAYES_NETWORK") {
+        WEKA_CLASSIFIER = BAYES_NET;
+    } else if (classifier == "1" ||
+            classifier == "PART") {
+        WEKA_CLASSIFIER = PART;
+    } else if (classifier == "2" ||
+            classifier == "RANDOM_FOREST" ||
+            classifier == "R_FOREST" ||
+            classifier == "R_F") {
+        WEKA_CLASSIFIER = RANDOM_FOREST;
+    } else if (classifier == "3" ||
+            classifier == "RANDOM_TREE" ||
+            classifier == "R_TREE" ||
+            classifier == "R_T") {
+        WEKA_CLASSIFIER = RANDOM_TREE;
+    } else if (classifier == "4" ||
+            classifier == "DECISION_TABLE" ||
+            classifier == "D_TABLE" ||
+            classifier == "D_T") {
+        WEKA_CLASSIFIER = DECISION_TABLE;
+    }
 }
 
 string Config::getWEKAClassifierName() const {

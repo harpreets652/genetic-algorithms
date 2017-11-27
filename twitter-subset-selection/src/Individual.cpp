@@ -2,6 +2,7 @@
 #define __INDIVIDUAL_CPP_
 
 #include <utility>
+#include <Timer.h>
 
 #include "Individual.h"
 #include "config.h"
@@ -27,7 +28,7 @@ void Individual::print() const {
     for (unsigned int i = 0; i < this->size(); i++) {
         cout << at(i);
     }
-    cout << " - [fitness: " << fitness << ", distance: " << distance << "]" << endl;
+    cout << " - [fitness: " << fitness << ", distance: " << distance << ", time: " << timeTaken << "]" << endl;
 }
 
 void Individual::evaluate() {
