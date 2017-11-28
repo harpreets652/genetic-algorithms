@@ -17,3 +17,9 @@ string Utils::getOutputFilename() {
     string result = "some_output.log";
     return result;
 }
+
+void Utils::to_upper(string &word) {
+    for (auto &c : word) {
+        c = (char) toupper(c);
+    }
+}

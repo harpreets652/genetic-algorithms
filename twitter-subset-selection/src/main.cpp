@@ -100,7 +100,7 @@ void iterateThrough(int argc, char * argv[]) {
     }
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, const char const *argv[]) {
     srand((unsigned int)time(nullptr));
     if (argc < 1) {
         cout << "You don't have the right inputs, read the README" << endl;
@@ -109,15 +109,20 @@ int main(int argc, char *argv[]) {
     }
 
     // parse and set the correct cmd line args
-    argh::parser cmdl({ "-w", "--wekaloc", "-d", "--data" });
+    argh::parser cmdl({ "-w", "--wekaloc", "-d", "--data", "-m", "--machine" });
     cmdl.parse(argc, argv);
     Evaluator::getInstance()->setWekaLocation(cmdl("wekaloc").str());
     Evaluator::getInstance()->setDataLocation(cmdl("data").str());
+    config.setClassifier(cmdl("machine").str());
 
-    GA ga;
-    cout << "running GA" << endl;
-    ga.init();
-    ga.run();
+    vector<GA> gas(1);
+    for (auto& ga : gas) {
+        ga.init();
+        ga.run();
+    }
+
+    // compile values
+    vector<double> mins, maxs, avgs;
 
     return 0;
 }

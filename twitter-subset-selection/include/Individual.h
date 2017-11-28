@@ -29,6 +29,7 @@ public:
 
     double distance;
     double fitness;
+    double timeTaken;
     double normalizedProb;
 
     double diffDistance;

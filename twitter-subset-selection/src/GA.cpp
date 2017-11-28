@@ -41,6 +41,10 @@ void GA::makeNextGen() {
 
 void GA::run() {
     for (int i = 0; i < config.ITERATION_SIZE; i++) {
+        minTimeline.push_back(parentPop.minFitness);
+        maxTimeline.push_back(parentPop.maxFitness);
+        averageTimeline.push_back(parentPop.averageFitness);
+
         cout << "iteration: " << i << endl;
         makeNextGen();
         parentPop = childPop;

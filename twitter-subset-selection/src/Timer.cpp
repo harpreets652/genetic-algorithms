@@ -23,7 +23,7 @@ void Timer::stop() throw (std::logic_error) {
 		std::cout << "stop() before timer was started" << std::endl;
 	else {
 		timerWasStarted = false;
-		gettimeofday(&duration, NULL);
+		gettimeofday(&duration, nullptr);
 	}
 }
 
