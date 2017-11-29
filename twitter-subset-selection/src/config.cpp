@@ -2,6 +2,7 @@
 #define __CONFIG_CPP_
 
 #include <Utils.h>
+#include <Evaluator.h>
 #include "config.h"
 
 Config &Config::operator=(const Config &other) {
@@ -38,6 +39,11 @@ void Config::setClassifier(string classifier) {
             classifier == "D_TABLE" ||
             classifier == "D_T") {
         WEKA_CLASSIFIER = DECISION_TABLE;
+    } else if (classifier == "5" ||
+            classifier == "NEURAL_NET" ||
+            classifier == "NN" ||
+            classifier == "MULTILAYER_PERCEPTRON") {
+        WEKA_CLASSIFIER = NEURAL_NETWORK;
     }
 }
 
@@ -55,7 +61,35 @@ string Config::getWEKAClassifierName() const {
             return "weka.classifiers.trees.RandomTree";
         case DECISION_TABLE:
             return "weka.classifiers.rules.DecisionTable";
+        case NEURAL_NETWORK:
+            return "weka.classifiers.functions.MultilayerPerceptron";
     }
+}
+
+string Config::getSimpleWEKAName() const {
+    switch (WEKA_CLASSIFIER) {
+        case BAYES_NET:
+            return "BayesianNet";
+        case PART:
+            return "Part";
+        case ZERO_R:
+            return "ZeroR";
+        case RANDOM_FOREST:
+            return "RandomForest";
+        case RANDOM_TREE:
+            return "RandomTree";
+        case DECISION_TABLE:
+            return "DecisionTable";
+        case NEURAL_NETWORK:
+            return "MultilayerPerceptron";
+    }
+}
+
+string Config::getOutputFilename() const {
+    char buffer[200];
+    snprintf(buffer, 200, "%s/%s-%.3f-%.3f", Evaluator::getInstance()->getDataLocation().c_str(),
+             getSimpleWEKAName().c_str(), PROB_MUTATION, PROB_CROSSOVER);
+    return string(buffer);
 }
 
 map<unsigned int, string> Config::getFSMap() {

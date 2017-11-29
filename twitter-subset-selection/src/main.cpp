@@ -1,6 +1,7 @@
 #include <iostream>
 #include <array>
 #include <argh/argh.h>
+#include <Timer.h>
 
 #include "config.h"
 #include "Logger.h"
@@ -26,21 +27,6 @@ void getAverageValues(vector<GA> gas, vector<double>& avgMin, vector<double>& av
 }
 
 void iterateThrough(int argc, char * argv[]) {
-    if (argc >= 2) {
-        switch(atoi(argv[1])) {
-            case 1:
-                config = config_1;
-                cout << "working on config_1" << endl;
-                break;
-            default:
-                cout << "not lol..." << endl;
-                config = config_test;
-                break;
-        }
-    } else {
-        config = config_test;
-    }
-
     pair<double, double> probabilityCombinations[] = {
             {0.01,    0.2},
             {0.01,    0.67},
@@ -100,11 +86,11 @@ void iterateThrough(int argc, char * argv[]) {
     }
 }
 
-int main(int argc, const char const *argv[]) {
+int main(int argc, const char *argv[]) {
     srand((unsigned int)time(nullptr));
     if (argc < 1) {
         cout << "You don't have the right inputs, read the README" << endl;
-        cout << "You dumb fuck" << endl;
+        cout << "You dumb f***" << endl;
         return 0;
     }
 
@@ -115,14 +101,27 @@ int main(int argc, const char const *argv[]) {
     Evaluator::getInstance()->setDataLocation(cmdl("data").str());
     config.setClassifier(cmdl("machine").str());
 
+    Timer timer;
     vector<GA> gas(1);
+    timer.start();
     for (auto& ga : gas) {
         ga.init();
         ga.run();
     }
+    timer.stop();
 
-    // compile values
-    vector<double> mins, maxs, avgs;
+
+    Logger graphLogger(config.getOutputFilename() + ".tsv");
+    cout << "outputting to " << config.getOutputFilename() << endl;
+    for (int i = 0; i < gas[0].minTimeline.size(); i++) {
+        string log = to_string(i) + "\t" +
+                     to_string(gas[0].minTimeline[i]) + "\t" +
+                     to_string(gas[0].averageTimeline[i]) + "\t" +
+                     to_string(gas[0].maxTimeline[i]) + "\t";
+        graphLogger.log(log);
+    }
+
+    cout << "GA took " << timer.getElapsedTime() << " seconds to run total." << endl;
 
     return 0;
 }

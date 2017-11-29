@@ -7,7 +7,7 @@ Logger::Logger() : outputDirectory("../out/"), outputFileName(""), outputLocatio
 
 }
 
-Logger::Logger(const string& _outputFileName) : outputDirectory("../out/"), outputFileName(_outputFileName), outputLocation(FILE) {
+Logger::Logger(const string& _outputFileName) : outputDirectory(""), outputFileName(_outputFileName), outputLocation(FILE) {
 
 }
 
@@ -26,7 +26,7 @@ void Logger::log(const string& logMessage) {
 void Logger::outputToFile() {
     outputFileName = outputDirectory + outputFileName;
     ofstream fout(outputFileName.c_str());
-    for (string s : this->logs) {
+    for (const string& s : this->logs) {
         fout << s << endl;
     }
     fout.close();

@@ -10,26 +10,31 @@ using namespace std;
 
 #define BREAKINGPOINT char dummychar; cin >> dummychar;
 
+enum MLType {
+    BAYES_NET,
+    PART,
+    ZERO_R,
+    RANDOM_FOREST,
+    RANDOM_TREE,
+    DECISION_TABLE,
+    NEURAL_NETWORK
+};
+
 struct Config {
+
     Config() = default;
-
     Config& operator=(const Config& other);
+
     void setClassifier(string classifier);
-
     double PROB_MUTATION = 0.001; // 0.01, 0.001, 0.0001
-    double PROB_CROSSOVER = 0.20;  // 0.2, 0.67, 0.99
-    string INPUT_FILENAME;
+    double PROB_CROSSOVER = 0.67;  // 0.2, 0.67, 0.99
 
-    enum {
-        BAYES_NET,
-        PART,
-        ZERO_R,
-        RANDOM_FOREST,
-        RANDOM_TREE,
-        DECISION_TABLE
-    } WEKA_CLASSIFIER = DECISION_TABLE;
+    string INPUT_FILENAME;
+    MLType WEKA_CLASSIFIER = DECISION_TABLE;
 
     string getWEKAClassifierName() const;
+    string getSimpleWEKAName() const;
+    string getOutputFilename() const;
 
     unsigned int NUM_FEATURES = 40;
     unsigned int POPULATION_SIZE = 100;
@@ -41,9 +46,6 @@ struct Config {
     map<unsigned int, string> FEATURE_STRINGS;
     map<unsigned int, string> FEATURE_TYPE_STRINGS;
 };
-
-const Config config_1;
-const Config config_test;
 
 extern Config config;
 
