@@ -17,7 +17,7 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROPERTIES_FILE = 'twitter-client.properties'
 properties = dict(line.strip().split('=') for line in open(ROOT_DIR + '/' + PROPERTIES_FILE))
 
-conn = psyco.connect(dbname="cs_776", user="system", password="system", host="localhost")
+conn = psyco.connect(dbname="cs_776", user="system", password="SYSTEM", host="localhost")
 
 
 def run(batchSize, numOfThreads):

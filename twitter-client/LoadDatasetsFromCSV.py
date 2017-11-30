@@ -106,6 +106,9 @@ def loadTweets(tweetDir):
                             pass
 
                         tweetInsertCounter += 1
+                        if tweetInsertCounter % 1000 == 0:
+                            conn.commit()
+                            print ("committed {} so far".format(tweetInsertCounter))
 
         print("{} tweets inserted for {}".format(tweetInsertCounter, tweetDataFile))
 
