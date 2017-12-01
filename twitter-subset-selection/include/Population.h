@@ -15,8 +15,9 @@ public:
     void generate(int n = 100);
     void print() const;
     void evaluate();
-    void sortByFitness();
 
+    void sortByAccuracy();
+    void sortByBitCount();
 
     Individual proportionalSelect();
     Individual tournamentSelect();
@@ -28,5 +29,15 @@ public:
 private:
     double sumFitness;
 };
+
+class ParetoFront : public Population {
+public:
+    void assignCrowdingDistance();
+    void sortByCrowdingOperator();
+private:
+    bool isSorted = false;
+};
+
+vector<ParetoFront> sortFastNonDominated(Population& p);
 
 #endif

@@ -31,6 +31,18 @@ void Evaluator::init() {
 }
 
 void Evaluator::evaluate(Individual &individual) {
+    bool isAllZeros = true;
+    for (bool b : individual) {
+        if (b) {
+            isAllZeros = false;
+            break;
+        }
+    }
+    if (isAllZeros) {
+        individual.accuracy = 0;
+        return;
+    }
+
     // build the output file
     ofstream fout(dataLocation + "/" + individual.to_string() + ".arff");
     createFileHeader(fout, individual);
@@ -43,10 +55,9 @@ void Evaluator::evaluate(Individual &individual) {
     for (bool b : {true, false}) {
         string query = buildQuery(individual, b);
         result r = txn.exec(query);
-        // if we have nothing, report fitness of 0
+        // if we have nothing, report accuracy of 0
         if (r.empty()) {
-            individual.fitness = 0;
-            individual.distance = 0;
+            individual.accuracy = 0;
             return;
         }
         // output each of the data points (per user) here
@@ -62,10 +73,8 @@ void Evaluator::evaluate(Individual &individual) {
     t.stop();
 
     // get the data from it
-    individual.fitness = getFitnessFromOutput(output) * 100;
+    individual.accuracy = getAccuracyFromOutput(output) * 100;
     individual.timeTaken = t.getElapsedTime();
-
-    individual.print();
 }
 
 void Evaluator::createFileHeader(ofstream& fout, Individual &individual) {
@@ -172,12 +181,12 @@ void Evaluator::setDataLocation(const string &dataLoc) {
 
 string Evaluator::getRunCommand(const string& filename) {
     char cmd[200];
-    snprintf(cmd, 200, "java -Xmx8000m -classpath %s/weka.jar %s -t %s/%s.arff",
+    snprintf(cmd, 200, "java -Xmx800m -classpath %s/weka.jar %s -t %s/%s.arff",
             wekaLocation.c_str(), config.getWEKAClassifierName().c_str(), dataLocation.c_str(), filename.c_str());
     return string(cmd);
 }
 
-double Evaluator::getFitnessFromOutput(const string &output) {
+double Evaluator::getAccuracyFromOutput(const string &output) {
     stringstream ss(output);
     string s;
 
@@ -190,7 +199,7 @@ double Evaluator::getFitnessFromOutput(const string &output) {
     getline(ss, s);
     stringstream(s) >> s >> s >> s >> numIncorrect >> dummy >> s;
     total = numCorrect + numIncorrect;
-    cout << numCorrect << " and " << numIncorrect << endl;
+//    cout << numCorrect << " and " << numIncorrect << endl;
 
     return numCorrect/total;
 }

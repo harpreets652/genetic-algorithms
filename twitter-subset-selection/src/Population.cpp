@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <thread>
 #include <functional>
+#include <cfloat>
 
 Population::Population() : minFitness(INT_MAX), maxFitness(0.0), averageFitness(0.0), sumFitness(0.0),
                            bestIndividualIndex(0), worstIndividualIndex(0) {
@@ -52,29 +53,84 @@ void Population::evaluate() {
     }
 
     for (unsigned int i = 0; i < this->size(); i++) {
-        minFitness = min(minFitness, at(i).fitness);
-        maxFitness = max(maxFitness, at(i).fitness);
-        if (at(i).fitness > at(bestIndividualIndex).fitness) {
+        minFitness = min(minFitness, at(i).accuracy);
+        maxFitness = max(maxFitness, at(i).accuracy);
+        if (at(i).accuracy > at(bestIndividualIndex).accuracy) {
             bestIndividualIndex = i;
         }
-        sumFitness += at(i).fitness;
+        sumFitness += at(i).accuracy;
     }
     averageFitness = sumFitness / double(this->size());
     // give that individual back its proportional size
     for (int i = 0; i < this->size(); i++) {
-        (*this)[i].normalizedProb = at(i).fitness / sumFitness;
+        (*this)[i].normalizedProb = at(i).accuracy / sumFitness;
     }
 
     // get rid of all the temp files
     Evaluator::getInstance()->exec("rm -f " + Evaluator::getInstance()->getDataLocation() + "/*.arff");
 }
 
-bool sortFunc(Individual i, Individual j) {
-    return i.fitness < j.fitness;
+bool sortAccuracyFunc(Individual i, Individual j) {
+    return i.accuracy < j.accuracy;
+}
+bool sortBitCountFunc(Individual i, Individual j) {
+    return i.numFeaturesActive < j.numFeaturesActive;
 }
 
-void Population::sortByFitness() {
-    sort(begin(), end(), sortFunc);
+void Population::sortByAccuracy() {
+    sort(begin(), end(), sortAccuracyFunc);
+}
+void Population::sortByBitCount() {
+    sort(begin(), end(), sortBitCountFunc);
+}
+
+vector<ParetoFront> sortFastNonDominated(Population& p) {
+    int N = p.size();
+
+    vector<ParetoFront> fronts(1);
+
+    for (unsigned int i = 0; i < p.size(); i++) {
+        p[i].peopleIDominate.clear();
+        p[i].numDominateMe = 0;
+
+        for (unsigned int j = 0; j < p.size(); j++) {
+            if (j == i) {
+                continue;
+            }
+
+            if (p[i].paretoDominates(p[j])) {
+                p[i].peopleIDominate.push_back(&p[j]);
+            } else if (p[j].paretoDominates(p[i])) {
+                p[i].numDominateMe++;
+            }
+        }
+
+        if (p[i].numDominateMe == 0) {
+            p[i].rank = 1;
+            fronts[0].push_back(p[i]);
+        }
+    }
+
+    // for each person in the first front
+    ParetoFront nextFront;
+    int currentFrontIndex = 0;
+
+    // while this front doesn't have people that are empty
+    while (!fronts[currentFrontIndex].empty()) {
+        for (Individual& p1 : fronts[currentFrontIndex]) {
+            for (Individual* p2 : p1.peopleIDominate) {
+                p2->numDominateMe--;
+                if (p2->numDominateMe == 0) {
+                    nextFront.push_back(*p2);
+                }
+            }
+        }
+        currentFrontIndex++;
+        fronts.push_back(nextFront);
+        nextFront.clear();
+    }
+
+    return fronts; // STUB
 }
 
 Individual Population::proportionalSelect() {
@@ -92,7 +148,7 @@ Individual Population::proportionalSelect() {
 Individual Population::tournamentSelect() {
     int left = Utils::randIntBetween(0, size());
     int right = Utils::randIntBetween(0, size());
-    if (at(left).fitness >= at(right).fitness) {
+    if (at(left).accuracy >= at(right).accuracy) {
         return at(left);
     } else {
         return at(right);
@@ -101,6 +157,46 @@ Individual Population::tournamentSelect() {
 
 Individual Population::getBestIndividual() const {
     return at(bestIndividualIndex);
+}
+
+void ParetoFront::assignCrowdingDistance() {
+    if (isSorted || empty())
+        return;
+
+    isSorted = true;
+
+    for (Individual& i : (*this)) {
+        i.distance = 0;
+    }
+    // accuracy
+    sortByAccuracy();
+    (*this)[0].distance = DBL_MAX;
+    (*this)[size()-1].distance = DBL_MAX;
+    for (unsigned int i = 1; i < size()-1; i++) {
+        double numerator = at(i+1).accuracy - at(i-1).accuracy;
+        double denominator = 100;
+        (*this)[i].distance += numerator/denominator;
+    }
+
+    // bit count
+    sortByBitCount();
+    (*this)[0].distance = DBL_MAX;
+    (*this)[size()-1].distance = DBL_MAX;
+    for (unsigned int i = 1; i < size()-1; i++) {
+        // we have to flip these instead (because we're minimizing this number)
+        double numerator = at(i-1).numFeaturesActive - at(i+1).numFeaturesActive;
+        double denominator = 40;
+        (*this)[i].distance += numerator/denominator;
+    }
+}
+
+// CCO - Crowding-Comparison Operator
+bool sortCCOFunc(Individual i, Individual j) {
+    return (i.rank < j.rank) || ((i.rank == j.rank) && (i.distance > j.distance));
+}
+
+void ParetoFront::sortByCrowdingOperator() {
+    sort(begin(), end(), sortCCOFunc);
 }
 
 #endif

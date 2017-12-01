@@ -22,12 +22,12 @@ enum MLType {
 
 struct Config {
 
-    Config() = default;
+    Config();
     Config& operator=(const Config& other);
 
     void setClassifier(string classifier);
-    double PROB_MUTATION = 0.001; // 0.01, 0.001, 0.0001
-    double PROB_CROSSOVER = 0.67;  // 0.2, 0.67, 0.99
+    double PROB_MUTATION = 0.1; // 0.01, 0.001, 0.0001
+    double PROB_CROSSOVER = 0.2;  // 0.2, 0.67, 0.99
 
     string INPUT_FILENAME;
     MLType WEKA_CLASSIFIER = DECISION_TABLE;

@@ -14,6 +14,8 @@ public:
     Population parentPop, childPop;
     void init();
     void makeNextGen();
+    void NSGAStep();
+    void NSGARun();
     void run();
     
     vector<double> minTimeline, maxTimeline, averageTimeline;

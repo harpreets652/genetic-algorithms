@@ -22,21 +22,28 @@ public:
     void init();
     void evaluate();
     string to_string() const;
-    //vector<double> getAsValues() const;
 
     void crossoverWith(Individual& other);
     void mutate();
+    bool paretoDominates(const Individual &opponent) const;
 
-    double distance;
+    double accuracy;
+    unsigned int numFeaturesActive;
     double fitness;
     double timeTaken;
     double normalizedProb;
 
-    double diffDistance;
-    double diffFitness;
+    double distance;
+    unsigned int rank;
+
+    // for fast-non-dominating-sort
+    vector<Individual*> peopleIDominate;
+    unsigned int numDominateMe = 0;
+
 
 private:
     //double getBinaryAsNumber(vector<bool> subset) const;
+    void recount();
 };
 
 #endif

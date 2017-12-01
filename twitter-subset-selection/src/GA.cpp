@@ -29,15 +29,54 @@ void GA::makeNextGen() {
     minTimeline.push_back(childPop.minFitness);
     maxTimeline.push_back(childPop.maxFitness);
     averageTimeline.push_back(childPop.averageFitness);
-    if (bestIndividualEver.fitness < childPop.getBestIndividual().fitness) {
+    if (bestIndividualEver.accuracy < childPop.getBestIndividual().accuracy) {
         bestIndividualEver = childPop.getBestIndividual();
     }
 
     // compile both populations, keep the second half
 
+//    childPop.insert(childPop.end(), parentPop.begin(), parentPop.end());
+//    childPop.sortByAccuracy();
+//    childPop.erase(childPop.begin(), childPop.begin() + (childPop.size() / 2));
+}
+
+void GA::NSGAStep() {
+    unsigned long N = parentPop.size();
     childPop.insert(childPop.end(), parentPop.begin(), parentPop.end());
-    childPop.sortByFitness();
-    childPop.erase(childPop.begin(), childPop.begin() + (childPop.size() / 2));
+    vector<ParetoFront> f = sortFastNonDominated(childPop);
+    parentPop.clear();
+    int index = 0;
+
+    // until the parent population is filled
+    while (index < f.size() && parentPop.size() + f[index].size() <= N) {
+        // calculate the crowding distance
+        f[index].assignCrowdingDistance();
+        // include the i-th nondominated front to the parent pop
+        parentPop.insert(parentPop.end(), f[index].begin(), f[index].end());
+        index++;
+    }
+    if (parentPop.size() < N) {
+        f[index].sortByCrowdingOperator();
+        parentPop.insert(parentPop.end(), f[index].begin(), f[index].begin() + (N - parentPop.size()));
+    } else if (parentPop.size() > N) {
+        parentPop.erase(parentPop.begin() + N, parentPop.end());
+    }
+}
+
+void GA::NSGARun() {
+    cout << "NSGA RUN!!" << endl;
+    makeNextGen();
+    for (int i = 0; i < config.ITERATION_SIZE; i++) {
+        minTimeline.push_back(parentPop.minFitness);
+        maxTimeline.push_back(parentPop.maxFitness);
+        averageTimeline.push_back(parentPop.averageFitness);
+
+        cout << "iteration (NSGA-2): " << i << endl;
+        NSGAStep();
+        makeNextGen();
+    }
+    cout << "my best: ";
+    bestIndividualEver.print();
 }
 
 void GA::run() {
@@ -46,7 +85,7 @@ void GA::run() {
         maxTimeline.push_back(parentPop.maxFitness);
         averageTimeline.push_back(parentPop.averageFitness);
 
-        cout << "iteration: " << i << endl;
+        cout << "iteration (Normal): " << i << endl;
         makeNextGen();
         parentPop = childPop;
     }

@@ -9,7 +9,7 @@
 
 Config config;
 
-Individual::Individual() : vector<bool>(config.NUM_FEATURES), fitness(0.0), distance(0.0), normalizedProb(0.0) {
+Individual::Individual() : vector<bool>(config.NUM_FEATURES), accuracy(0.0), distance(0.0), normalizedProb(0.0), rank(0) {
 
 }
 
@@ -20,7 +20,7 @@ void Individual::init() {
 void Individual::generateRandom() {
     // include all the indices
     for (unsigned int i = 0; i < config.NUM_FEATURES; i++) {
-        (*this)[i] = Utils::randomWithProbability(0.5);
+        (*this)[i] = Utils::randomWithProbability(0.05);
     }
 }
 
@@ -28,10 +28,11 @@ void Individual::print() const {
     for (unsigned int i = 0; i < this->size(); i++) {
         cout << at(i);
     }
-    cout << " - [fitness: " << fitness << ", distance: " << distance << ", time: " << timeTaken << "]" << endl;
+    cout << " - [accuracy: " << accuracy << ", numBits: " << numFeaturesActive << ", time: " << timeTaken << "]" << endl;
 }
 
 void Individual::evaluate() {
+    recount();
     Evaluator::getInstance()->evaluate((*this));
 }
 
@@ -59,6 +60,17 @@ void Individual::mutate() {
     // flip at a random index
     int index = Utils::randIntBetween(0, (int)size());
     (*this)[index] = !at((unsigned int)index);
+}
+
+bool Individual::paretoDominates(const Individual &opponent) const {
+    return !(this->accuracy < opponent.accuracy) && !(this->numFeaturesActive > opponent.numFeaturesActive);
+}
+
+void Individual::recount() {
+    numFeaturesActive = 0;
+    for (auto b : (*this)) {
+        numFeaturesActive += b? 1 : 0;
+    }
 }
 
 #endif
