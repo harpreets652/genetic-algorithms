@@ -25,7 +25,7 @@ public:
     string getDataLocation() const;
 
     string getRunCommand(const string& filename);
-    double getFitnessFromOutput(const string& output);
+    double getAccuracyFromOutput(const string &output);
 private:
     Evaluator();
     void init();

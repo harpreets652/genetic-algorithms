@@ -31,6 +31,18 @@ void Evaluator::init() {
 }
 
 void Evaluator::evaluate(Individual &individual) {
+    bool isAllZeros = true;
+    for (bool b : individual) {
+        if (b) {
+            isAllZeros = false;
+            break;
+        }
+    }
+    if (isAllZeros) {
+        individual.accuracy = 0;
+        return;
+    }
+
     // build the output file
     ofstream fout(dataLocation + "/" + individual.to_string() + ".arff");
     createFileHeader(fout, individual);
@@ -43,10 +55,9 @@ void Evaluator::evaluate(Individual &individual) {
     for (bool b : {true, false}) {
         string query = buildQuery(individual, b);
         result r = txn.exec(query);
-        // if we have nothing, report fitness of 0
+        // if we have nothing, report accuracy of 0
         if (r.empty()) {
-            individual.fitness = 0;
-            individual.distance = 0;
+            individual.accuracy = 0;
             return;
         }
         // output each of the data points (per user) here
@@ -62,7 +73,7 @@ void Evaluator::evaluate(Individual &individual) {
     t.stop();
 
     // get the data from it
-    individual.fitness = getFitnessFromOutput(output) * 100;
+    individual.accuracy = getAccuracyFromOutput(output) * 100;
     individual.timeTaken = t.getElapsedTime();
 
     individual.print();
@@ -177,7 +188,7 @@ string Evaluator::getRunCommand(const string& filename) {
     return string(cmd);
 }
 
-double Evaluator::getFitnessFromOutput(const string &output) {
+double Evaluator::getAccuracyFromOutput(const string &output) {
     stringstream ss(output);
     string s;
 

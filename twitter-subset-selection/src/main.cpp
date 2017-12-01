@@ -70,19 +70,19 @@ void iterateThrough(int argc, char * argv[]) {
 
     // output the statistics of the best ever
     for (unsigned int i = 0; i < bestIndividuals.size(); i++) {
-        // euclidian distance, fitness, indices
+        // euclidian distance, accuracy, indices
         string indices = "\t";
         for (unsigned int j = 0; j < bestIndividuals[i].size(); j++) {
             indices += "\t";
 //            indices += to_string(bestIndividuals[i][j]);
         }
-        bestIndividualsLogger.log(
-                to_string(bestIndividuals[i].diffDistance/(bestIndividuals[i].diffDistance + bestIndividuals[i].distance)) + "\t" +
-                to_string(bestIndividuals[i].diffDistance) + "\t" +
-                to_string(bestIndividuals[i].distance) + "\t" +
-                //to_string(bestIndividuals[i].fitness) + "\t" +
-                indices
-        );
+//        bestIndividualsLogger.log(
+//                to_string(bestIndividuals[i].diffDistance/(bestIndividuals[i].diffDistance + bestIndividuals[i].distance)) + "\t" +
+//                to_string(bestIndividuals[i].diffDistance) + "\t" +
+//                to_string(bestIndividuals[i].distance) + "\t" +
+//                //to_string(bestIndividuals[i].accuracy) + "\t" +
+//                indices
+//        );
     }
 }
 
@@ -106,7 +106,8 @@ int main(int argc, const char *argv[]) {
     timer.start();
     for (auto& ga : gas) {
         ga.init();
-        ga.run();
+//        ga.run();
+        ga.NSGARun();
     }
     timer.stop();
 
