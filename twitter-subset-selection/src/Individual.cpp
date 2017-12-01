@@ -63,11 +63,7 @@ void Individual::mutate() {
 }
 
 bool Individual::paretoDominates(const Individual &opponent) const {
-
-    return (
-            (this->accuracy > opponent.accuracy) && (this->numFeaturesActive <= opponent.numFeaturesActive) ||
-            (this->accuracy > opponent.accuracy) && (this->numFeaturesActive < opponent.numFeaturesActive)
-    );
+    return !(this->accuracy < opponent.accuracy) && !(this->numFeaturesActive > opponent.numFeaturesActive);
 }
 
 void Individual::recount() {
