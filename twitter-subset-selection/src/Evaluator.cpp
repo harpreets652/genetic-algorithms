@@ -75,8 +75,6 @@ void Evaluator::evaluate(Individual &individual) {
     // get the data from it
     individual.accuracy = getAccuracyFromOutput(output) * 100;
     individual.timeTaken = t.getElapsedTime();
-
-    individual.print();
 }
 
 void Evaluator::createFileHeader(ofstream& fout, Individual &individual) {
@@ -183,7 +181,7 @@ void Evaluator::setDataLocation(const string &dataLoc) {
 
 string Evaluator::getRunCommand(const string& filename) {
     char cmd[200];
-    snprintf(cmd, 200, "java -Xmx8000m -classpath %s/weka.jar %s -t %s/%s.arff",
+    snprintf(cmd, 200, "java -Xmx800m -classpath %s/weka.jar %s -t %s/%s.arff",
             wekaLocation.c_str(), config.getWEKAClassifierName().c_str(), dataLocation.c_str(), filename.c_str());
     return string(cmd);
 }
@@ -201,7 +199,7 @@ double Evaluator::getAccuracyFromOutput(const string &output) {
     getline(ss, s);
     stringstream(s) >> s >> s >> s >> numIncorrect >> dummy >> s;
     total = numCorrect + numIncorrect;
-    cout << numCorrect << " and " << numIncorrect << endl;
+//    cout << numCorrect << " and " << numIncorrect << endl;
 
     return numCorrect/total;
 }

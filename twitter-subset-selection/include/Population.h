@@ -30,7 +30,7 @@ private:
     double sumFitness;
 };
 
-class ParedoFront : public Population {
+class ParetoFront : public Population {
 public:
     void assignCrowdingDistance();
     void sortByCrowdingOperator();
@@ -38,6 +38,6 @@ private:
     bool isSorted = false;
 };
 
-vector<ParedoFront> sortFastNonDominated(Population& p);
+vector<ParetoFront> sortFastNonDominated(Population& p);
 
 #endif

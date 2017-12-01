@@ -5,6 +5,11 @@
 #include <Evaluator.h>
 #include "config.h"
 
+Config::Config() {
+    getFSMap();
+    getTypeMap();
+}
+
 Config &Config::operator=(const Config &other) {
     if (this == &other) {
         return *this;
@@ -152,21 +157,20 @@ map<unsigned int, string> Config::getTypeMap() {
     if (!FEATURE_TYPE_STRINGS.empty()) {
         return FEATURE_TYPE_STRINGS;
     }
-    map<unsigned int, string> m;
     for (unsigned int i = 0; i < config.NUM_FEATURES; i++) {
         switch (i) {
             case USER_HAS_DESCRIPTION:
             case USER_HAS_URL:
             case USER_DEF_PROFILE_PHOTO:
             case USER_IS_VERIFIED:
-                m[i] = "boolean";
+                FEATURE_TYPE_STRINGS[i] = "boolean";
                 break;
             case AVG_NUM_URLS:
             case USER_REGISTRATION_AGE:
             case USER_STATUS_COUNT:
             case USER_NUM_FOLLOWERS:
             case USER_NUM_FRIENDS:
-                m[i] = "numeric";
+                FEATURE_TYPE_STRINGS[i] = "numeric";
                 break;
             case MOST_POPULAR_HOUR:
             case NUM_PUB_ON_SUN:
@@ -176,14 +180,13 @@ map<unsigned int, string> Config::getTypeMap() {
             case NUM_PUB_ON_THUR:
             case NUM_PUB_ON_FRI:
             case NUM_PUB_ON_SAT:
-                m[i] = "integer";
+                FEATURE_TYPE_STRINGS[i] = "integer";
                 break;
             default:
-                m[i] = "real";
+                FEATURE_TYPE_STRINGS[i] = "real";
                 break;
         }
     }
-    FEATURE_TYPE_STRINGS = m;
     return FEATURE_TYPE_STRINGS;
 }
 

@@ -62,8 +62,12 @@ void Individual::mutate() {
     (*this)[index] = !at((unsigned int)index);
 }
 
-bool Individual::paredoDominates(const Individual &opponent) const {
-    return (this->accuracy > opponent.accuracy) && (this->numFeaturesActive < opponent.numFeaturesActive);
+bool Individual::paretoDominates(const Individual &opponent) const {
+
+    return (
+            (this->accuracy > opponent.accuracy) && (this->numFeaturesActive <= opponent.numFeaturesActive) ||
+            (this->accuracy > opponent.accuracy) && (this->numFeaturesActive < opponent.numFeaturesActive)
+    );
 }
 
 void Individual::recount() {

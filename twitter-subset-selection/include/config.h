@@ -22,7 +22,7 @@ enum MLType {
 
 struct Config {
 
-    Config() = default;
+    Config();
     Config& operator=(const Config& other);
 
     void setClassifier(string classifier);

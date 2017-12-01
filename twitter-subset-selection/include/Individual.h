@@ -25,7 +25,7 @@ public:
 
     void crossoverWith(Individual& other);
     void mutate();
-    bool paredoDominates(const Individual& opponent) const;
+    bool paretoDominates(const Individual &opponent) const;
 
     double accuracy;
     unsigned int numFeaturesActive;

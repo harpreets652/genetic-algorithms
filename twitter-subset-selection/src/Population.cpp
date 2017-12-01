@@ -84,10 +84,10 @@ void Population::sortByBitCount() {
     sort(begin(), end(), sortBitCountFunc);
 }
 
-vector<ParedoFront> sortFastNonDominated(Population& p) {
+vector<ParetoFront> sortFastNonDominated(Population& p) {
     int N = p.size();
 
-    vector<ParedoFront> fronts(1);
+    vector<ParetoFront> fronts(1);
 
     for (unsigned int i = 0; i < p.size(); i++) {
         p[i].peopleIDominate.clear();
@@ -98,9 +98,9 @@ vector<ParedoFront> sortFastNonDominated(Population& p) {
                 continue;
             }
 
-            if (p[i].paredoDominates(p[j])) {
+            if (p[i].paretoDominates(p[j])) {
                 p[i].peopleIDominate.push_back(&p[j]);
-            } else if (p[j].paredoDominates(p[i])) {
+            } else if (p[j].paretoDominates(p[i])) {
                 p[i].numDominateMe++;
             }
         }
@@ -112,7 +112,7 @@ vector<ParedoFront> sortFastNonDominated(Population& p) {
     }
 
     // for each person in the first front
-    ParedoFront nextFront;
+    ParetoFront nextFront;
     int currentFrontIndex = 0;
 
     // while this front doesn't have people that are empty
@@ -159,7 +159,7 @@ Individual Population::getBestIndividual() const {
     return at(bestIndividualIndex);
 }
 
-void ParedoFront::assignCrowdingDistance() {
+void ParetoFront::assignCrowdingDistance() {
     if (isSorted || empty())
         return;
 
@@ -195,7 +195,7 @@ bool sortCCOFunc(Individual i, Individual j) {
     return (i.rank < j.rank) || ((i.rank == j.rank) && (i.distance > j.distance));
 }
 
-void ParedoFront::sortByCrowdingOperator() {
+void ParetoFront::sortByCrowdingOperator() {
     sort(begin(), end(), sortCCOFunc);
 }
 

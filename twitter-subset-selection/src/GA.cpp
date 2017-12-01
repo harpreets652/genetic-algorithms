@@ -43,7 +43,7 @@ void GA::makeNextGen() {
 void GA::NSGAStep() {
     unsigned long N = parentPop.size();
     childPop.insert(childPop.end(), parentPop.begin(), parentPop.end());
-    vector<ParedoFront> f = sortFastNonDominated(childPop);
+    vector<ParetoFront> f = sortFastNonDominated(childPop);
     parentPop.clear();
     int index = 0;
 
@@ -64,8 +64,8 @@ void GA::NSGAStep() {
 }
 
 void GA::NSGARun() {
-    makeNextGen();
     cout << "NSGA RUN!!" << endl;
+    makeNextGen();
     for (int i = 0; i < config.ITERATION_SIZE; i++) {
         minTimeline.push_back(parentPop.minFitness);
         maxTimeline.push_back(parentPop.maxFitness);
