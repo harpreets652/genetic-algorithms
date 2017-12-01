@@ -26,64 +26,29 @@ void getAverageValues(vector<GA> gas, vector<double>& avgMin, vector<double>& av
     }
 }
 
-void iterateThrough(int argc, char * argv[]) {
-    pair<double, double> probabilityCombinations[] = {
-            {0.01,    0.2},
-            {0.01,    0.67},
-            {0.01,    0.99},
-            {0.001,   0.2},
-            {0.001,   0.67},
-            {0.001,   0.99},
-            {0.0001,  0.2},
-            {0.0001,  0.67},
-            {0.0001,  0.99}
-    };
-
-    vector<Individual> bestIndividuals;
-    // set the combo testing
-    config.PROB_MUTATION = probabilityCombinations[2].first;
-    config.PROB_CROSSOVER = probabilityCombinations[2].second;
-
-    // set the config and set up file
-    Logger graphLogger(Utils::getOutputFilename() + ".tsv"), bestIndividualsLogger("best" + Utils::getOutputFilename() + ".tsv");
-
-    // run the 30 iterations
-    vector<GA> runs(config.TOTAL_GAS_SIZE);
-    vector<double> mins, maxs, avgs;
-    for (int i = 0; i < config.TOTAL_GAS_SIZE; i++) {
-        cout << "running GA " << i << "..." << endl;
-        runs[i].init();
-        runs[i].run();
-        bestIndividuals.push_back(runs[i].bestIndividualEver);
+void runAndReportGA(bool useNSGAII = false) {
+    Timer timer;
+    timer.start();
+    GA ga;
+    ga.init();
+    if (useNSGAII) {
+        ga.NSGARun();
+    } else {
+        ga.run();
     }
+    timer.stop();
 
-    // compile and log averagaes
-    getAverageValues(runs, mins, avgs, maxs);
-    for (int i = 0; i < mins.size(); i++) {
-        //cout << mins[i] << '\t' << avgs[i] << '\t' << maxs[i] << endl;
+    Logger graphLogger(config.getOutputFilename() + ((useNSGAII) ? "_NSGA" : "") + ".tsv");
+    cout << "outputting to " << config.getOutputFilename() << endl;
+    for (int i = 0; i < ga.minTimeline.size(); i++) {
         string log = to_string(i) + "\t" +
-                     to_string(mins[i]) + "\t" +
-                     to_string(avgs[i]) + "\t" +
-                     to_string(maxs[i]) + "\t";
+                     to_string(ga.minTimeline[i]) + "\t" +
+                     to_string(ga.averageTimeline[i]) + "\t" +
+                     to_string(ga.maxTimeline[i]) + "\t";
         graphLogger.log(log);
     }
 
-    // output the statistics of the best ever
-    for (unsigned int i = 0; i < bestIndividuals.size(); i++) {
-        // euclidian distance, accuracy, indices
-        string indices = "\t";
-        for (unsigned int j = 0; j < bestIndividuals[i].size(); j++) {
-            indices += "\t";
-//            indices += to_string(bestIndividuals[i][j]);
-        }
-//        bestIndividualsLogger.log(
-//                to_string(bestIndividuals[i].diffDistance/(bestIndividuals[i].diffDistance + bestIndividuals[i].distance)) + "\t" +
-//                to_string(bestIndividuals[i].diffDistance) + "\t" +
-//                to_string(bestIndividuals[i].distance) + "\t" +
-//                //to_string(bestIndividuals[i].accuracy) + "\t" +
-//                indices
-//        );
-    }
+    cout << "GA took " << timer.getElapsedTime() << " seconds to run total." << endl;
 }
 
 int main(int argc, const char *argv[]) {
@@ -101,28 +66,8 @@ int main(int argc, const char *argv[]) {
     Evaluator::getInstance()->setDataLocation(cmdl("data").str());
     config.setClassifier(cmdl("machine").str());
 
-    Timer timer;
-    vector<GA> gas(1);
-    timer.start();
-    for (auto& ga : gas) {
-        ga.init();
-//        ga.run();
-        ga.NSGARun();
-    }
-    timer.stop();
-
-
-    Logger graphLogger(config.getOutputFilename() + ".tsv");
-    cout << "outputting to " << config.getOutputFilename() << endl;
-    for (int i = 0; i < gas[0].minTimeline.size(); i++) {
-        string log = to_string(i) + "\t" +
-                     to_string(gas[0].minTimeline[i]) + "\t" +
-                     to_string(gas[0].averageTimeline[i]) + "\t" +
-                     to_string(gas[0].maxTimeline[i]) + "\t";
-        graphLogger.log(log);
-    }
-
-    cout << "GA took " << timer.getElapsedTime() << " seconds to run total." << endl;
+    runAndReportGA(false);
+    runAndReportGA(true);
 
     return 0;
 }
