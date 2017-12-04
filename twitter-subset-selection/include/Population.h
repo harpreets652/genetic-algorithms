@@ -12,7 +12,7 @@ class Population : public vector<Individual> {
 public:
     Population();
 
-    void generate(int n = 100);
+    void generate(int n = config.POPULATION_SIZE);
     void print() const;
     void evaluate();
 

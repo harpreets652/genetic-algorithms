@@ -46,13 +46,18 @@ void Population::evaluate() {
     minFitness = 10000.0;
     sumFitness = 0.0;
 
-
-    #pragma omp for schedule(dynamic, 3)
-    for (unsigned int i = 0; i < this->size(); i++) {
-        at(i).evaluate();
+    vector<thread> threads;
+    for (unsigned int i = 0; i < size(); i++) {
+        threads.emplace_back(thread(&Individual::evaluate, at(i)));
     }
 
-    for (unsigned int i = 0; i < this->size(); i++) {
+//    #pragma omp for schedule(dynamic, 3)
+//    for (unsigned int i = 0; i < this->size(); i++) {
+//        at(i).evaluate();
+//    }
+
+    for (unsigned int i = 0; i < size(); i++) {
+        threads[i].join();
         minFitness = min(minFitness, at(i).accuracy);
         maxFitness = max(maxFitness, at(i).accuracy);
         if (at(i).accuracy > at(bestIndividualIndex).accuracy) {

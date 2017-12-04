@@ -24,18 +24,10 @@ void GA::makeNextGen() {
         childPop[i].mutate();
     }
     childPop.evaluate();
-    minTimeline.push_back(childPop.minFitness);
-    maxTimeline.push_back(childPop.maxFitness);
-    averageTimeline.push_back(childPop.averageFitness);
     if (bestIndividualEver.accuracy < childPop.getBestIndividual().accuracy) {
         bestIndividualEver = childPop.getBestIndividual();
     }
 
-    // compile both populations, keep the second half
-
-//    childPop.insert(childPop.end(), parentPop.begin(), parentPop.end());
-//    childPop.sortByAccuracy();
-//    childPop.erase(childPop.begin(), childPop.begin() + (childPop.size() / 2));
 }
 
 void GA::NSGAStep() {
@@ -63,15 +55,14 @@ void GA::NSGAStep() {
 
 void GA::NSGARun() {
     cout << "NSGA RUN!!" << endl;
-    makeNextGen();
     for (int i = 0; i < config.ITERATION_SIZE; i++) {
+        makeNextGen();
         minTimeline.push_back(parentPop.minFitness);
         maxTimeline.push_back(parentPop.maxFitness);
         averageTimeline.push_back(parentPop.averageFitness);
 
         cout << "iteration (NSGA-2): " << i << endl;
         NSGAStep();
-        makeNextGen();
     }
     cout << "my best: ";
     bestIndividualEver.print();
@@ -85,9 +76,14 @@ void GA::run() {
 
         cout << "iteration (Normal): " << i << endl;
         makeNextGen();
+
+        // mix both populations, keep the better half
+        childPop.insert(childPop.end(), parentPop.begin(), parentPop.end());
+        childPop.sortByAccuracy();
+        childPop.erase(childPop.begin(), childPop.begin() + (childPop.size() / 2));
+
         parentPop = childPop;
     }
-
     cout << "my best: ";
     bestIndividualEver.print();
 }
