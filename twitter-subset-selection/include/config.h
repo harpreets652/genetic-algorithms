@@ -26,7 +26,7 @@ struct Config {
     Config& operator=(const Config& other);
 
     void setClassifier(string classifier);
-    double PROB_MUTATION = 0.1; // 0.01, 0.001, 0.0001
+    double PROB_MUTATION = 0.001; // 0.01, 0.001, 0.0001
     double PROB_CROSSOVER = 0.2;  // 0.2, 0.67, 0.99
 
     string INPUT_FILENAME;
@@ -37,7 +37,7 @@ struct Config {
     string getOutputFilename() const;
 
     unsigned int NUM_FEATURES = 40;
-    unsigned int POPULATION_SIZE = 100;
+    unsigned int POPULATION_SIZE = 50;
     unsigned int ITERATION_SIZE = 200;
     unsigned int TOTAL_GAS_SIZE = 30; // 5 for testing, 30 for reality
 

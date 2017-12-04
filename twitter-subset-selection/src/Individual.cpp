@@ -34,6 +34,7 @@ void Individual::print() const {
 void Individual::evaluate() {
     recount();
     Evaluator::getInstance()->evaluate((*this));
+    print();
 }
 
 string Individual::to_string() const {
@@ -57,9 +58,11 @@ void Individual::crossoverWith(Individual& other) {
 }
 
 void Individual::mutate() {
-    // flip at a random index
-    int index = Utils::randIntBetween(0, (int)size());
-    (*this)[index] = !at((unsigned int)index);
+    for (unsigned int i = 0; i < size(); i++) {
+        if (Utils::randomWithProbability(config.PROB_MUTATION)) {
+            (*this)[i] = !at(i);
+        }
+    }
 }
 
 bool Individual::paretoDominates(const Individual &opponent) const {

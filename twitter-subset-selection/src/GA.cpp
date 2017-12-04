@@ -21,9 +21,7 @@ void GA::makeNextGen() {
             childPop[i].crossoverWith(parentPop[Utils::randIntBetween(0, parentPop.size())]);
         }
         // if mutation probabiltiy, mess with individual i
-        if (Utils::randomWithProbability(config.PROB_MUTATION)) {
-            childPop[i].mutate();
-        }
+        childPop[i].mutate();
     }
     childPop.evaluate();
     minTimeline.push_back(childPop.minFitness);
