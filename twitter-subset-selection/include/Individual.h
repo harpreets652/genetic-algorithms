@@ -29,7 +29,6 @@ public:
 
     double accuracy;
     unsigned int numFeaturesActive;
-    double fitness;
     double timeTaken;
     double normalizedProb;
 

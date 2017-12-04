@@ -10,7 +10,8 @@
 #include <functional>
 #include <cfloat>
 
-Population::Population() : minFitness(INT_MAX), maxFitness(0.0), averageFitness(0.0), sumFitness(0.0),
+Population::Population() : minAccuracy(INT_MAX), maxAccuracy(0.0), averageAccuracy(0.0),
+                           minBitCount(INT_MAX), maxBitCount(0.0), averageBitCount(0.0),
                            bestIndividualIndex(0), worstIndividualIndex(0) {
 
 }
@@ -31,9 +32,9 @@ void Population::generate(int n) {
 }
 
 void Population::print() const {
-    cout << "Max Fitness:   " << maxFitness << endl;
-    cout << "Min Fitness:   " << minFitness << endl;
-    cout << "Avg Fitness:   " << averageFitness << endl;
+    cout << "Max Fitness:   " << maxAccuracy << endl;
+    cout << "Min Fitness:   " << minAccuracy << endl;
+    cout << "Avg Fitness:   " << averageAccuracy << endl;
     for (unsigned int i = 0; i < this->size(); i++) {
         cout << "[" << ((i < 10) ? "0" : "") << i << "] - ";
         at(i).print();
@@ -42,33 +43,34 @@ void Population::print() const {
 
 void Population::evaluate() {
     // eval each individual, and collect your own stats
-    maxFitness = 0.0;
-    minFitness = 10000.0;
-    sumFitness = 0.0;
+    minAccuracy = 10000.0;
+    maxAccuracy = 0.0;
+    minBitCount = 10000.0;
+    maxBitCount = 0.0;
+    double sumAccuracy = 0.0;
+    double sumBitCount = 0.0;
 
-    vector<thread> threads;
     for (unsigned int i = 0; i < size(); i++) {
-        threads.emplace_back(thread(&Individual::evaluate, at(i)));
+        at(i).evaluate();
     }
 
-//    #pragma omp for schedule(dynamic, 3)
-//    for (unsigned int i = 0; i < this->size(); i++) {
-//        at(i).evaluate();
-//    }
-
     for (unsigned int i = 0; i < size(); i++) {
-        threads[i].join();
-        minFitness = min(minFitness, at(i).accuracy);
-        maxFitness = max(maxFitness, at(i).accuracy);
-        if (at(i).accuracy > at(bestIndividualIndex).accuracy) {
+        at(i).print();
+        minAccuracy = min(minAccuracy, at(i).accuracy);
+        maxAccuracy = max(maxAccuracy, at(i).accuracy);
+        minBitCount = min(minBitCount, (double)at(i).numFeaturesActive);
+        maxBitCount = max(maxBitCount, (double)at(i).numFeaturesActive);
+        if (at(i).paretoDominates(at(bestIndividualIndex))) {
             bestIndividualIndex = i;
         }
-        sumFitness += at(i).accuracy;
+        sumAccuracy += at(i).accuracy;
+        sumBitCount += at(i).numFeaturesActive;
     }
-    averageFitness = sumFitness / double(this->size());
+    averageAccuracy = sumAccuracy / double(size());
+    averageBitCount = sumBitCount / double(size());
     // give that individual back its proportional size
-    for (int i = 0; i < this->size(); i++) {
-        (*this)[i].normalizedProb = at(i).accuracy / sumFitness;
+    for (int i = 0; i < size(); i++) {
+        (*this)[i].normalizedProb = at(i).accuracy / sumAccuracy;
     }
 
     // get rid of all the temp files

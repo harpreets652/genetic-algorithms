@@ -23,11 +23,9 @@ public:
     Individual tournamentSelect();
     Individual getBestIndividual() const;
 
-    double minFitness, maxFitness, averageFitness;
+    double minAccuracy, maxAccuracy, averageAccuracy;
+    double minBitCount, maxBitCount, averageBitCount;
     unsigned int bestIndividualIndex, worstIndividualIndex;
-
-private:
-    double sumFitness;
 };
 
 class ParetoFront : public Population {

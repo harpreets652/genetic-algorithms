@@ -57,9 +57,7 @@ void GA::NSGARun() {
     cout << "NSGA RUN!!" << endl;
     for (int i = 0; i < config.ITERATION_SIZE; i++) {
         makeNextGen();
-        minTimeline.push_back(parentPop.minFitness);
-        maxTimeline.push_back(parentPop.maxFitness);
-        averageTimeline.push_back(parentPop.averageFitness);
+        collectToStats();
 
         cout << "iteration (NSGA-2): " << i << endl;
         NSGAStep();
@@ -70,9 +68,7 @@ void GA::NSGARun() {
 
 void GA::run() {
     for (int i = 0; i < config.ITERATION_SIZE; i++) {
-        minTimeline.push_back(parentPop.minFitness);
-        maxTimeline.push_back(parentPop.maxFitness);
-        averageTimeline.push_back(parentPop.averageFitness);
+        collectToStats();
 
         cout << "iteration (Normal): " << i << endl;
         makeNextGen();
@@ -86,6 +82,16 @@ void GA::run() {
     }
     cout << "my best: ";
     bestIndividualEver.print();
+}
+
+void GA::collectToStats() {
+    minAccuracyTimeline.push_back(parentPop.minAccuracy);
+    maxAccuracyTimeline.push_back(parentPop.maxAccuracy);
+    averageAccuracyTimeline.push_back(parentPop.averageAccuracy);
+
+    minBitCountTimeline.push_back(parentPop.minBitCount);
+    maxBitCountTimeline.push_back(parentPop.maxBitCount);
+    averageAccuracyTimeline.push_back(parentPop.averageBitCount);
 }
 
 #endif

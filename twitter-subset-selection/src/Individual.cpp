@@ -34,7 +34,6 @@ void Individual::print() const {
 void Individual::evaluate() {
     recount();
     Evaluator::getInstance()->evaluate((*this));
-    print();
 }
 
 string Individual::to_string() const {

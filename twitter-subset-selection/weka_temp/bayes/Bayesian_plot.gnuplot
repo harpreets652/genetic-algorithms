@@ -6,7 +6,7 @@
       set xtic auto                          # set xtics automatically
       set ytic auto                          # set ytics automatically
       set xlabel "Iteration (Generation tick)"
-      set ylabel "Fitness"
+      set ylabel "Percent Accuracy"
       #set key 0.01,100
       #set label "Yield Point" at 0.003,260
       #set arrow from 0.0028,250 to 0.003,280
@@ -14,8 +14,8 @@
       set xr [0:200]
       set terminal png size 600,600 enhanced font 'Verdana,10'
 
-    set title "GA Evolution of Bayesian Network ML with 0.001 Mutation Probability and 0.67 Crossover Probability"
-    set output 'Bayesian_1.png'
-    plot "BayesianNet-0.001-0.670.tsv" using 1:2 title 'Min' with linespoints , \
-         "BayesianNet-0.001-0.670.tsv" using 1:3 title 'Avg' with linespoints , \
-         "BayesianNet-0.001-0.670.tsv" using 1:4 title 'Max' with linespoints
+    set title "GA Evolution of Bayesian Network ML with 0.1 Mutation and 0.2 Crossover Probability"
+    set output 'Bayesian_canon.png'
+    plot "BayesianNet-0.001-0.200.tsv" using 1:2 title 'Min' with linespoints , \
+         "BayesianNet-0.001-0.200.tsv" using 1:3 title 'Avg' with linespoints , \
+         "BayesianNet-0.001-0.200.tsv" using 1:4 title 'Max' with linespoints

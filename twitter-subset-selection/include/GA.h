@@ -17,8 +17,10 @@ public:
     void NSGAStep();
     void NSGARun();
     void run();
+    void collectToStats();
     
-    vector<double> minTimeline, maxTimeline, averageTimeline;
+    vector<double> minAccuracyTimeline, maxAccuracyTimeline, averageAccuracyTimeline;
+    vector<double> minBitCountTimeline, maxBitCountTimeline, averageBitCountTimeline;
     Individual bestIndividualEver;
 };
 

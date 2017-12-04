@@ -10,22 +10,6 @@
 
 using namespace std;
 
-void getAverageValues(vector<GA> gas, vector<double>& avgMin, vector<double>& avgMax, vector<double>& avgAvg) {
-    // iterate
-    int vecSize = (int)gas[0].averageTimeline.size();
-    for (int i = 0; i < vecSize; i++) {
-        double sumMin = 0.0, sumAvg = 0.0, sumMax = 0.0;
-        for (int gaIndex = 0; gaIndex < gas.size(); gaIndex++) {
-            sumMin += gas[gaIndex].minTimeline[i];
-            sumAvg += gas[gaIndex].averageTimeline[i];
-            sumMax += gas[gaIndex].maxTimeline[i];
-        }
-        avgMin.push_back(sumMin/double(gas.size()));
-        avgAvg.push_back(sumAvg/double(gas.size()));
-        avgMax.push_back(sumMax/double(gas.size()));
-    }
-}
-
 void runAndReportGA(bool useNSGAII = false) {
     Timer timer;
     timer.start();
@@ -40,11 +24,15 @@ void runAndReportGA(bool useNSGAII = false) {
 
     Logger graphLogger(config.getOutputFilename() + ((useNSGAII) ? "_NSGA" : "") + ".tsv");
     cout << "outputting to " << config.getOutputFilename() << endl;
-    for (int i = 0; i < ga.minTimeline.size(); i++) {
+    for (int i = 0; i < ga.minAccuracyTimeline.size(); i++) {
         string log = to_string(i) + "\t" +
-                     to_string(ga.minTimeline[i]) + "\t" +
-                     to_string(ga.averageTimeline[i]) + "\t" +
-                     to_string(ga.maxTimeline[i]) + "\t";
+                     to_string(ga.minAccuracyTimeline[i]) + "\t" +
+                     to_string(ga.averageAccuracyTimeline[i]) + "\t" +
+                     to_string(ga.maxAccuracyTimeline[i]) + "\t" +
+
+                     to_string(ga.minBitCountTimeline[i]) + "\t" +
+                     to_string(ga.averageBitCountTimeline[i]) + "\t" +
+                     to_string(ga.maxBitCountTimeline[i]) + "\t";
         graphLogger.log(log);
     }
 

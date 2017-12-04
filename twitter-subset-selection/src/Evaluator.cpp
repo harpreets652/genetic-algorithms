@@ -156,7 +156,7 @@ string Evaluator::exec(const char *cmd) {
 }
 
 string Evaluator::exec(const string& cmd) {
-    cout << "CMD: " << cmd << endl;
+//    cout << "CMD: " << cmd << endl;
     char buffer[128];
     string result;
     shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
