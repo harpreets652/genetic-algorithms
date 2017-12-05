@@ -23,7 +23,6 @@ void Population::generate(int n) {
     for (int i = 0; i < allTrue.size(); i++) {
         allTrue[i] = true;
     }
-//    this->push_back(allTrue);
     for (int i = 0; i < n; i++) {
         Individual randIndividual;
         randIndividual.init();
@@ -41,6 +40,28 @@ void Population::print() const {
     }
 }
 
+void Population::evaluateEach() {
+    map<Individual, vector<unsigned int> > duplicateCount;
+    vector<Individual *> evaluatingSet;
+
+    for (unsigned int i = 0; i < size(); i++) {
+        // if i have a duplicate, just increment his count
+        if (duplicateCount.find(at(i)) != duplicateCount.end()) {
+            duplicateCount[at(i)].push_back(i);
+        } else {
+            duplicateCount.insert(pair<Individual, vector<unsigned int> >(at(i), vector<unsigned int>(i)));
+            evaluatingSet.push_back(&at(i));
+        }
+    }
+    Evaluator::getInstance()->evaluate(evaluatingSet);
+
+    for (auto const &value : duplicateCount) {
+        for (unsigned int index : value.second) {
+            (*this)[index] = at(value.second[0]);
+        }
+    }
+}
+
 void Population::evaluate(bool useParedoToCompare) {
     // eval each individual, and collect your own stats
     minAccuracy = 10000.0;
@@ -50,12 +71,7 @@ void Population::evaluate(bool useParedoToCompare) {
     double sumAccuracy = 0.0;
     double sumBitCount = 0.0;
 
-    vector<Individual*> people;
-    for (unsigned int i = 0; i < size(); i++) {
-        people.push_back(&at(i));
-//        at(i).evaluate();
-    }
-    Evaluator::getInstance()->evaluate(people);
+    evaluateEach();
 
     for (unsigned int i = 0; i < size(); i++) {
         at(i).print();

@@ -32,7 +32,7 @@ void Evaluator::init() {
 }
 
 void Evaluator::evaluate(vector<Individual*> indiv) {
-    unsigned int num_threads = 10;
+    unsigned int num_threads = min(10, (int)indiv.size());
     vector<thread> workers(num_threads);
 
     for (unsigned int i = 0; i < indiv.size(); i++) {

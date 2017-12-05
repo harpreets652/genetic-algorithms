@@ -15,6 +15,7 @@ public:
     void generate(int n = config.POPULATION_SIZE);
     void print() const;
     void evaluate(bool useParedoToCompare = false);
+    void evaluateEach();
 
     void sortByAccuracy();
     void sortByBitCount();
