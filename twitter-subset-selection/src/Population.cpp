@@ -64,7 +64,7 @@ void Population::evaluate(bool useParedoToCompare) {
         minBitCount = min(minBitCount, (double)at(i).numFeaturesActive);
         maxBitCount = max(maxBitCount, (double)at(i).numFeaturesActive);
         if ((useParedoToCompare && at(i).paretoDominates(at(bestIndividualIndex))) ||
-            (!useParedoToCompare && at(i).accuracy > at(bestIndividualIndex))) {
+            (!useParedoToCompare && at(i).accuracy < at(bestIndividualIndex).accuracy)) {
             bestIndividualIndex = i;
         }
         sumAccuracy += at(i).accuracy;
