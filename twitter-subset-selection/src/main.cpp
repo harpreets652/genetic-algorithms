@@ -54,7 +54,7 @@ int main(int argc, const char *argv[]) {
     Evaluator::getInstance()->setDataLocation(cmdl("data").str());
     config.setClassifier(cmdl("machine").str());
 
-    runAndReportGA(false);
+//    runAndReportGA(false);
     runAndReportGA(true);
 
     return 0;

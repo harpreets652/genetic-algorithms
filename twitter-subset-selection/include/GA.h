@@ -13,7 +13,7 @@ class GA {
 public:
     Population parentPop, childPop;
     void init();
-    void makeNextGen();
+    void makeNextGen(bool useParedoToCompare = false);
     void NSGAStep();
     void NSGARun();
     void run();

@@ -41,7 +41,7 @@ void Population::print() const {
     }
 }
 
-void Population::evaluate() {
+void Population::evaluate(bool useParedoToCompare) {
     // eval each individual, and collect your own stats
     minAccuracy = 10000.0;
     maxAccuracy = 0.0;
@@ -63,7 +63,8 @@ void Population::evaluate() {
         maxAccuracy = max(maxAccuracy, at(i).accuracy);
         minBitCount = min(minBitCount, (double)at(i).numFeaturesActive);
         maxBitCount = max(maxBitCount, (double)at(i).numFeaturesActive);
-        if (at(i).paretoDominates(at(bestIndividualIndex))) {
+        if ((useParedoToCompare && at(i).paretoDominates(at(bestIndividualIndex))) ||
+            (!useParedoToCompare && at(i).accuracy > at(bestIndividualIndex))) {
             bestIndividualIndex = i;
         }
         sumAccuracy += at(i).accuracy;

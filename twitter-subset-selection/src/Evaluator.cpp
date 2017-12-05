@@ -68,7 +68,7 @@ void Evaluator::evaluateSingle(Individual *individual) {
     createFileHeader(fout, *individual);
 
     // connect to the database
-    connection c("dbname=cs_776 user=system password=SYSTEM host=hpcvis3.cse.unr.edu");
+    connection c("dbname=cs_776 user=system password=SYSTEM host=localhost");
     work txn(c);
 
     // query the database

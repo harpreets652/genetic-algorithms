@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <cmath>
+#include <thread>
 
 class Evaluator;
 

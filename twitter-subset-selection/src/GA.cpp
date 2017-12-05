@@ -6,10 +6,10 @@
 
 void GA::init() {
     parentPop.generate(config.POPULATION_SIZE);
-    parentPop.evaluate();
+    parentPop.evaluate(false);
 }
 
-void GA::makeNextGen() {
+void GA::makeNextGen(bool useParedoToCompare) {
     childPop.clear();
     for (unsigned int i = 0; i < parentPop.size(); i++) {
         childPop.push_back(
@@ -23,7 +23,7 @@ void GA::makeNextGen() {
         // if mutation probabiltiy, mess with individual i
         childPop[i].mutate();
     }
-    childPop.evaluate();
+    childPop.evaluate(useParedoToCompare);
     if (bestIndividualEver.accuracy < childPop.getBestIndividual().accuracy) {
         bestIndividualEver = childPop.getBestIndividual();
     }
@@ -55,7 +55,7 @@ void GA::NSGAStep() {
 void GA::NSGARun() {
     cout << "NSGA RUN!!" << endl;
     for (int i = 0; i < config.ITERATION_SIZE; i++) {
-        makeNextGen();
+        makeNextGen(true);
         collectToStats();
 
         cout << "iteration (NSGA-2): " << i << endl;
@@ -70,7 +70,7 @@ void GA::run() {
         collectToStats();
 
         cout << "iteration (Normal): " << i << endl;
-        makeNextGen();
+        makeNextGen(false);
 
         // mix both populations, keep the better half
         childPop.insert(childPop.end(), parentPop.begin(), parentPop.end());
