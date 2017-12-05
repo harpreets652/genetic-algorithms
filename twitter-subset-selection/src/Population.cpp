@@ -50,9 +50,12 @@ void Population::evaluate() {
     double sumAccuracy = 0.0;
     double sumBitCount = 0.0;
 
+    vector<Individual*> people;
     for (unsigned int i = 0; i < size(); i++) {
-        at(i).evaluate();
+        people.push_back(&at(i));
+//        at(i).evaluate();
     }
+    Evaluator::getInstance()->evaluate(people);
 
     for (unsigned int i = 0; i < size(); i++) {
         at(i).print();

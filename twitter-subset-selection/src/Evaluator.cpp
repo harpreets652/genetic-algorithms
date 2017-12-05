@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <Timer.h>
+#include <thread>
 
 #include "Evaluator.h"
 #include "config.h"
@@ -30,22 +31,41 @@ void Evaluator::init() {
 
 }
 
-void Evaluator::evaluate(Individual &individual) {
+void Evaluator::evaluate(vector<Individual*> indiv) {
+    unsigned int num_threads = 10;
+    vector<thread> workers(num_threads);
+
+    for (unsigned int i = 0; i < indiv.size(); i++) {
+        // freshen up
+        if (workers[i%num_threads].joinable()) {
+            workers[i%num_threads].join();
+        }
+
+        workers[i%num_threads] = thread(&Evaluator::evaluateSingle, Evaluator::getInstance(), indiv[i]);
+    }
+
+    for (auto& worker : workers) {
+        worker.join();
+    }
+}
+
+void Evaluator::evaluateSingle(Individual *individual) {
+    individual->recount();
     bool isAllZeros = true;
-    for (bool b : individual) {
+    for (bool b : *individual) {
         if (b) {
             isAllZeros = false;
             break;
         }
     }
     if (isAllZeros) {
-        individual.accuracy = 0;
+        individual->accuracy = 0;
         return;
     }
 
     // build the output file
-    ofstream fout(dataLocation + "/" + individual.to_string() + ".arff");
-    createFileHeader(fout, individual);
+    ofstream fout(dataLocation + "/" + individual->to_string() + ".arff");
+    createFileHeader(fout, *individual);
 
     // connect to the database
     connection c("dbname=cs_776 user=system password=SYSTEM host=hpcvis3.cse.unr.edu");
@@ -53,15 +73,15 @@ void Evaluator::evaluate(Individual &individual) {
 
     // query the database
     for (bool b : {true, false}) {
-        string query = buildQuery(individual, b);
+        string query = buildQuery(*individual, b);
         result r = txn.exec(query);
         // if we have nothing, report accuracy of 0
         if (r.empty()) {
-            individual.accuracy = 0;
+            individual->accuracy = 0;
             return;
         }
         // output each of the data points (per user) here
-        createDataPoints(fout, r, individual);
+        createDataPoints(fout, r, *individual);
     }
 
     fout.close();
@@ -69,12 +89,12 @@ void Evaluator::evaluate(Individual &individual) {
     // call the WEKA on this function
     Timer t;
     t.start();
-    string output = exec(getRunCommand(individual.to_string()));
+    string output = exec(getRunCommand(individual->to_string()));
     t.stop();
 
-    // get the data from it
-    individual.accuracy = getAccuracyFromOutput(output) * 100;
-    individual.timeTaken = t.getElapsedTime();
+    // get the data from it->
+    individual->accuracy = getAccuracyFromOutput(output) * 100;
+    individual->timeTaken = t.getElapsedTime();
 }
 
 void Evaluator::createFileHeader(ofstream& fout, Individual &individual) {
@@ -191,6 +211,9 @@ double Evaluator::getAccuracyFromOutput(const string &output) {
     string s;
 
     double numCorrect = 0.0, numIncorrect = 0.0, total, dummy;
+    do {
+        getline(ss, s);
+    } while (s != "=== Stratified cross-validation ===");
     do {
         getline(ss, s);
     } while (s.substr(0,30) != "Correctly Classified Instances");

@@ -20,7 +20,7 @@ void Individual::init() {
 void Individual::generateRandom() {
     // include all the indices
     for (unsigned int i = 0; i < config.NUM_FEATURES; i++) {
-        (*this)[i] = Utils::randomWithProbability(0.05);
+        (*this)[i] = Utils::randomWithProbability(0.5);
     }
 }
 
@@ -29,11 +29,6 @@ void Individual::print() const {
         cout << at(i);
     }
     cout << " - [accuracy: " << accuracy << ", numBits: " << numFeaturesActive << ", time: " << timeTaken << "]" << endl;
-}
-
-void Individual::evaluate() {
-    recount();
-    Evaluator::getInstance()->evaluate((*this));
 }
 
 string Individual::to_string() const {

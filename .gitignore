@@ -42,3 +42,4 @@
 # Data Files
 *.log
 *.csv
+*.arff

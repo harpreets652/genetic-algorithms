@@ -16,7 +16,8 @@ class Evaluator {
 public:
     static Evaluator* getInstance();
     ~Evaluator();
-    void evaluate(Individual &indiv);
+    void evaluate(vector<Individual*> indiv);
+    void evaluateSingle(Individual *indiv);
 
     string exec(const string& cmd);
     string exec(const char * cmd);

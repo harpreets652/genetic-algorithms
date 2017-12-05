@@ -20,7 +20,6 @@ public:
     void generateRandom();
     void print() const;
     void init();
-    void evaluate();
     string to_string() const;
 
     void crossoverWith(Individual& other);
@@ -40,9 +39,9 @@ public:
     unsigned int numDominateMe = 0;
 
 
-private:
-    //double getBinaryAsNumber(vector<bool> subset) const;
     void recount();
+private:
+//    double getBinaryAsNumber(vector<bool> subset) const;
 };
 
 #endif

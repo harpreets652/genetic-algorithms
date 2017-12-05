@@ -27,7 +27,6 @@ void GA::makeNextGen() {
     if (bestIndividualEver.accuracy < childPop.getBestIndividual().accuracy) {
         bestIndividualEver = childPop.getBestIndividual();
     }
-
 }
 
 void GA::NSGAStep() {
