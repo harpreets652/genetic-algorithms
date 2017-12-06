@@ -25,7 +25,7 @@ public:
     Individual getBestIndividual() const;
 
     double minAccuracy, maxAccuracy, averageAccuracy;
-    double minBitCount, maxBitCount, averageBitCount;
+    unsigned int minBitCount, maxBitCount, averageBitCount;
     unsigned int bestIndividualIndex, worstIndividualIndex;
 };
 

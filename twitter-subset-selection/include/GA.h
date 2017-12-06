@@ -20,7 +20,7 @@ public:
     void collectToStats();
     
     vector<double> minAccuracyTimeline, maxAccuracyTimeline, averageAccuracyTimeline;
-    vector<double> minBitCountTimeline, maxBitCountTimeline, averageBitCountTimeline;
+    vector<unsigned int> minBitCountTimeline, maxBitCountTimeline, averageBitCountTimeline;
     Individual bestIndividualEver;
 };
 

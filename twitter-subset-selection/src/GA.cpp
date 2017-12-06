@@ -7,6 +7,7 @@
 void GA::init() {
     parentPop.generate(config.POPULATION_SIZE);
     parentPop.evaluate(false);
+    collectToStats();
 }
 
 void GA::makeNextGen(bool useParedoToCompare) {
@@ -55,10 +56,10 @@ void GA::NSGAStep() {
 void GA::NSGARun() {
     cout << "NSGA RUN!!" << endl;
     for (int i = 0; i < config.ITERATION_SIZE; i++) {
-        makeNextGen(true);
         collectToStats();
 
         cout << "iteration (NSGA-2): " << i << endl;
+        makeNextGen(true);
         NSGAStep();
     }
     cout << "my best: ";
@@ -90,7 +91,7 @@ void GA::collectToStats() {
 
     minBitCountTimeline.push_back(parentPop.minBitCount);
     maxBitCountTimeline.push_back(parentPop.maxBitCount);
-    averageAccuracyTimeline.push_back(parentPop.averageBitCount);
+    averageBitCountTimeline.push_back(parentPop.averageBitCount);
 }
 
 #endif

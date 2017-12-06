@@ -11,7 +11,7 @@
 #include <cfloat>
 
 Population::Population() : minAccuracy(INT_MAX), maxAccuracy(0.0), averageAccuracy(0.0),
-                           minBitCount(INT_MAX), maxBitCount(0.0), averageBitCount(0.0),
+                           minBitCount(INT_MAX), maxBitCount(0), averageBitCount(0),
                            bestIndividualIndex(0), worstIndividualIndex(0) {
 
 }
@@ -66,10 +66,10 @@ void Population::evaluate(bool useParedoToCompare) {
     // eval each individual, and collect your own stats
     minAccuracy = 10000.0;
     maxAccuracy = 0.0;
-    minBitCount = 10000.0;
-    maxBitCount = 0.0;
+    minBitCount = 10000;
+    maxBitCount = 0;
     double sumAccuracy = 0.0;
-    double sumBitCount = 0.0;
+    unsigned int sumBitCount = 0;
 
     evaluateEach();
 
@@ -77,8 +77,8 @@ void Population::evaluate(bool useParedoToCompare) {
         at(i).print();
         minAccuracy = min(minAccuracy, at(i).accuracy);
         maxAccuracy = max(maxAccuracy, at(i).accuracy);
-        minBitCount = min(minBitCount, (double)at(i).numFeaturesActive);
-        maxBitCount = max(maxBitCount, (double)at(i).numFeaturesActive);
+        minBitCount = min(minBitCount, at(i).numFeaturesActive);
+        maxBitCount = max(maxBitCount, at(i).numFeaturesActive);
         if ((useParedoToCompare && at(i).paretoDominates(at(bestIndividualIndex))) ||
             (!useParedoToCompare && at(i).accuracy < at(bestIndividualIndex).accuracy)) {
             bestIndividualIndex = i;
@@ -87,7 +87,7 @@ void Population::evaluate(bool useParedoToCompare) {
         sumBitCount += at(i).numFeaturesActive;
     }
     averageAccuracy = sumAccuracy / double(size());
-    averageBitCount = sumBitCount / double(size());
+    averageBitCount = sumBitCount / (unsigned int)size();
     // give that individual back its proportional size
     for (int i = 0; i < size(); i++) {
         (*this)[i].normalizedProb = at(i).accuracy / sumAccuracy;

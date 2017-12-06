@@ -14,7 +14,7 @@
       set xr [0:200]
       set terminal png size 600,600 enhanced font 'Verdana,10'
 
-    set title "GA Evolution of Bayesian Network ML with 0.1 Mutation and 0.2 Crossover Probability"
+    set title "Bayesian Network ML with 0.1 Mutation and 0.2 Crossover Probability"
     set output 'Bayesian_canon.png'
     plot "BayesianNet-0.001-0.200.tsv" using 1:2 title 'Min' with linespoints , \
          "BayesianNet-0.001-0.200.tsv" using 1:3 title 'Avg' with linespoints , \
