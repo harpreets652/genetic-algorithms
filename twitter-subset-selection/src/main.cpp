@@ -1,5 +1,4 @@
 #include <iostream>
-#include <array>
 #include <argh/argh.h>
 #include <Timer.h>
 
@@ -22,7 +21,8 @@ void runAndReportGA(bool useNSGAII = false) {
     }
     timer.stop();
 
-    Logger graphLogger(config.getOutputFilename() + ((useNSGAII) ? "_NSGA" : "") + ".tsv");
+    string outputFilename = config.getOutputFilename() + ((useNSGAII) ? "_NSGA" : "") + ".tsv";
+    Logger graphLogger(outputFilename);
     cout << "outputting to " << config.getOutputFilename() << endl;
     for (int i = 0; i < ga.minAccuracyTimeline.size(); i++) {
         string log = to_string(i) + "\t" +
@@ -54,7 +54,7 @@ int main(int argc, const char *argv[]) {
     Evaluator::getInstance()->setDataLocation(cmdl("data").str());
     config.setClassifier(cmdl("machine").str());
 
-    runAndReportGA(false);
+//    runAndReportGA(false);
     runAndReportGA(true);
 
     return 0;

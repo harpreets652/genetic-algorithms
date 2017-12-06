@@ -2,7 +2,6 @@
 #define __GA_CPP_
 
 #include "GA.h"
-#include "config.h"
 
 void GA::init() {
     parentPop.generate(config.POPULATION_SIZE);
@@ -51,11 +50,13 @@ void GA::NSGAStep() {
     } else if (parentPop.size() > N) {
         parentPop.erase(parentPop.begin() + N, parentPop.end());
     }
+    parentPop.getStatsFromIndividuals(true);
 }
 
 void GA::NSGARun() {
     cout << "NSGA RUN!!" << endl;
     for (int i = 0; i < config.ITERATION_SIZE; i++) {
+        parentPop.print();
         collectToStats();
 
         cout << "iteration (NSGA-2): " << i << endl;

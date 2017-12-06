@@ -2,12 +2,8 @@
 #define __POPULATION_CPP_
 
 #include "Population.h"
-#include "config.h"
-#include <cmath>
 #include <climits>
 #include <algorithm>
-#include <thread>
-#include <functional>
 #include <cfloat>
 
 Population::Population() : minAccuracy(INT_MAX), maxAccuracy(0.0), averageAccuracy(0.0),
@@ -18,11 +14,6 @@ Population::Population() : minAccuracy(INT_MAX), maxAccuracy(0.0), averageAccura
 
 void Population::generate(int n) {
     this->clear();
-    Individual allTrue;
-    allTrue.init();
-    for (int i = 0; i < allTrue.size(); i++) {
-        allTrue[i] = true;
-    }
     for (int i = 0; i < n; i++) {
         Individual randIndividual;
         randIndividual.init();
@@ -62,8 +53,7 @@ void Population::evaluateEach() {
     }
 }
 
-void Population::evaluate(bool useParedoToCompare) {
-    // eval each individual, and collect your own stats
+void Population::getStatsFromIndividuals(bool useParedoToCompare) {
     minAccuracy = 10000.0;
     maxAccuracy = 0.0;
     minBitCount = 10000;
@@ -71,10 +61,8 @@ void Population::evaluate(bool useParedoToCompare) {
     double sumAccuracy = 0.0;
     unsigned int sumBitCount = 0;
 
-    evaluateEach();
-
     for (unsigned int i = 0; i < size(); i++) {
-        at(i).print();
+//        at(i).print();
         minAccuracy = min(minAccuracy, at(i).accuracy);
         maxAccuracy = max(maxAccuracy, at(i).accuracy);
         minBitCount = min(minBitCount, at(i).numFeaturesActive);
@@ -92,6 +80,12 @@ void Population::evaluate(bool useParedoToCompare) {
     for (int i = 0; i < size(); i++) {
         (*this)[i].normalizedProb = at(i).accuracy / sumAccuracy;
     }
+}
+
+void Population::evaluate(bool useParedoToCompare) {
+    // eval each individual, and collect your own stats
+    evaluateEach();
+    getStatsFromIndividuals(useParedoToCompare);
 
     // get rid of all the temp files
     Evaluator::getInstance()->exec("rm -f " + Evaluator::getInstance()->getDataLocation() + "/*.arff");
@@ -112,8 +106,6 @@ void Population::sortByBitCount() {
 }
 
 vector<ParetoFront> sortFastNonDominated(Population& p) {
-    int N = p.size();
-
     vector<ParetoFront> fronts(1);
 
     for (unsigned int i = 0; i < p.size(); i++) {

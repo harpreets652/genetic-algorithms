@@ -16,6 +16,7 @@ public:
     void print() const;
     void evaluate(bool useParedoToCompare = false);
     void evaluateEach();
+    void getStatsFromIndividuals(bool useParedoToCompare = false);
 
     void sortByAccuracy();
     void sortByBitCount();
