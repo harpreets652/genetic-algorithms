@@ -69,6 +69,7 @@ void GA::NSGARun() {
 
 void GA::run() {
     for (int i = 0; i < config.ITERATION_SIZE; i++) {
+        parentPop.print();
         collectToStats();
 
         cout << "iteration (Normal): " << i << endl;

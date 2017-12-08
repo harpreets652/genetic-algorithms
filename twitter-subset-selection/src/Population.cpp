@@ -62,13 +62,12 @@ void Population::getStatsFromIndividuals(bool useParedoToCompare) {
     unsigned int sumBitCount = 0;
 
     for (unsigned int i = 0; i < size(); i++) {
-//        at(i).print();
         minAccuracy = min(minAccuracy, at(i).accuracy);
         maxAccuracy = max(maxAccuracy, at(i).accuracy);
         minBitCount = min(minBitCount, at(i).numFeaturesActive);
         maxBitCount = max(maxBitCount, at(i).numFeaturesActive);
         if ((useParedoToCompare && at(i).paretoDominates(at(bestIndividualIndex))) ||
-            (!useParedoToCompare && at(i).accuracy < at(bestIndividualIndex).accuracy)) {
+            (!useParedoToCompare && at(i).accuracy > at(bestIndividualIndex).accuracy)) {
             bestIndividualIndex = i;
         }
         sumAccuracy += at(i).accuracy;
