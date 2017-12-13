@@ -28,11 +28,11 @@ def plot_gen_vs_fitness(file_name, title, fig_text):
 def plot_pareto_front(file_name, title, fig_text):
     nsga_data = load_nsga_data(file_name)
 
-    non_dominated_front = get_non_dominated_list(nsga_data)
+    unique_individuals = get_unique_individuals(nsga_data)
 
     accuracy = []
     num_bits = []
-    for individual in non_dominated_front:
+    for individual in unique_individuals:
         accuracy.append(individual.Accur)
         num_bits.append(individual.NumBits)
 
@@ -74,8 +74,15 @@ def plot_gen_vs_max_fit_multi_file(file_names, plot_label, plot_colors, title):
     return
 
 
+def get_unique_individuals(nsga_data):
+    seen = set()
+    seen_add = seen.add
+
+    return [data for data in nsga_data if not (data.Chrom in seen or seen_add(data.Chrom))]
+
+
 def load_nsga_data(file_name):
-    nsga_data = []
+    nsga_data = list()
 
     with open(file_name) as inFile:
         user_reader = csv.DictReader(inFile)
@@ -146,18 +153,18 @@ def pareto_front(file_name, title, fig_text):
 #     "Bayes Network",
 #     "Bayes Network ML with 0.1 Mutation and 0.2 Crossover Probabilities")
 
-plot_gen_vs_max_fit_multi_file(
-    [
-        "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_temp/bayes/BayesianNet-0.010-0.950.tsv",
-        "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_temp/decision_tree/DecisionTable-0.010-0.950.tsv"],
-    ["BayesianNet",
-     "DecisionTable"],
-    ['b-',
-     'g-'],
-    "Best Fitness over Generations"
-)
+# plot_gen_vs_max_fit_multi_file(
+#     [
+#         "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_temp/bayes/BayesianNet-0.010-0.950.tsv",
+#         "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_temp/decision_tree/DecisionTable-0.010-0.950.tsv"],
+#     ["BayesianNet",
+#      "DecisionTable"],
+#     ['b-',
+#      'g-'],
+#     "Best Fitness over Generations"
+# )
 
-# plot_pareto_front(
-#     "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_temp/bayes/BayesianNet_NSGA_LastGen.tsv",
-#     "Bayes Network Multiobjective Max(Accuracy), Min(Features)",
-#     "Bayes Network ML with 0.1 Mutation and 0.2 Crossover Probabilities")
+plot_pareto_front(
+    "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_temp/bayes/BayesianNet_NSGA_LastGen.tsv",
+    "Bayes Network Multiobjective Max(Accuracy), Min(Features)",
+    "Bayes Network ML with 0.1 Mutation and 0.2 Crossover Probabilities")
