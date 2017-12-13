@@ -1,5 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import csv
+from collections import namedtuple
+
+NsgaIndividual = namedtuple("NsgaIndividual", "Id Chrom Accur NumBits Time")
 
 
 def gen_vs_fitness(file_name, title, fig_text):
@@ -21,12 +25,65 @@ def gen_vs_fitness(file_name, title, fig_text):
     return
 
 
-def num_bits_vs_fitness(file_name, title, fig_text):
-    data = np.loadtxt(file_name)
-    gen, avg_val, avg_num_bits = data[:, 0], data[:, 2], data[:, 5]
+# todo: need to implement to show max fitness for multiple ml models
+def max_fitness_vs_gen_multi_file():
+    return
 
-    plt.plot(avg_num_bits, avg_val, 'g-', linewidth=2.0)
-    plt.scatter(avg_num_bits, avg_val)
+
+def load_nsga_data(file_name):
+    nsga_data = []
+
+    with open(file_name) as inFile:
+        user_reader = csv.DictReader(inFile)
+        for line in user_reader:
+            data = NsgaIndividual(int(line['Id']),
+                                  line['Chrom'],
+                                  float(line['Accuracy']),
+                                  int(line['NumBits']),
+                                  float(line['Time']))
+
+            nsga_data.append(data)
+
+    return nsga_data
+
+
+def get_non_dominated_list(nsga_data):
+    nondominated_front = []
+
+    for current in nsga_data:
+        num_dominate_me = 0
+
+        for other in nsga_data:
+            if current.Id == other.Id:
+                continue
+
+            if pareto_dominates(other, current):
+                num_dominate_me += 1
+
+        if num_dominate_me == 0:
+            nondominated_front.append(current)
+
+    return nondominated_front
+
+
+# if this dominates opponent
+def pareto_dominates(this, opponent):
+    return (not (this.Accur < opponent.Accur)) and (not (this.NumBits > opponent.NumBits))
+
+
+def pareto_front(file_name, title, fig_text):
+    nsga_data = load_nsga_data(file_name)
+
+    non_dominated_front = get_non_dominated_list(nsga_data)
+
+    accuracy = []
+    num_bits = []
+    for individual in non_dominated_front:
+        accuracy.append(individual.Accur)
+        num_bits.append(individual.NumBits)
+
+    plt.plot(num_bits, accuracy, 'g-', linewidth=2.0)
+    plt.scatter(num_bits, accuracy)
     plt.legend(loc='best')
 
     plt.xlabel("Number of Features")
@@ -39,12 +96,12 @@ def num_bits_vs_fitness(file_name, title, fig_text):
     return
 
 
-gen_vs_fitness(
-    "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_temp/bayes/BayesianNet-0.010-0.950.tsv",
-    "Bayes Network",
+# gen_vs_fitness(
+#     "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_temp/bayes/BayesianNet-0.010-0.950.tsv",
+#     "Bayes Network",
+#     "Bayes Network ML with 0.1 Mutation and 0.2 Crossover Probabilities")
+
+pareto_front(
+    "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_temp/bayes/BayesianNet_NSGA_LastGen.tsv",
+    "Bayes Network Multiobjective Max(Accuracy), Min(Features)",
     "Bayes Network ML with 0.1 Mutation and 0.2 Crossover Probabilities")
-
-
-num_bits_vs_fitness("/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_temp/bayes/BayesianNet-0.010-0.950_NSGA.tsv",
-                    "Bayes Network Multiobjective Max(Accuracy), Min(Features)",
-                    "Bayes Network ML with 0.1 Mutation and 0.2 Crossover Probabilities")
