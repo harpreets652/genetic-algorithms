@@ -6,7 +6,7 @@ from collections import namedtuple
 NsgaIndividual = namedtuple("NsgaIndividual", "Id Chrom Accur NumBits Time")
 
 
-def gen_vs_fitness(file_name, title, fig_text):
+def plot_gen_vs_fitness(file_name, title, fig_text):
     data = np.loadtxt(file_name)
     gen, min_val, avg_val, max_val = data[:, 0], data[:, 1], data[:, 2], data[:, 3]
 
@@ -24,6 +24,29 @@ def gen_vs_fitness(file_name, title, fig_text):
 
     return
 
+def plot_pareto_front(file_name, title, fig_text):
+    nsga_data = load_nsga_data(file_name)
+
+    non_dominated_front = get_non_dominated_list(nsga_data)
+
+    accuracy = []
+    num_bits = []
+    for individual in non_dominated_front:
+        accuracy.append(individual.Accur)
+        num_bits.append(individual.NumBits)
+
+    plt.plot(num_bits, accuracy, 'g-', linewidth=2.0)
+    plt.scatter(num_bits, accuracy)
+    plt.legend(loc='best')
+
+    plt.xlabel("Number of Features")
+    plt.ylabel("Percent Accuracy")
+    plt.title(title)
+    plt.figtext(0.2, 0.009, fig_text)
+
+    plt.show()
+
+    return
 
 # todo: need to implement to show max fitness for multiple ml models
 def max_fitness_vs_gen_multi_file():
@@ -102,7 +125,7 @@ def pareto_front(file_name, title, fig_text):
 #     "Bayes Network",
 #     "Bayes Network ML with 0.1 Mutation and 0.2 Crossover Probabilities")
 
-pareto_front(
+plot_pareto_front(
     "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_temp/bayes/BayesianNet_NSGA_LastGen.tsv",
     "Bayes Network Multiobjective Max(Accuracy), Min(Features)",
     "Bayes Network ML with 0.1 Mutation and 0.2 Crossover Probabilities")
