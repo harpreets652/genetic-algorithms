@@ -54,7 +54,7 @@ def get_non_dominated_list(nsga_data):
         num_dominate_me = 0
 
         for other in nsga_data:
-            if current.Id == other.Id:
+            if current.Chrom == other.Chrom:
                 continue
 
             if pareto_dominates(other, current):
@@ -75,6 +75,7 @@ def pareto_front(file_name, title, fig_text):
     nsga_data = load_nsga_data(file_name)
 
     non_dominated_front = get_non_dominated_list(nsga_data)
+    print (len(non_dominated_front))
 
     accuracy = []
     num_bits = []
