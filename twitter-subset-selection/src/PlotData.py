@@ -24,6 +24,7 @@ def plot_gen_vs_fitness(file_name, title, fig_text):
 
     return
 
+
 def plot_pareto_front(file_name, title, fig_text):
     nsga_data = load_nsga_data(file_name)
 
@@ -48,8 +49,28 @@ def plot_pareto_front(file_name, title, fig_text):
 
     return
 
-# todo: need to implement to show max fitness for multiple ml models
-def max_fitness_vs_gen_multi_file():
+
+def plot_gen_vs_max_fit_multi_file(file_names, plot_label, plot_colors, title):
+    counter = 0
+    for file_name in file_names:
+        data = np.loadtxt(file_name)
+        gen, max_val = data[:, 0], data[:, 3]
+
+        plt.plot(gen,
+                 max_val,
+                 plot_colors[counter],
+                 label=plot_label[counter],
+                 linewidth=2.0)
+
+        counter += 1
+
+    plt.legend(loc='best')
+    plt.xlabel("GA Generation")
+    plt.ylabel("Fitness (Percent Accuracy)")
+    plt.title(title)
+
+    plt.show()
+
     return
 
 
@@ -125,7 +146,18 @@ def pareto_front(file_name, title, fig_text):
 #     "Bayes Network",
 #     "Bayes Network ML with 0.1 Mutation and 0.2 Crossover Probabilities")
 
-plot_pareto_front(
-    "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_temp/bayes/BayesianNet_NSGA_LastGen.tsv",
-    "Bayes Network Multiobjective Max(Accuracy), Min(Features)",
-    "Bayes Network ML with 0.1 Mutation and 0.2 Crossover Probabilities")
+plot_gen_vs_max_fit_multi_file(
+    [
+        "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_temp/bayes/BayesianNet-0.010-0.950.tsv",
+        "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_temp/decision_tree/DecisionTable-0.010-0.950.tsv"],
+    ["BayesianNet",
+     "DecisionTable"],
+    ['b-',
+     'g-'],
+    "Best Fitness over Generations"
+)
+
+# plot_pareto_front(
+#     "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_temp/bayes/BayesianNet_NSGA_LastGen.tsv",
+#     "Bayes Network Multiobjective Max(Accuracy), Min(Features)",
+#     "Bayes Network ML with 0.1 Mutation and 0.2 Crossover Probabilities")
