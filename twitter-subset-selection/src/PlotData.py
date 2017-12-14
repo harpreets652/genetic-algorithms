@@ -152,10 +152,10 @@ def pareto_front(file_name, title, fig_text):
     return
 
 
-# gen_vs_fitness(
-#     "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_temp/bayes/BayesianNet-0.010-0.950.tsv",
-#     "Bayes Network",
-#     "Bayes Network ML with 0.1 Mutation and 0.2 Crossover Probabilities")
+# plot_gen_vs_fitness(
+#     "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_social_temp/random_tree/RandomTree-0.010-0.950.tsv",
+#     "Random Tree",
+#     " ")
 
 # plot_gen_vs_max_fit_multi_file(
 #     [
@@ -170,5 +170,5 @@ def pareto_front(file_name, title, fig_text):
 
 plot_pareto_front(
     "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_temp/bayes/BayesianNet_NSGA_LastGen.tsv",
-    "Bayes Network Multiobjective Max(Accuracy), Min(Features)",
-    "Bayes Network ML with 0.1 Mutation and 0.2 Crossover Probabilities")
+    "Bayes Network NSGA II",
+    " ")
