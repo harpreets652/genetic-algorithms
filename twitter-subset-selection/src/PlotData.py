@@ -30,6 +30,8 @@ def plot_pareto_front(file_name, title, fig_text):
 
     unique_individuals = get_unique_individuals(nsga_data)
 
+    unique_individuals.sort(key=lambda individual: individual.NumBits)
+
     accuracy = []
     num_bits = []
     for individual in unique_individuals:
@@ -38,6 +40,7 @@ def plot_pareto_front(file_name, title, fig_text):
 
     plt.plot(num_bits, accuracy, 'g-', linewidth=2.0)
     plt.scatter(num_bits, accuracy)
+    plt.gca().invert_xaxis()
     plt.legend(loc='best')
 
     plt.xlabel("Number of Features")
@@ -78,7 +81,8 @@ def get_unique_individuals(nsga_data):
     seen = set()
     seen_add = seen.add
 
-    return [data for data in nsga_data if not (data.Chrom in seen or seen_add(data.Chrom))]
+    return [data for data in nsga_data if
+            not (data.Chrom + "_" + str(data.NumBits) in seen or seen_add(data.Chrom + "_" + str(data.NumBits)))]
 
 
 def load_nsga_data(file_name):
