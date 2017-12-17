@@ -72,8 +72,8 @@ void Evaluator::evaluateSingle(Individual *individual) {
     work txn(c);
 
     // query the database
-    for (bool b : {true, false}) {
-        string query = buildQuery(*individual, b);
+    for (auto classification : {0, 1}) {
+        string query = buildQuery(*individual, classification);
         result r = txn.exec(query);
         // if we have nothing, report accuracy of 0
         if (r.empty()) {
@@ -111,16 +111,18 @@ void Evaluator::createFileHeader(ofstream& fout, Individual &individual) {
             }
         }
     }
-    fout << "@ATTRIBUTE class \t\t{REAL,TRADITIONAL}" << endl;
+    fout << "@ATTRIBUTE class \t\t{REAL,SOCIAL}" << endl;
 
     fout << "@DATA" << endl;
 }
 
 void Evaluator::createDataPoints(ofstream& fout, result &dataPoint, Individual &individual) {
     const string REAL = "REAL",
+                 FAKE_S = "SOCIAL",
                  FAKE_T = "TRADITIONAL";
     const int REAL_VALUE = 0,
-            FAKE_T_VALUE = 1;
+            FAKE_S_VALUE = 1,
+            FAKE_T_VALUE = 2;
 
     // it is assumed that data point will have at least one point
     // and that at least one feature is enabled in the chromosome
@@ -138,16 +140,23 @@ void Evaluator::createDataPoints(ofstream& fout, result &dataPoint, Individual &
         }
 
         int isGenuine = row["classification"].as<int>();
-        if (isGenuine == REAL_VALUE)
-            fout << REAL;
-        else
-            fout << FAKE_T;
-
+        switch (isGenuine) {
+            case REAL_VALUE:
+                fout << REAL;
+                break;
+            case FAKE_S_VALUE:
+                fout << FAKE_S;
+                break;
+            default:
+            case FAKE_T_VALUE:
+                fout << FAKE_T;
+                break;
+        }
         fout << endl;
     }
 }
 
-string Evaluator::buildQuery(Individual &indiv, bool getReal) {
+string Evaluator::buildQuery(Individual &indiv, unsigned int desiredClassification) {
     string query, whereClause, limitClause = "limit 1000";
 
     for (unsigned int i = 0; i < config.NUM_FEATURES; i++) {
@@ -160,11 +169,7 @@ string Evaluator::buildQuery(Individual &indiv, bool getReal) {
     }
     query += ",classification";
 
-    if (getReal) {
-        whereClause = "where process_error is null and classification = 0 ";
-    } else {
-        whereClause = "where process_error is null and classification > 0 ";
-    }
+    whereClause = "where process_error is null and classification = " + to_string(desiredClassification) +  " ";
 
     return "select " + query + " from tss_dev.users_features "
             + whereClause
@@ -201,7 +206,7 @@ void Evaluator::setDataLocation(const string &dataLoc) {
 
 string Evaluator::getRunCommand(const string& filename) {
     char cmd[200];
-    snprintf(cmd, 200, "java -Xmx800m -classpath %s/weka.jar %s -t %s/%s.arff",
+    snprintf(cmd, 200, "java -Xmx6000m -classpath %s/weka.jar %s -t %s/%s.arff",
             wekaLocation.c_str(), config.getWEKAClassifierName().c_str(), dataLocation.c_str(), filename.c_str());
     return string(cmd);
 }

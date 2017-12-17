@@ -30,7 +30,7 @@ public:
 private:
     Evaluator();
     void init();
-    string buildQuery(Individual &individual, bool getReal);
+    string buildQuery(Individual &individual, unsigned int getReal);
     void createFileHeader(ofstream& fout, Individual &individual);
     void createDataPoints(ofstream& fout, result &dataPoint, Individual &individual);
 
