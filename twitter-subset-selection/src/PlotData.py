@@ -53,6 +53,45 @@ def plot_pareto_front(file_name, title, fig_text):
     return
 
 
+def plot_pareto_front_multi_file(file_names, plot_label, plot_colors, title):
+    counter = 0
+    for file_name in file_names:
+        nsga_data = load_nsga_data(file_name)
+
+        unique_individuals = get_unique_individuals(nsga_data)
+
+        unique_individuals.sort(key=lambda individual: individual.NumBits)
+
+        accuracy = []
+        num_bits = []
+        for individual in unique_individuals:
+            accuracy.append(individual.Accur)
+            num_bits.append(individual.NumBits)
+
+        plt.plot(num_bits,
+                 accuracy,
+                 plot_colors[counter],
+                 label=plot_label[counter],
+                 linewidth=2.0)
+
+        # plt.scatter(num_bits, accuracy)
+        counter += 1
+
+    # x1, x2, y1, y2 = plt.axis()
+    # plt.axis((x1, x2, y1, 100))
+    # plt.yticks(np.arange(y1, 102, 0.5))
+    plt.gca().invert_xaxis()
+    plt.legend(loc='best')
+
+    plt.xlabel("Number of Features")
+    plt.ylabel("Percent Accuracy")
+    plt.title(title)
+
+    plt.show()
+
+    return
+
+
 def plot_gen_vs_max_fit_multi_file(file_names, plot_label, plot_colors, title):
     counter = 0
     for file_name in file_names:
@@ -66,6 +105,9 @@ def plot_gen_vs_max_fit_multi_file(file_names, plot_label, plot_colors, title):
                  linewidth=2.0)
 
         counter += 1
+
+    x1, x2, y1, y2 = plt.axis()
+    plt.axis((x1, x2, y1, 100))
 
     plt.legend(loc='best')
     plt.xlabel("GA Generation")
@@ -153,22 +195,51 @@ def pareto_front(file_name, title, fig_text):
 
 
 # plot_gen_vs_fitness(
-#     "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_social_temp/random_tree/RandomTree-0.010-0.950.tsv",
-#     "Random Tree",
+#     "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_social_temp/part/Part-0.010-0.950.tsv",
+#     "Partition List",
 #     " ")
 
 # plot_gen_vs_max_fit_multi_file(
 #     [
-#         "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_temp/bayes/BayesianNet-0.010-0.950.tsv",
-#         "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_temp/decision_tree/DecisionTable-0.010-0.950.tsv"],
+#         "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_social_temp/bayes/BayesianNet-0.010-0.950.tsv",
+#         "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_social_temp/decision_tree/DecisionTable-0.010-0.950.tsv",
+#         "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_social_temp/part/Part-0.010-0.950.tsv",
+#         "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_social_temp/random_forest/RandomForest-0.010-0.950.tsv",
+#         "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_social_temp/random_tree/RandomTree-0.010-0.950.tsv"],
 #     ["BayesianNet",
-#      "DecisionTable"],
+#      "DecisionTree",
+#      "PartitionList",
+#      "RandomForest",
+#      "RandomTree"],
 #     ['b-',
-#      'g-'],
+#      'g-',
+#      'r-',
+#      'c-',
+#      'm-'],
 #     "Best Fitness over Generations"
 # )
 
-plot_pareto_front(
-    "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_temp/bayes/BayesianNet_NSGA_LastGen.tsv",
-    "Bayes Network NSGA II",
-    " ")
+# plot_pareto_front(
+#     "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_social_temp/random_tree/RandomTree_NSGA_lastGen.tsv",
+#     "Random Tree - NSGA II",
+#     " ")
+
+# plot_pareto_front_multi_file(
+#     [
+#         "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_social_temp/bayes/BayesianNetwork_NSGA_LastGen.tsv",
+#         "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_social_temp/decision_tree/DecisionTree_NSGA_LastGen.tsv",
+#         "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_social_temp/part/PartitionTable_NSGA_LastGen.tsv",
+#         "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_social_temp/random_forest/RandomForest_NSGA_LastGen.tsv",
+#         "/Users/harpreetsingh/github/genetic-algorithms-submit/twitter-subset-selection/weka_social_temp/random_tree/RandomTree_NSGA_lastGen.tsv"],
+#     ["BayesianNet",
+#      "DecisionTree",
+#      "PartitionList",
+#      "RandomForest",
+#      "RandomTree"],
+#     ['b-',
+#      'g-',
+#      'r-',
+#      'c-',
+#      'm-'],
+#     "Pareto Fronts"
+# )
