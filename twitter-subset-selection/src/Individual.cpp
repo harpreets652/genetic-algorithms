@@ -13,8 +13,14 @@ Individual::Individual() : vector<bool>(config.NUM_FEATURES), accuracy(0.0), dis
 
 }
 
-void Individual::init() {
-    generateRandom();
+void Individual::init(bool allOnes) {
+    if (!allOnes)
+        generateRandom();
+    else {
+        for (int i = 0; i < size(); i++) {
+            (*this)[i] = true;
+        }
+    }
 }
 
 void Individual::generateRandom() {

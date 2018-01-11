@@ -20,7 +20,7 @@ public:
 
     void generateRandom();
     void print() const;
-    void init();
+    void init(bool allOnes = false);
     string to_string() const;
 
     void crossoverWith(Individual& other);

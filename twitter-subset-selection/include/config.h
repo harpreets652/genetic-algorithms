@@ -20,6 +20,14 @@ enum MLType {
     NEURAL_NETWORK
 };
 
+enum Comparison {
+    TRADITIONAL_V_GENUINE,
+    SOCIAL_V_GENUINE,
+    MISC_V_GENUINE,
+    FAKE_V_GENUINE,                 // fake = tradition + social + misc
+    TRADITIONAL_V_SOCIAL_V_GENUINE, // tri-class
+};
+
 struct Config {
 
     Config();
@@ -31,6 +39,7 @@ struct Config {
 
     string INPUT_FILENAME;
     MLType WEKA_CLASSIFIER = DECISION_TABLE;
+    Comparison comparison = TRADITIONAL_V_GENUINE;
 
     string getWEKAClassifierName() const;
     string getSimpleWEKAName() const;

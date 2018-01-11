@@ -14,10 +14,13 @@ Population::Population() : minAccuracy(INT_MAX), maxAccuracy(0.0), averageAccura
 
 void Population::generate(int n) {
     this->clear();
-    for (int i = 0; i < n; i++) {
+    Individual allOnes;
+    allOnes.init(true);
+    push_back(allOnes);
+    for (int i = 1; i < n; i++) {
         Individual randIndividual;
         randIndividual.init();
-        this->push_back(randIndividual);
+        push_back(randIndividual);
     }
 }
 

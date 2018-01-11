@@ -72,7 +72,7 @@ void Evaluator::evaluateSingle(Individual *individual) {
     work txn(c);
 
     // query the database
-    for (auto classification : {0, 1}) {
+    for (auto classification : {0, 2}) {
         string query = buildQuery(*individual, classification);
         result r = txn.exec(query);
         // if we have nothing, report accuracy of 0
@@ -111,7 +111,7 @@ void Evaluator::createFileHeader(ofstream& fout, Individual &individual) {
             }
         }
     }
-    fout << "@ATTRIBUTE class \t\t{REAL,SOCIAL}" << endl;
+    fout << "@ATTRIBUTE class \t\t{REAL,TRADITIONAL}" << endl;
 
     fout << "@DATA" << endl;
 }
