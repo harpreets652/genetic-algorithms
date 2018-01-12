@@ -3,6 +3,8 @@
 
 #include "Population.h"
 #include <cfloat>
+#include <cmath>
+#include <algorithm>
 
 Population::Population() : minAccuracy(INT_MAX), maxAccuracy(0.0), averageAccuracy(0.0),
                            minBitCount(INT_MAX), maxBitCount(0), averageBitCount(0),
