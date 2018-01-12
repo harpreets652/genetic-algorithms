@@ -5,6 +5,7 @@
 #include <cfloat>
 #include <cmath>
 #include <algorithm>
+#include <climits>
 
 Population::Population() : minAccuracy(INT_MAX), maxAccuracy(0.0), averageAccuracy(0.0),
                            minBitCount(INT_MAX), maxBitCount(0), averageBitCount(0),
@@ -40,7 +41,7 @@ void Population::evaluateEach() {
         if (duplicateCount.find(at(i)) != duplicateCount.end()) {
             duplicateCount[at(i)].push_back(i);
         } else {
-            duplicateCount.insert(pair<Individual, vector<unsigned int> >(at(i), vector<unsigned int>(i)));
+            duplicateCount.insert(pair<Individual, vector<unsigned int> >(at(i), {i}));
             evaluatingSet.push_back(&at(i));
         }
     }

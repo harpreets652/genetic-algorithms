@@ -49,8 +49,8 @@ struct Config {
     string getSimpleComparisonName() const;
 
     unsigned int NUM_FEATURES = 40;
-    unsigned int POPULATION_SIZE = 5;
-    unsigned int ITERATION_SIZE = 3;
+    unsigned int POPULATION_SIZE = 100;
+    unsigned int ITERATION_SIZE = 200;
 
     map<unsigned int, string> getFSMap();
     map<unsigned int, string> getTypeMap();
