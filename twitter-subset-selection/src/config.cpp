@@ -3,7 +3,6 @@
 
 #include <Utils.h>
 #include <Evaluator.h>
-#include "config.h"
 
 Config::Config() {
     getFSMap();
@@ -22,7 +21,12 @@ Config &Config::operator=(const Config &other) {
 
 void Config::setClassifier(string classifier) {
     Utils::to_upper(classifier);
-    if (classifier == "0" ||
+    if (classifier == "-1" ||
+            classifier == "ZERO_R" ||
+            classifier == "DEBUG") {
+        WEKA_CLASSIFIER = ZERO_R;
+    }
+    else if (classifier == "0" ||
             classifier == "BAYES" ||
             classifier == "BAYES_NETWORK") {
         WEKA_CLASSIFIER = BAYES_NET;
@@ -49,25 +53,70 @@ void Config::setClassifier(string classifier) {
             classifier == "NN" ||
             classifier == "MULTILAYER_PERCEPTRON") {
         WEKA_CLASSIFIER = NEURAL_NETWORK;
+    } else if (classifier == "6" ||
+            classifier == "SVM_LINEAR_KERNEL" ||
+            classifier == "SVM_LINEAR" ||
+            classifier == "SVM1") {
+        WEKA_CLASSIFIER = SVM_LINEAR_KERNEL;
+    } else if (classifier == "7" ||
+            classifier == "SVM_RBF_KERNEL" ||
+            classifier == "SVM_RBF" ||
+            classifier == "SVM2") {
+        WEKA_CLASSIFIER = SVM_RBF_KERNEL;
+    } else if (classifier == "8" ||
+            classifier == "J48_TREE" ||
+            classifier == "J48") {
+        WEKA_CLASSIFIER = J48_TREE;
+    }
+}
+
+void Config::setComparison(string pComparison) {
+    Utils::to_upper(pComparison);
+    if (pComparison == "0" ||
+            pComparison == "TRADITIONAL_V_GENUINE" ||
+            pComparison == "TVG") {
+        COMPARISON = TRADITIONAL_V_GENUINE;
+    } else if (pComparison == "1" ||
+            pComparison == "SOCIAL_V_GENUINE" ||
+            pComparison == "SVG") {
+        COMPARISON = SOCIAL_V_GENUINE;
+    } else if (pComparison == "2" ||
+            pComparison == "MISC_V_GENUINE" ||
+            pComparison == "MVG") {
+        COMPARISON = MISC_V_GENUINE;
+    } else if (pComparison == "3" ||
+            pComparison == "FAKE_V_GENUINE" ||
+            pComparison == "FVG") {
+        COMPARISON = FAKE_V_GENUINE;
+    } else if (pComparison == "4" ||
+            pComparison == "TRADITIONAL_V_SOCIAL_V_GENUINE" ||
+            pComparison == "TVSVG") {
+        COMPARISON = TRADITIONAL_V_SOCIAL_V_GENUINE;
     }
 }
 
 string Config::getWEKAClassifierName() const {
     switch (WEKA_CLASSIFIER) {
         case BAYES_NET:
-            return "weka.classifiers.bayes.BayesNet";
+            return "weka.classifiers.bayes.BayesNet -D -Q weka.classifiers.bayes.net.search.local.K2 -- -P 1 -S BAYES -E weka.classifiers.bayes.net.estimate.SimpleEstimator -- -A 0.5";
         case PART:
-            return "weka.classifiers.rules.PART";
+            return "weka.classifiers.rules.PART -M 2 -C 0.25 -Q 1";
         case ZERO_R:
             return "weka.classifiers.rules.ZeroR";
         case RANDOM_FOREST:
-            return "weka.classifiers.trees.RandomForest";
+            return "weka.classifiers.trees.RandomForest -P 100 -I 100 -num-slots 1 -K 0 -M 1.0 -V 0.001 -S 1";
         case RANDOM_TREE:
-            return "weka.classifiers.trees.RandomTree";
+            return "weka.classifiers.trees.RandomTree -K 0 -M 1.0 -V 0.001 -S 1";
         case DECISION_TABLE:
-            return "weka.classifiers.rules.DecisionTable";
+            return "weka.classifiers.rules.DecisionTable -X 1 -S \"weka.attributeSelection.BestFirst -D 1 -N 5\"";
         case NEURAL_NETWORK:
-            return "weka.classifiers.functions.MultilayerPerceptron";
+            return "weka.classifiers.functions.MultilayerPerceptron -L 0.3 -M 0.8 -N 200 -V 0 -S 0 -E 20 -H a";
+        case SVM_LINEAR_KERNEL:
+            return "weka.classifiers.functions.SMO -C 1.0 -L 0.001 -P 1.0E-12 -N 0 -V -1 -W 1 -K \"weka.classifiers.functions.supportVector.PolyKernel -E 1.0 -C 250007\" -calibrator \"weka.classifiers.functions.Logistic -R 1.0E-8 -M -1 -num-decimal-places 4\"";
+        case SVM_RBF_KERNEL:
+            return "weka.classifiers.functions.SMO -C 1.0 -L 0.001 -P 1.0E-12 -N 0 -V -1 -W 1 -K \"weka.classifiers.functions.supportVector.RBFKernel -G 0.01 -C 250007\" -calibrator \"weka.classifiers.functions.Logistic -R 1.0E-8 -M -1 -num-decimal-places 4\"";
+        case J48_TREE:
+            return "weka.classifiers.trees.J48 -C 0.25 -M 2";
     }
 }
 
@@ -87,6 +136,27 @@ string Config::getSimpleWEKAName() const {
             return "DecisionTable";
         case NEURAL_NETWORK:
             return "MultilayerPerceptron";
+        case SVM_LINEAR_KERNEL:
+            return "SVMLinear";
+        case SVM_RBF_KERNEL:
+            return "SVMRBF";
+        case J48_TREE:
+            return "J48Tree";
+    }
+}
+
+string Config::getSimpleComparisonName() const {
+    switch (COMPARISON) {
+        case TRADITIONAL_V_GENUINE:
+            return "traditional_v_genuine";
+        case SOCIAL_V_GENUINE:
+            return "social_v_genuine";
+        case MISC_V_GENUINE:
+            return "misc_v_genuine";
+        case FAKE_V_GENUINE:
+            return "fake_v_genuine";
+        case TRADITIONAL_V_SOCIAL_V_GENUINE:
+            return "traditional_v_social_v_genuine";
     }
 }
 

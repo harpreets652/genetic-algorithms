@@ -48,13 +48,15 @@ int main(int argc, const char *argv[]) {
     }
 
     // parse and set the correct cmd line args
-    argh::parser cmdl({ "-w", "--wekaloc", "-d", "--data", "-m", "--machine" });
+    argh::parser cmdl({"--wekaloc", "--data", "--machine", "--comparison"});
     cmdl.parse(argc, argv);
     Evaluator::getInstance()->setWekaLocation(cmdl("wekaloc").str());
     Evaluator::getInstance()->setDataLocation(cmdl("data").str());
     config.setClassifier(cmdl("machine").str());
+    config.setComparison(cmdl("comparison").str());
 
     runAndReportGA(false);
+    cout << endl;
     runAndReportGA(true);
 
     return 0;

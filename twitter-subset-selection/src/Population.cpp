@@ -2,8 +2,6 @@
 #define __POPULATION_CPP_
 
 #include "Population.h"
-#include <climits>
-#include <algorithm>
 #include <cfloat>
 
 Population::Population() : minAccuracy(INT_MAX), maxAccuracy(0.0), averageAccuracy(0.0),
@@ -14,10 +12,7 @@ Population::Population() : minAccuracy(INT_MAX), maxAccuracy(0.0), averageAccura
 
 void Population::generate(int n) {
     this->clear();
-    Individual allOnes;
-    allOnes.init(true);
-    push_back(allOnes);
-    for (int i = 1; i < n; i++) {
+    for (int i = 0; i < n; i++) {
         Individual randIndividual;
         randIndividual.init();
         push_back(randIndividual);
@@ -49,7 +44,7 @@ void Population::evaluateEach() {
     }
     Evaluator::getInstance()->evaluate(evaluatingSet);
 
-    for (auto const &value : duplicateCount) {
+    for (auto& value : duplicateCount) {
         for (unsigned int index : value.second) {
             (*this)[index] = at(value.second[0]);
         }
@@ -90,7 +85,7 @@ void Population::evaluate(bool useParedoToCompare) {
     getStatsFromIndividuals(useParedoToCompare);
 
     // get rid of all the temp files
-    Evaluator::getInstance()->exec("rm -f " + Evaluator::getInstance()->getDataLocation() + "/*.arff");
+    Evaluator::getInstance()->clearTempFiles();
 }
 
 bool sortAccuracyFunc(Individual i, Individual j) {

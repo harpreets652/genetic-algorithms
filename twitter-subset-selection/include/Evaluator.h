@@ -21,6 +21,7 @@ public:
 
     string exec(const string& cmd);
     string exec(const char * cmd);
+    void clearTempFiles();
     void setWekaLocation(const string& wekaLoc);
     void setDataLocation(const string& dataLoc);
     string getDataLocation() const;
@@ -33,6 +34,7 @@ private:
     string buildQuery(Individual &individual, unsigned int getReal);
     void createFileHeader(ofstream& fout, Individual &individual);
     void createDataPoints(ofstream& fout, result &dataPoint, Individual &individual);
+    void generateOutputFile(Individual *indiv);
 
     static Evaluator* instance;
     string wekaLocation;

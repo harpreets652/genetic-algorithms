@@ -9,8 +9,8 @@
 
 Config config;
 
-Individual::Individual() : vector<bool>(config.NUM_FEATURES), accuracy(0.0), distance(0.0), normalizedProb(0.0), rank(0) {
-
+Individual::Individual() : accuracy(0.0), distance(0.0), normalizedProb(0.0), rank(0) {
+    resize(config.NUM_FEATURES);
 }
 
 void Individual::init(bool allOnes) {
@@ -67,6 +67,14 @@ void Individual::mutate() {
 
 bool Individual::paretoDominates(const Individual &opponent) const {
     return !(this->accuracy < opponent.accuracy) && !(this->numFeaturesActive > opponent.numFeaturesActive);
+}
+
+bool Individual::operator==(const Individual &other) const {
+    for (unsigned int i = 0; size(); i++) {
+        if (at(i) != other[i])
+            return false;
+    }
+    return true;
 }
 
 void Individual::recount() {

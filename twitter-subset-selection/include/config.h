@@ -8,8 +8,6 @@
 
 using namespace std;
 
-#define BREAKINGPOINT char dummychar; cin >> dummychar;
-
 enum MLType {
     BAYES_NET,
     PART,
@@ -17,7 +15,10 @@ enum MLType {
     RANDOM_FOREST,
     RANDOM_TREE,
     DECISION_TABLE,
-    NEURAL_NETWORK
+    NEURAL_NETWORK,
+    SVM_LINEAR_KERNEL,
+    SVM_RBF_KERNEL,
+    J48_TREE
 };
 
 enum Comparison {
@@ -34,20 +35,22 @@ struct Config {
     Config& operator=(const Config& other);
 
     void setClassifier(string classifier);
+    void setComparison(string comparison);
     double PROB_MUTATION = 0.01; // 0.01, 0.001, 0.0001
     double PROB_CROSSOVER = 0.95 ;  // 0.2, 0.67, 0.99
 
     string INPUT_FILENAME;
     MLType WEKA_CLASSIFIER = DECISION_TABLE;
-    Comparison comparison = TRADITIONAL_V_GENUINE;
+    Comparison COMPARISON = TRADITIONAL_V_GENUINE;
 
     string getWEKAClassifierName() const;
     string getSimpleWEKAName() const;
     string getOutputFilename() const;
+    string getSimpleComparisonName() const;
 
     unsigned int NUM_FEATURES = 40;
-    unsigned int POPULATION_SIZE = 100;
-    unsigned int ITERATION_SIZE = 200;
+    unsigned int POPULATION_SIZE = 5;
+    unsigned int ITERATION_SIZE = 3;
 
     map<unsigned int, string> getFSMap();
     map<unsigned int, string> getTypeMap();

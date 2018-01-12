@@ -63,11 +63,11 @@ void GA::NSGARun() {
         makeNextGen(true);
         NSGAStep();
     }
-    cout << "my best: ";
-    bestIndividualEver.print();
+    printFeaturesOfBestIndividual();
 }
 
 void GA::run() {
+    cout << "ELITIST GA RUN!!" << endl;
     for (int i = 0; i < config.ITERATION_SIZE; i++) {
         parentPop.print();
         collectToStats();
@@ -82,8 +82,7 @@ void GA::run() {
 
         parentPop = childPop;
     }
-    cout << "my best: ";
-    bestIndividualEver.print();
+    printFeaturesOfBestIndividual();
 }
 
 void GA::collectToStats() {
@@ -94,6 +93,19 @@ void GA::collectToStats() {
     minBitCountTimeline.push_back(parentPop.minBitCount);
     maxBitCountTimeline.push_back(parentPop.maxBitCount);
     averageBitCountTimeline.push_back(parentPop.averageBitCount);
+}
+
+void GA::printFeaturesOfBestIndividual() const {
+    cout << "Best Individual: ";
+    bestIndividualEver.print();
+    // go through and print them out
+    for (int i = 0; i < bestIndividualEver.size(); i++) {
+        if (bestIndividualEver[i]) {
+            if (i < 10)
+                cout << "0";
+            cout << i << " -- " << config.getFSMap().at(i) << endl;
+        }
+    }
 }
 
 #endif

@@ -6,7 +6,6 @@
 #include <thread>
 
 #include "Evaluator.h"
-#include "config.h"
 
 Evaluator* Evaluator::instance = nullptr;
 
@@ -32,7 +31,7 @@ void Evaluator::init() {
 }
 
 void Evaluator::evaluate(vector<Individual*> indiv) {
-    unsigned int num_threads = min(10, (int)indiv.size());
+    unsigned int num_threads = min(1, (int)indiv.size());
     vector<thread> workers(num_threads);
 
     for (unsigned int i = 0; i < indiv.size(); i++) {
@@ -63,28 +62,7 @@ void Evaluator::evaluateSingle(Individual *individual) {
         return;
     }
 
-    // build the output file
-    ofstream fout(dataLocation + "/" + individual->to_string() + ".arff");
-    createFileHeader(fout, *individual);
-
-    // connect to the database
-    connection c("dbname=cs_776 user=system password=SYSTEM host=hpcvis3.cse.unr.edu");
-    work txn(c);
-
-    // query the database
-    for (auto classification : {0, 2}) {
-        string query = buildQuery(*individual, classification);
-        result r = txn.exec(query);
-        // if we have nothing, report accuracy of 0
-        if (r.empty()) {
-            individual->accuracy = 0;
-            return;
-        }
-        // output each of the data points (per user) here
-        createDataPoints(fout, r, *individual);
-    }
-
-    fout.close();
+    generateOutputFile(individual);
 
     // call the WEKA on this function
     Timer t;
@@ -95,6 +73,53 @@ void Evaluator::evaluateSingle(Individual *individual) {
     // get the data from it->
     individual->accuracy = getAccuracyFromOutput(output) * 100;
     individual->timeTaken = t.getElapsedTime();
+}
+
+void Evaluator::generateOutputFile(Individual *individual) {
+    exec("mkdir -p " + getDataLocation());
+    string filename = getDataLocation() + "/" + individual->to_string() + ".arff";
+    ofstream fout(filename);
+    createFileHeader(fout, *individual);
+
+    // connect to the database
+    connection c("dbname=cs_776 user=system password=SYSTEM host=localhost");
+    work txn(c);
+
+    // query the database
+    vector<int> types = {0};
+    switch (config.COMPARISON) {
+        case TRADITIONAL_V_GENUINE:
+            types.push_back(2);
+            break;
+        case SOCIAL_V_GENUINE:
+            types.push_back(1);
+            break;
+        case FAKE_V_GENUINE:
+            types.push_back(3);
+            break;
+        case MISC_V_GENUINE:
+            types.push_back(1);
+            types.push_back(2);
+            types.push_back(3);
+            break;
+        case TRADITIONAL_V_SOCIAL_V_GENUINE:
+            types.push_back(1);
+            types.push_back(2);
+            break;
+    }
+
+    for (auto type : types) {
+        string query = buildQuery(*individual, type);
+        result r = txn.exec(query);
+        // if we have nothing, report accuracy of 0
+        if (r.empty()) {
+            individual->accuracy = 0;
+            return;
+        }
+        // output each of the data points (per user) here
+        createDataPoints(fout, r, *individual);
+    }
+    fout.close();
 }
 
 void Evaluator::createFileHeader(ofstream& fout, Individual &individual) {
@@ -111,7 +136,23 @@ void Evaluator::createFileHeader(ofstream& fout, Individual &individual) {
             }
         }
     }
-    fout << "@ATTRIBUTE class \t\t{REAL,TRADITIONAL}" << endl;
+    fout << "@ATTRIBUTE class \t\t";
+    switch (config.COMPARISON) {
+        case TRADITIONAL_V_GENUINE:
+            fout << "{REAL,TRADITIONAL}";
+            break;
+        case SOCIAL_V_GENUINE:
+            fout << "{REAL,SOCIAL}";
+            break;
+        case MISC_V_GENUINE:
+        case FAKE_V_GENUINE:
+            fout << "{REAL,FAKE}";
+            break;
+        case TRADITIONAL_V_SOCIAL_V_GENUINE:
+            fout << "{REAL,TRADITIONAL,SOCIAL}";
+            break;
+    }
+    fout << endl;
 
     fout << "@DATA" << endl;
 }
@@ -196,18 +237,25 @@ string Evaluator::exec(const string& cmd) {
     return result;
 }
 
+void Evaluator::clearTempFiles() {
+    exec("rm -f " + getDataLocation() + "/*.arff");
+}
+
 void Evaluator::setWekaLocation(const string &wekaLoc) {
-    this->wekaLocation = wekaLoc;
+    wekaLocation = wekaLoc;
 }
 
 void Evaluator::setDataLocation(const string &dataLoc) {
-    this->dataLocation = dataLoc;
+    dataLocation = dataLoc;
+    if (dataLocation[dataLocation.size()-1] == '/') {
+        dataLocation = dataLocation.substr(0, dataLocation.size()-1);
+    }
 }
 
 string Evaluator::getRunCommand(const string& filename) {
-    char cmd[200];
-    snprintf(cmd, 200, "java -Xmx6000m -classpath %s/weka.jar %s -t %s/%s.arff",
-            wekaLocation.c_str(), config.getWEKAClassifierName().c_str(), dataLocation.c_str(), filename.c_str());
+    char cmd[500];
+    snprintf(cmd, 500, "java -Xmx6000m -classpath %s/weka.jar %s -t %s/%s.arff",
+            wekaLocation.c_str(), config.getWEKAClassifierName().c_str(), getDataLocation().c_str(), filename.c_str());
     return string(cmd);
 }
 
@@ -233,7 +281,7 @@ double Evaluator::getAccuracyFromOutput(const string &output) {
 }
 
 string Evaluator::getDataLocation() const {
-    return dataLocation;
+    return dataLocation + "/" + config.getSimpleComparisonName() + "/" + config.getSimpleWEKAName();
 }
 
 #endif

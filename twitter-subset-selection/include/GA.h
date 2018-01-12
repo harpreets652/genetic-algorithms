@@ -18,6 +18,7 @@ public:
     void NSGARun();
     void run();
     void collectToStats();
+    void printFeaturesOfBestIndividual() const;
     
     vector<double> minAccuracyTimeline, maxAccuracyTimeline, averageAccuracyTimeline;
     vector<unsigned int> minBitCountTimeline, maxBitCountTimeline, averageBitCountTimeline;
