@@ -20,6 +20,7 @@ public:
 
     void sortByAccuracy();
     void sortByBitCount();
+    void sortByChromosome();
 
     Individual proportionalSelect();
     Individual tournamentSelect();

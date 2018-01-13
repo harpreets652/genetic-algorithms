@@ -31,7 +31,7 @@ void Evaluator::init() {
 }
 
 void Evaluator::evaluate(vector<Individual*> indiv) {
-    unsigned int num_threads = min(10, (int)indiv.size());
+    unsigned int num_threads = min(8, (int)indiv.size());
     vector<thread> workers(num_threads);
 
     for (unsigned int i = 0; i < indiv.size(); i++) {
@@ -82,7 +82,7 @@ void Evaluator::generateOutputFile(Individual *individual) {
     createFileHeader(fout, *individual);
 
     // connect to the database
-    connection c("dbname=cs_776 user=system password=SYSTEM host=localhost");
+    connection c("dbname=cs_776 user=system password=SYSTEM host=hpcvis3.cse.unr.edu");
     work txn(c);
 
     // query the database

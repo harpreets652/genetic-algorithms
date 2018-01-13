@@ -39,9 +39,9 @@ void Population::evaluateEach() {
     for (unsigned int i = 0; i < size(); i++) {
         // if i have a duplicate, just increment his count
         if (duplicateCount.find(at(i)) != duplicateCount.end()) {
-            duplicateCount[at(i)].push_back(i);
+            duplicateCount[(*this)[i]].push_back(i);
         } else {
-            duplicateCount.insert(pair<Individual, vector<unsigned int> >(at(i), {i}));
+            duplicateCount[(*this)[i]] = {i};
             evaluatingSet.push_back(&at(i));
         }
     }
@@ -91,11 +91,20 @@ void Population::evaluate(bool useParedoToCompare) {
     Evaluator::getInstance()->clearTempFiles();
 }
 
-bool sortAccuracyFunc(Individual i, Individual j) {
+bool sortAccuracyFunc(const Individual &i, const Individual &j) {
     return i.accuracy < j.accuracy;
 }
-bool sortBitCountFunc(Individual i, Individual j) {
+bool sortBitCountFunc(const Individual &i, const Individual &j) {
     return i.numFeaturesActive < j.numFeaturesActive;
+}
+
+bool sortChromosomeFunc(const Individual &l, const Individual &r) {
+    for (int i = 0; i < l.size(); i++) {
+        if (l[i] != r[i]) {
+            return int(l[i]) < int(r[i]);
+        }
+    }
+    return false;
 }
 
 void Population::sortByAccuracy() {
@@ -103,6 +112,10 @@ void Population::sortByAccuracy() {
 }
 void Population::sortByBitCount() {
     sort(begin(), end(), sortBitCountFunc);
+}
+
+void Population::sortByChromosome() {
+    sort(begin(), end(), sortChromosomeFunc);
 }
 
 vector<ParetoFront> sortFastNonDominated(Population& p) {

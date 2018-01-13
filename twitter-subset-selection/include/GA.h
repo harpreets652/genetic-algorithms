@@ -17,7 +17,7 @@ public:
     void NSGAStep();
     void NSGARun();
     void run();
-    void collectToStats();
+    void collectStats();
     void printFeaturesOfBestIndividual() const;
     
     vector<double> minAccuracyTimeline, maxAccuracyTimeline, averageAccuracyTimeline;

@@ -6,7 +6,7 @@
 void GA::init() {
     parentPop.generate(config.POPULATION_SIZE);
     parentPop.evaluate(false);
-    collectToStats();
+    collectStats();
 }
 
 void GA::makeNextGen(bool useParedoToCompare) {
@@ -20,10 +20,11 @@ void GA::makeNextGen(bool useParedoToCompare) {
         if (i < (parentPop.size() - 1) && Utils::randomWithProbability(config.PROB_CROSSOVER)) {
             childPop[i].crossoverWith(parentPop[Utils::randIntBetween(0, parentPop.size())]);
         }
-        // if mutation probabiltiy, mess with individual i
+        // if mutation probability, mess with individual i
         childPop[i].mutate();
     }
     childPop.evaluate(useParedoToCompare);
+    childPop.getStatsFromIndividuals(useParedoToCompare);
     if (bestIndividualEver.accuracy < childPop.getBestIndividual().accuracy) {
         bestIndividualEver = childPop.getBestIndividual();
     }
@@ -50,16 +51,16 @@ void GA::NSGAStep() {
     } else if (parentPop.size() > N) {
         parentPop.erase(parentPop.begin() + N, parentPop.end());
     }
-    parentPop.getStatsFromIndividuals(true);
 }
 
 void GA::NSGARun() {
     cout << "NSGA RUN!!" << endl;
     for (int i = 0; i < config.ITERATION_SIZE; i++) {
+        parentPop.getStatsFromIndividuals(true);
         parentPop.print();
-        collectToStats();
+        collectStats();
 
-        cout << "iteration (NSGA-2): " << i << endl;
+        cout << "iteration (NSGA-II): " << i << endl;
         makeNextGen(true);
         NSGAStep();
     }
@@ -69,8 +70,10 @@ void GA::NSGARun() {
 void GA::run() {
     cout << "ELITIST GA RUN!!" << endl;
     for (int i = 0; i < config.ITERATION_SIZE; i++) {
+        parentPop.getStatsFromIndividuals(false);
+        parentPop.sortByChromosome();
         parentPop.print();
-        collectToStats();
+        collectStats();
 
         cout << "iteration (Normal): " << i << endl;
         makeNextGen(false);
@@ -85,7 +88,7 @@ void GA::run() {
     printFeaturesOfBestIndividual();
 }
 
-void GA::collectToStats() {
+void GA::collectStats() {
     minAccuracyTimeline.push_back(parentPop.minAccuracy);
     maxAccuracyTimeline.push_back(parentPop.maxAccuracy);
     averageAccuracyTimeline.push_back(parentPop.averageAccuracy);
